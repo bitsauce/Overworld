@@ -16,14 +16,17 @@ enum Tile
 	MAX_TILES
 }
 
-class Terrain
+namespace global {
+	Terrain @terrain;
+}
+
+class Terrain //: GameObject
 {
 	grid<Tile> tiles;
 	
 	
 	
-	Animation @grassAnim;
-	Animation @stoneAnim;
+	array<Animation@> tileAnims(MAX_TILES);
 	Batch @batch = Batch();
 	private int width = 0;
 	private int height = 0;
@@ -33,42 +36,55 @@ class Terrain
 		@TILE_TEXTURES[GRASS_TILE] = @Texture(":/sprites/tiles/grass_tile.png");
 		@TILE_TEXTURES[STONE_TILE] = @Texture(":/sprites/tiles/stone_tile.png");
 		
-		@grassAnim = @Animation(@TILE_TEXTURES[GRASS_TILE], 1, 21);
-		@stoneAnim = @Animation(@TILE_TEXTURES[STONE_TILE], 1, 21);
+		// Load tile animations
+		for(int i = NULL_TILE + 1; i < MAX_TILES; i++) {
+			@tileAnims[i] = @Animation(@TILE_TEXTURES[i], 1, 21);
+		}
+		
+		@global::terrain = @this;
 		
 		tiles.resize(width, height);
 		
-		Sprite @tile = Sprite(grassAnim.getKeyFrame(0));
+		// Initialize terrain buffers
+		Sprite @tile = Sprite(tileAnims[GRASS_TILE].getKeyFrame(0)); // TODO: Should be default constructor
 		for(int y = 0; y < height; y++) {
 			for(int x = 0; x < width; x++) {
 				tile.setPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
-				
-				if(y > height/2) {
-					tile.setRegion(grassAnim.getKeyFrame(0));
-				}else{
-					tile.setRegion(grassAnim.getKeyFrame(1));
-					tiles[x, y] = GRASS_TILE;
+				for(int i = NULL_TILE + 1; i < MAX_TILES; i++) {
+					tile.setRegion(tileAnims[i].getKeyFrame(0));
+					tile.draw(@batch);
 				}
-				tile.draw(@batch);
-				
-				if(y > height/2) {
-					tile.setRegion(stoneAnim.getKeyFrame(1));
-					tiles[x, y] = STONE_TILE;
-				}else{
-					tile.setRegion(stoneAnim.getKeyFrame(0));
-				}
-				tile.draw(@batch);
+				tiles[x, y] = NULL_TILE;
 			}
 		}
 		batch.makeStatic();
 		
 		this.width = width;
 		this.height = height;
+		
+		for(int x = 0; x < width; x++) {
+			float h = (Math.sin(x*0.05f)) * 20;
+			for(int y = height - 1; y >= 0 && y > h; y--) {
+				addTile(x, y, GRASS_TILE);
+			}
+		}
 	}
 	
 	bool isValid(const int x, const int y)
 	{
 		return x >= 0 && x < width && y >= 0 && y < height;
+	}
+	
+	Tile getTileAt(const int x, const int y)
+	{
+		if(!isValid(x, y))
+			return NULL_TILE;
+		return tiles[x, y];
+	}
+	
+	bool isTileAt(const int x, const int y)
+	{
+		return getTileAt(x, y) != NULL_TILE;
 	}
 	
 	void addTile(const int x, const int y, Tile tile)
@@ -93,18 +109,6 @@ class Terrain
 		updateTile(x-1, y);
 		updateTile(x, y+1);
 		updateTile(x, y-1);
-	}
-	
-	Tile getTileAt(const int x, const int y)
-	{
-		if(!isValid(x, y))
-			return NULL_TILE;
-		return tiles[x, y];
-	}
-	
-	bool isTileAt(const int x, const int y)
-	{
-		return getTileAt(x, y) != NULL_TILE;
 	}
 	
 	void removeTile(const int x, const int y)
@@ -173,7 +177,7 @@ class Terrain
 		if(!isTileAt(x, y)) return;
 		
 		batch.setTexture(@TILE_TEXTURES[getTileAt(x, y)]);
-		TextureRegion @region = grassAnim.getKeyFrame(getTileFrame(getTileState(x, y)));
+		TextureRegion @region = tileAnims[GRASS_TILE].getKeyFrame(getTileFrame(getTileState(x, y)));
 		int i = (y*width + x) * 4;
 		for(int j = 0; j < 4; j++) {
 			Vertex vertex = batch.getVertex(i+j);
@@ -189,6 +193,10 @@ class Terrain
 	
 	void draw()
 	{
+		Matrix4 mat;
+		mat.translate(-camera.x, -camera.y, 0.0f);
+		batch.setProjectionMatrix(mat);
+		global::batches[global::FOREGROUND_LAYER].setProjectionMatrix(mat);
 		batch.setTexture(@TILE_TEXTURES[GRASS_TILE]);
 		batch.draw();
 	}
