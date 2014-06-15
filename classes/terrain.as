@@ -2,10 +2,10 @@ const int TILE_SIZE = 16;
 
 enum Direction
 {
-	NORTH		= 2,
-	SOUTH		= 4,
-	EAST		= 16,
-	WEST		= 32
+	NORTH		= 1,
+	SOUTH		= 2,
+	EAST		= 4,
+	WEST		= 8
 }
 
 enum Tile
@@ -23,8 +23,9 @@ namespace global {
 class Terrain //: GameObject
 {
 	grid<Tile> tiles;
+	grid<b2Fixture@> fixtures;
 	
-	
+	b2Body @body;
 	
 	array<Animation@> tileAnims(MAX_TILES);
 	Batch @batch = Batch();
@@ -44,9 +45,10 @@ class Terrain //: GameObject
 		@global::terrain = @this;
 		
 		tiles.resize(width, height);
+		fixtures.resize(width, height);
 		
 		// Initialize terrain buffers
-		Sprite @tile = Sprite(tileAnims[GRASS_TILE].getKeyFrame(0)); // TODO: Should be default constructor
+		Sprite @tile = Sprite(tileAnims[GRASS_TILE].getKeyFrame(0)); // TODO: Sprite should have a default constructor for this reason
 		for(int y = 0; y < height; y++) {
 			for(int x = 0; x < width; x++) {
 				tile.setPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
@@ -62,8 +64,14 @@ class Terrain //: GameObject
 		this.width = width;
 		this.height = height;
 		
+		b2BodyDef def;
+		def.type = b2_staticBody;
+		def.position.set(0.0f, 0.0f);
+		def.allowSleep = true;
+		@body = b2Body(def);
+		
 		for(int x = 0; x < width; x++) {
-			float h = (Math.sin(x*0.05f)) * 20;
+			float h = 25;//(Math.sin(x*0.05f)) * 20;
 			for(int y = height - 1; y >= 0 && y > h; y--) {
 				addTile(x, y, GRASS_TILE);
 			}
@@ -104,6 +112,7 @@ class Terrain //: GameObject
 		}
 		
 		tiles[x, y] = tile;
+		@fixtures[x, y] = @body.createFixture(Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE), 32.0f);
 		updateTile(x, y);
 		updateTile(x+1, y);
 		updateTile(x-1, y);
@@ -130,6 +139,8 @@ class Terrain //: GameObject
 		
 		// Mark as a null tile
 		tiles[x, y] = NULL_TILE;
+		body.removeFixture(@fixtures[x, y]);
+		@fixtures[x, y] = null;
 		updateTile(x+1, y);
 		updateTile(x-1, y);
 		updateTile(x, y+1);
@@ -154,22 +165,22 @@ class Terrain //: GameObject
 		bool t = (state & NORTH) == 0;
 		bool l = (state & WEST) == 0;
 		bool b = (state & SOUTH) == 0;
-		if(r) if(t) if(l) if(b)	return 1;
+		if(r) if(t) if(l) if(b)			return 1;
                              else		return 6;
                        else if(b)		return 8;
-                       else			return 7;
+                       else				return 7;
                   else if(l) if(b)		return 2;
                              else		return 10;
                   else if(b)			return 9;
-                  else				return 12;
-		else if(t) if(l) if(b)		return 4;
+                  else					return 12;
+		else if(t) if(l) if(b)			return 4;
                             else		return 5;
                       else if(b)		return 13;
-		           else			return 15;
-		     else if(l) if(b)		return 3;
-		     else				return 11;
-		else if(b)				return 14;
-		else					return 16;
+		           else					return 15;
+		     else if(l) if(b)			return 3;
+		     else						return 11;
+		else if(b)						return 14;
+		else							return 16;
 	}
 	
 	void updateTile(const int x, const int y)
@@ -196,7 +207,6 @@ class Terrain //: GameObject
 		Matrix4 mat;
 		mat.translate(-camera.x, -camera.y, 0.0f);
 		batch.setProjectionMatrix(mat);
-		global::batches[global::FOREGROUND_LAYER].setProjectionMatrix(mat);
 		batch.setTexture(@TILE_TEXTURES[GRASS_TILE]);
 		batch.draw();
 	}

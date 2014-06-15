@@ -17,6 +17,8 @@ namespace global {
 
 void main()
 {
+	Box2D.scale = TILE_SIZE;
+	
 	Terrain(50, 50);
 	Background();
 	Player();
@@ -29,6 +31,10 @@ void main()
 
 void draw()
 {
+	Matrix4 mat;
+	mat.translate(-camera.x, -camera.y, 0.0f);
+	global::batches[global::FOREGROUND_LAYER].setProjectionMatrix(mat);
+		
 	// Clear batches
 	for(int i = 0; i < global::batches.size; i++) {
 		global::batches[i].clear();
@@ -46,6 +52,8 @@ void draw()
 	}
 	
 	global::terrain.draw();
+	
+	Box2D.draw();
 }
 
 Vector2 camera;
@@ -70,4 +78,6 @@ void update()
 	}else{
 		profilerToggled = false;
 	}
+	
+	Box2D.step(Graphics.dt);
 }
