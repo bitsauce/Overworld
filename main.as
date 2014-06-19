@@ -1,27 +1,17 @@
-#include "classes/terrain.as"
-#include "classes/background.as"
-#include "classes/gameobject.as"
-#include "classes/player.as"
-
-array<Texture@> TILE_TEXTURES(MAX_TILES);
-Font @arial = @Font("Arial Bold", 12);
-
-namespace global {
-	enum Layer {
-		BACKGROUND_LAYER,
-		FOREGROUND_LAYER,
-		NUM_LAYERS
-	}
-	array<Batch@> batches(NUM_LAYERS);
-}
+// Include "includes.as"-files
+#include "core/includes.as"
+#include "classes/includes.as"
+#include "scripts/includes.as"
 
 void main()
 {
 	Box2D.scale = TILE_SIZE;
-	
+	
+	TimeOfDay();
 	Terrain(50, 50);
 	Background();
 	Player();
+	Inventory();
 	
 	// Create batches
 	for(int i = 0; i < global::batches.size; i++) {
@@ -45,7 +35,7 @@ void draw()
 	}
 	
 	arial.setColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-	arial.draw(@global::batches[global::BACKGROUND_LAYER], Vector2(12.0f, 12.0f), "FPS: " + Graphics.FPS);
+	arial.draw(@global::batches[global::GUI], Vector2(730.0f, 12.0f), "FPS: " + Graphics.FPS);
 	
 	for(int i = 0; i < global::batches.size; i++) {
 		global::batches[i].draw();
@@ -63,10 +53,17 @@ bool profilerToggled = false;
 
 void update()
 {
-	if(Input.getKeyState(KEY_LMB))
+	if(Input.getKeyState(KEY_LMB)) {
 		global::terrain.removeTile((Input.position.x+camera.x)/TILE_SIZE, (Input.position.y+camera.y)/TILE_SIZE);
-	else if(Input.getKeyState(KEY_RMB))
+	}else if(Input.getKeyState(KEY_RMB)){
 		global::terrain.addTile((Input.position.x+camera.x)/TILE_SIZE, (Input.position.y+camera.y)/TILE_SIZE, GRASS_TILE);
+	}
+	
+	if(Input.getKeyState(KEY_I))
+	{
+		Item i();
+		i.body.setTransform(Input.position+camera, 0.0f);
+	}
 	
 	for(int i = 0; i < global::gameObjects.size; i++) {
 		global::gameObjects[i].update();
