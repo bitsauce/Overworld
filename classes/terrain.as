@@ -24,11 +24,10 @@ class Terrain //: GameObject
 {
 	grid<Tile> tiles;
 	grid<b2Fixture@> fixtures;
-	
 	b2Body @body;
 	
 	array<Animation@> tileAnims(MAX_TILES);
-	Batch @batch = Batch();
+	array<SpriteBatch@> batches(MAX_TILES);
 	private int width = 0;
 	private int height = 0;
 	
@@ -40,6 +39,7 @@ class Terrain //: GameObject
 		// Load tile animations
 		for(int i = NULL_TILE + 1; i < MAX_TILES; i++) {
 			@tileAnims[i] = @Animation(@TILE_TEXTURES[i], 1, 21);
+			@batches[i] = @SpriteBatch();
 		}
 		
 		@global::terrain = @this;
@@ -48,18 +48,20 @@ class Terrain //: GameObject
 		fixtures.resize(width, height);
 		
 		// Initialize terrain buffers
-		Sprite @tile = Sprite(tileAnims[GRASS_TILE].getKeyFrame(0)); // TODO: Sprite should have a default constructor for this reason
 		for(int y = 0; y < height; y++) {
 			for(int x = 0; x < width; x++) {
-				tile.setPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
-				for(int i = NULL_TILE + 1; i < MAX_TILES; i++) {
-					tile.setRegion(tileAnims[i].getKeyFrame(0));
-					tile.draw(@batch);
+				for(int i = NULL_TILE + 1; i < MAX_TILES; i++) {
+					Sprite @tile = @Sprite(tileAnims[i].getKeyFrame(0));
+					tile.setPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+					batches[i].add(@tile);
 				}
 				tiles[x, y] = NULL_TILE;
 			}
 		}
-		batch.makeStatic();
+		
+		for(int i = NULL_TILE + 1; i < MAX_TILES; i++) {
+			batches[i].makeStatic();
+		}
 		
 		this.width = width;
 		this.height = height;
@@ -101,16 +103,11 @@ class Terrain //: GameObject
 		if(!isValid(x, y) || isTileAt(x, y)) // Last check probably optional
 			return;
 		
-		// Set the correct layer
-		batch.setTexture(@TILE_TEXTURES[tile]);
+		// Show this tile
+		int i = (y*width + x);
+		batches[tile].get(i).setColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 		
-		int i = (y*width + x) * 4;
-		for(int j = 0; j < 4; j++) {
-			Vertex vertex = batch.getVertex(i+j);
-			vertex.color.set(1.0f, 1.0f, 1.0f, 1.0f);
-			batch.modifyVertex(i+j, vertex);
-		}
-		
+		// Set this tile
 		tiles[x, y] = tile;
 		@fixtures[x, y] = @body.createFixture(Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE), 32.0f);
 		updateTile(x, y);
@@ -126,16 +123,9 @@ class Terrain //: GameObject
 		if(!isValid(x, y) || !isTileAt(x, y))
 			return;
 		
-		// Set the correct layer
-		batch.setTexture(@TILE_TEXTURES[getTileAt(x, y)]);
-		
 		// Hide this tile (by setting its vertices alpha channels to 0)
-		int i = (y*width + x) * 4;
-		for(int j = 0; j < 4; j++) {
-			Vertex vertex = batch.getVertex(i+j);
-			vertex.color.set(1.0f, 1.0f, 1.0f, 0.0f);
-			batch.modifyVertex(i+j, vertex);
-		}
+		int i = (y*width + x);
+		batches[getTileAt(x, y)].get(i).setColor(Vector4(1.0f, 1.0f, 1.0f, 0.0f));
 		
 		// Mark as a null tile
 		tiles[x, y] = NULL_TILE;
@@ -187,27 +177,20 @@ class Terrain //: GameObject
 	{
 		if(!isTileAt(x, y)) return;
 		
-		batch.setTexture(@TILE_TEXTURES[getTileAt(x, y)]);
-		TextureRegion @region = tileAnims[GRASS_TILE].getKeyFrame(getTileFrame(getTileState(x, y)));
-		int i = (y*width + x) * 4;
-		for(int j = 0; j < 4; j++) {
-			Vertex vertex = batch.getVertex(i+j);
-			switch(j) {
-				case 0: vertex.texCoord.set(region.uv0.x, region.uv1.y); break;
-				case 1: vertex.texCoord.set(region.uv1.x, region.uv1.y); break;
-				case 2: vertex.texCoord.set(region.uv1.x, region.uv0.y); break;
-				case 3: vertex.texCoord.set(region.uv0.x, region.uv0.y); break;
-			}
-			batch.modifyVertex(i+j, vertex);
-		}
+		// Update texture region
+		Tile tile = getTileAt(x, y);
+		int i = (y*width + x);
+		TextureRegion @region = tileAnims[tile].getKeyFrame(getTileFrame(getTileState(x, y)));
+		batches[tile].get(i).setRegion(@region);
 	}
 	
 	void draw()
 	{
 		Matrix4 mat;
 		mat.translate(-camera.x, -camera.y, 0.0f);
-		batch.setProjectionMatrix(mat);
-		batch.setTexture(@TILE_TEXTURES[GRASS_TILE]);
-		batch.draw();
+		for(int i = NULL_TILE + 1; i < MAX_TILES; i++) {
+			batches[i].setProjectionMatrix(mat);
+			batches[i].draw();
+		}
 	}
 }

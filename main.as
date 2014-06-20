@@ -6,12 +6,14 @@
 void main()
 {
 	Box2D.scale = TILE_SIZE;
-	
+	
 	TimeOfDay();
 	Terrain(50, 50);
 	Background();
 	Player();
-	Inventory();
+	Inventory();
+	
+	arial.setColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 	
 	// Create batches
 	for(int i = 0; i < global::batches.size; i++) {
@@ -32,9 +34,8 @@ void draw()
 	
 	for(int i = 0; i < global::gameObjects.size; i++) {
 		global::gameObjects[i].draw();
-	}
-	
-	arial.setColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+	
 	arial.draw(@global::batches[global::GUI], Vector2(730.0f, 12.0f), "FPS: " + Graphics.FPS);
 	
 	for(int i = 0; i < global::batches.size; i++) {
