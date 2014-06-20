@@ -62,6 +62,6 @@ class Item : GameObject, Body
 	{
 		Shape @shape = @Shape(Rect(body.getPosition(), size));
 		shape.setFillTexture(@itemTexture);
-		shape.draw(global::batches[global::FOREGROUND_LAYER]);
+		shape.draw(global::batches[global::FOREGROUND]);
 	}
 }

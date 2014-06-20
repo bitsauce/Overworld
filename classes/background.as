@@ -97,15 +97,15 @@ class Background : GameObject
 		vertices[3].position.set(0, Window.getSize().y);
 		vertices[3].color = bottomColor;
 		
-		global::batches[global::BACKGROUND_LAYER].addVertices(vertices, QUAD_INDICES);
+		global::batches[global::BACKGROUND].addVertices(vertices, QUAD_INDICES);
 		
 		// Draw sun/moon
 		int hour = global::timeOfDay.getHour();
 		if(hour >= 6 && hour < 18)
 		{
-			sun.draw(@global::batches[global::BACKGROUND_LAYER]);
+			sun.draw(@global::batches[global::BACKGROUND]);
 		}else{
-			moon.draw(@global::batches[global::BACKGROUND_LAYER]);
+			moon.draw(@global::batches[global::BACKGROUND]);
 		}
 	}
 }

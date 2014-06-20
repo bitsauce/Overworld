@@ -11,9 +11,16 @@ void main()
 	Terrain(50, 50);
 	Background();
 	Player();
-	Inventory();
+	Inventory inv();
 	
-	arial.setColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+	ItemData data;
+	data.maxStack = 10;
+	data.desc = "Stick";
+	@data.icon = @Sprite(@itemTexture);
+	inv.addItem(@data, 7);
+	inv.addItem(@data, 5);
+	inv.addItem(@data, 10);
+	inv.addItem(@data, 10);
 	
 	// Create batches
 	for(int i = 0; i < global::batches.size; i++) {
@@ -25,7 +32,7 @@ void draw()
 {
 	Matrix4 mat;
 	mat.translate(-camera.x, -camera.y, 0.0f);
-	global::batches[global::FOREGROUND_LAYER].setProjectionMatrix(mat);
+	global::batches[global::FOREGROUND].setProjectionMatrix(mat);
 		
 	// Clear batches
 	for(int i = 0; i < global::batches.size; i++) {
@@ -34,9 +41,10 @@ void draw()
 	
 	for(int i = 0; i < global::gameObjects.size; i++) {
 		global::gameObjects[i].draw();
-	}
-	
-	arial.draw(@global::batches[global::GUI], Vector2(730.0f, 12.0f), "FPS: " + Graphics.FPS);
+	}
+	
+	arial.setColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+	arial.draw(@global::batches[global::UITEXT], Vector2(730.0f, 12.0f), "FPS: " + Graphics.FPS);
 	
 	for(int i = 0; i < global::batches.size; i++) {
 		global::batches[i].draw();

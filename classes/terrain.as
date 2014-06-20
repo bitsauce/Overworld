@@ -50,8 +50,8 @@ class Terrain //: GameObject
 		// Initialize terrain buffers
 		for(int y = 0; y < height; y++) {
 			for(int x = 0; x < width; x++) {
-				for(int i = NULL_TILE + 1; i < MAX_TILES; i++) {
-					Sprite @tile = @Sprite(tileAnims[i].getKeyFrame(0));
+				for(int i = NULL_TILE + 1; i < MAX_TILES; i++) {
+					Sprite @tile = @Sprite(tileAnims[i].getKeyFrame(0));
 					tile.setPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
 					batches[i].add(@tile);
 				}
