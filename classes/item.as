@@ -1,4 +1,3 @@
-Texture @itemTexture = Texture(":/sprites/items/stick.png");
 const float ITEM_PICKUP_RADIUS = 125.0f;
 const float ITEM_SPEED = 1000.0f;
 class Item : GameObject, Body
@@ -10,8 +9,8 @@ class Item : GameObject, Body
 	b2Fixture @fix;
 	
 	ItemData @data = @ITEMS[0];
-	int amount = 1;
-	
+	int amount = 1;
+	
 	float cooldown = 2.0f;
 	
 	bool jumping = false;
@@ -22,19 +21,28 @@ class Item : GameObject, Body
 		def.type = b2_dynamicBody;
 		def.fixedRotation = true;
 		@body = @b2Body(def);
-		body.setObject(@this);
+		body.setObject(@this);
+		body.setPreSolveCallback(ContactFunc(@preSolve));
 		@fix = @body.createFixture(Rect(0, 0, size.x, size.y), 32.0f);
 	}
 	
-	bool canPickup()
+	void remove()
 	{
-		return cooldown <= 0.0f;
+		body.destroy();
+		GameObject::remove();
 	}
 	
-	void remove()
+	bool canPickup()
 	{
-		body.destroy();
-		GameObject::remove();
+		return cooldown <= 0.0f;
+	}
+	
+	void preSolve(b2Contact @contact)
+	{
+		Item @item;
+		if(contact.other.getObject(@item)) {
+			contact.setEnabled(false);
+		}
 	}
 	
 	Vector2 getPosition()
@@ -63,18 +71,18 @@ class Item : GameObject, Body
 	}
 	
 	void update()
-	{
-		if(cooldown > 0.0f)
-		{
-			cooldown -= Graphics.dt;
-			return;
-		}
+	{
+		if(cooldown > 0.0f)
+		{
+			cooldown -= Graphics.dt;
+			return;
+		}
 		
 		for(int i = 0; i < global::players.size; i++)
 		{
 			Vector2 dt = global::players[i].getCenter() - getCenter();
 			if(dt.length() <= ITEM_PICKUP_RADIUS)
-			{
+			{
 				Vector2 impulse = dt.normalized() * ITEM_SPEED;
 				body.applyImpulse(impulse, getCenter());
 			}
@@ -82,9 +90,9 @@ class Item : GameObject, Body
 	}
 	
 	void draw()
-	{
-		Shape @shape = @Shape(Rect(body.getPosition(), size));
-		shape.setFillTexture(@itemTexture);
-		shape.draw(global::batches[global::FOREGROUND]);
+	{
+		Sprite @sprite = @data.icon;
+		sprite.setPosition(getPosition());
+		sprite.draw(global::batches[global::FOREGROUND]);
 	}
 }

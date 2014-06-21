@@ -81,8 +81,24 @@ class Inventory : GameObject
 		return amount; // Return remainding amount
 	}
 	
-	void removeItem(ItemData @data, int amount = 1, int slotX = -1, int slotY = -1)
-	{
+	bool removeItem(ItemData @data, int amount = 1, int slotX = -1, int slotY = -1)
+	{
+		ItemSlot @slot;
+		if(slotX <= 0 || slotY <= 0) {
+			@slot = @slots[selectedSlot, 0];
+		}else{
+			@slot = @slots[slotX, slotY];
+		}
+		
+		if(!slot.isEmpty()) {
+			slot.amount -= amount;
+			if(slot.amount <= 0) {
+				@slot.data = null;
+				Console.log("outf");
+			}
+			return true;
+		}
+		return false;
 	}
 	
 	void update()
