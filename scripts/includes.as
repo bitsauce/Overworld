@@ -1,1 +1,2 @@
-#include "globals.as"
+#include "globals.as"
+#include "itemdata.as"

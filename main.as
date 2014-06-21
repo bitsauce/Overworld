@@ -11,16 +11,6 @@ void main()
 	Terrain(50, 50);
 	Background();
 	Player();
-	Inventory inv();
-	
-	ItemData data;
-	data.maxStack = 10;
-	data.desc = "Stick";
-	@data.icon = @Sprite(@itemTexture);
-	inv.addItem(@data, 7);
-	inv.addItem(@data, 5);
-	inv.addItem(@data, 10);
-	inv.addItem(@data, 10);
 	
 	// Create batches
 	for(int i = 0; i < global::batches.size; i++) {

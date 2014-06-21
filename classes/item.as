@@ -1,6 +1,6 @@
 Texture @itemTexture = Texture(":/sprites/items/stick.png");
-const float ITEM_PICKUP_RADIUS = 200.0f;
-const float ITEM_SPEED = 1.0f;
+const float ITEM_PICKUP_RADIUS = 125.0f;
+const float ITEM_SPEED = 1000.0f;
 class Item : GameObject, Body
 {
 	Vector2 velocity;
@@ -8,6 +8,11 @@ class Item : GameObject, Body
 	float moveSpeed = 7.0f;
 	b2Body @body;
 	b2Fixture @fix;
+	
+	ItemData @data = @ITEMS[0];
+	int amount = 1;
+	
+	float cooldown = 2.0f;
 	
 	bool jumping = false;
 	
@@ -17,8 +22,19 @@ class Item : GameObject, Body
 		def.type = b2_dynamicBody;
 		def.fixedRotation = true;
 		@body = @b2Body(def);
-		//body.setObject(@this);
+		body.setObject(@this);
 		@fix = @body.createFixture(Rect(0, 0, size.x, size.y), 32.0f);
+	}
+	
+	bool canPickup()
+	{
+		return cooldown <= 0.0f;
+	}
+	
+	void remove()
+	{
+		body.destroy();
+		GameObject::remove();
 	}
 	
 	Vector2 getPosition()
@@ -47,13 +63,20 @@ class Item : GameObject, Body
 	}
 	
 	void update()
-	{
+	{
+		if(cooldown > 0.0f)
+		{
+			cooldown -= Graphics.dt;
+			return;
+		}
+		
 		for(int i = 0; i < global::players.size; i++)
 		{
 			Vector2 dt = global::players[i].getCenter() - getCenter();
 			if(dt.length() <= ITEM_PICKUP_RADIUS)
-			{
-				setPosition(getPosition() + dt.normalized() * ITEM_SPEED);
+			{
+				Vector2 impulse = dt.normalized() * ITEM_SPEED;
+				body.applyImpulse(impulse, getCenter());
 			}
 		}
 	}

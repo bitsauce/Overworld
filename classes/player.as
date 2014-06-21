@@ -15,10 +15,14 @@ class Player : GameObject, Body
 	b2Body @body;
 	b2Fixture @fix;
 	
+	Inventory @inventory;
+	
 	bool jumping = false;
 	
 	Player()
-	{
+	{
+		@inventory = @Inventory(@this);
+		
 		b2BodyDef def;
 		def.type = b2_dynamicBody;
 		def.fixedRotation = true;
@@ -26,16 +30,10 @@ class Player : GameObject, Body
 		@body = @b2Body(def);
 		@fix = @body.createFixture(Rect(0, 0, size.x, size.y), 32.0f);
 		
-		//body.setObject(@this);
-		//body.setBeginContactCallback(ContactFunc(@collision));
+		body.setObject(@this);
+		body.setPreSolveCallback(ContactFunc(@collision));
 		
 		global::players.insertLast(@this);
-	}
-	
-	~Player()
-	{
-		Console.log("Destroy Player");
-		//body.setObject(null);
 	}
 	
 	Vector2 getPosition()
@@ -65,11 +63,18 @@ class Player : GameObject, Body
 	
 	void collision(b2Contact @contact)
 	{
-		Console.log("Collided");
-		/*Item @item;
+		Item @item;
 		if(contact.other.getObject(@item)) {
-			item.remove();
-		}*/
+			contact.setEnabled(false);
+			if(item.canPickup()) {
+				int result = inventory.addItem(@item.data, item.amount);
+				if(result == 0) {
+					item.remove();
+				}else{
+					item.amount = result;
+				}
+			}
+		}
 	}
 	
 	void update()
