@@ -48,6 +48,11 @@ class Inventory : GameObject
 	Inventory(Player @player)
 	{
 		@this.player = @player;
+	}
+	
+	ItemData @getSelectedItem()
+	{
+		return @slots[selectedSlot, 0].data;
 	}
 	
 	int addItem(ItemData @data, int amount = 1)
