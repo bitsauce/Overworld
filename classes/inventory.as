@@ -82,22 +82,22 @@ class Inventory : GameObject
 	}
 	
 	bool removeItem(ItemData @data, int amount = 1, int slotX = -1, int slotY = -1)
-	{
-		ItemSlot @slot;
-		if(slotX <= 0 || slotY <= 0) {
-			@slot = @slots[selectedSlot, 0];
-		}else{
-			@slot = @slots[slotX, slotY];
-		}
-		
-		if(!slot.isEmpty()) {
-			slot.amount -= amount;
-			if(slot.amount <= 0) {
-				@slot.data = null;
-				Console.log("outf");
-			}
-			return true;
-		}
+	{
+		ItemSlot @slot;
+		if(slotX <= 0 || slotY <= 0) {
+			@slot = @slots[selectedSlot, 0];
+		}else{
+			@slot = @slots[slotX, slotY];
+		}
+		
+		if(!slot.isEmpty()) {
+			slot.amount -= amount;
+			if(slot.amount <= 0) {
+				@slot.data = null;
+				Console.log("outf");
+			}
+			return true;
+		}
 		return false;
 	}
 	
@@ -116,7 +116,7 @@ class Inventory : GameObject
 		else showBag = false;
 		if(Input.getKeyState(KEY_Q))
 		{
-			removeItem(@ITEMS[0], 1, selectedSlot, 0);
+			removeItem(@global::items[GRASS_BLOCK], 1, selectedSlot, 0);
 			Item item();
 			item.setPosition(player.getCenter());
 			item.body.applyImpulse(Vector2(1.0f,-1.0f)*5000.0f, item.getCenter());

@@ -90,19 +90,19 @@ class Player : GameObject, Body
 			jumping = true;
 		}else{
 			jumping = false;
-		}
-		
-		if(Input.getKeyState(KEY_RMB)) {
-			Vector2 dt = Input.position+camera - getCenter();
-			if(dt.length() <= ITEM_PICKUP_RADIUS) {
-				Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
-				Tile tile = global::terrain.getTileAt(pos.x, pos.y);
-				if(tile == NULL_TILE && inventory.removeItem(@ITEMS[0]))
-				{
-					global::terrain.addTile(pos.x, pos.y, GRASS_TILE);
-				}
+		}
+		
+		if(Input.getKeyState(KEY_RMB)) {
+			Vector2 dt = Input.position+camera - getCenter();
+			if(dt.length() <= ITEM_PICKUP_RADIUS) {
+				Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
+				Tile tile = global::terrain.getTileAt(pos.x, pos.y);
+				if(tile == NULL_TILE && inventory.removeItem(@global::items[GRASS_BLOCK]))
+				{
+					global::terrain.addTile(pos.x, pos.y, GRASS_TILE);
+				}
 			}
-		}
+		}
 	
 		camera = position - Vector2(Window.getSize())/2.0f;
 	}

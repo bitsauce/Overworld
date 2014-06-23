@@ -8,7 +8,7 @@ class Item : GameObject, Body
 	b2Body @body;
 	b2Fixture @fix;
 	
-	ItemData @data = @ITEMS[0];
+	ItemData @data = @global::items[GRASS_BLOCK];
 	int amount = 1;
 	
 	float cooldown = 2.0f;
@@ -21,28 +21,28 @@ class Item : GameObject, Body
 		def.type = b2_dynamicBody;
 		def.fixedRotation = true;
 		@body = @b2Body(def);
-		body.setObject(@this);
+		body.setObject(@this);
 		body.setPreSolveCallback(ContactFunc(@preSolve));
 		@fix = @body.createFixture(Rect(0, 0, size.x, size.y), 32.0f);
-	}
-	
-	void remove()
-	{
-		body.destroy();
-		GameObject::remove();
+	}
+	
+	void remove()
+	{
+		body.destroy();
+		GameObject::remove();
 	}
 	
 	bool canPickup()
 	{
 		return cooldown <= 0.0f;
-	}
-	
-	void preSolve(b2Contact @contact)
-	{
-		Item @item;
-		if(contact.other.getObject(@item)) {
-			contact.setEnabled(false);
-		}
+	}
+	
+	void preSolve(b2Contact @contact)
+	{
+		Item @item;
+		if(contact.other.getObject(@item)) {
+			contact.setEnabled(false);
+		}
 	}
 	
 	Vector2 getPosition()
@@ -90,8 +90,8 @@ class Item : GameObject, Body
 	}
 	
 	void draw()
-	{
-		Sprite @sprite = @data.icon;
+	{
+		Sprite @sprite = @data.icon;
 		sprite.setPosition(getPosition());
 		sprite.draw(global::batches[global::FOREGROUND]);
 	}

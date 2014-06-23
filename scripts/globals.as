@@ -14,5 +14,7 @@ namespace global {
 	array<GameObject@> gameObjects;
 	TimeOfDay @timeOfDay;
 	
-	Font @arial8 = @Font("Arial", 8);
+	Font @arial8 = @Font("Arial", 8);
+	
+	ItemManager @items = @ItemManager();
 }

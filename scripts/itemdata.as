@@ -1,5 +1,10 @@
-enum ItemType
+enum ItemID
 {
+	GRASS_BLOCK,
+	TREE_BLOCK,
+	STONE_BLOCK,
+	
+	
 	STICK,
 	MAX_ITEMS
 }
@@ -20,12 +25,29 @@ class ItemData
 	}
 }
 
-array<ItemData@> ITEMS = {
-	@ItemData("Grass block", "A block of grass", 255, @Sprite(@TextureRegion(@Texture(":/sprites/tiles/grass_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f))),
-	@ItemData("Stick", "A stick", 5, @Sprite(@Texture(":/sprites/items/stick.png")))
-};
-
-
-void loadItems()
+class ItemManager
 {
+	private array<ItemData@> data(MAX_ITEMS);
+	
+	ItemManager()
+	{
+		addItem(GRASS_BLOCK, "Grass block", "A block of grass", 255, @Sprite(@TextureRegion(@Texture(":/sprites/tiles/grass_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)));
+		addItem(STICK, "Stick", "A stick", 5, @Sprite(@Texture(":/sprites/items/stick.png")));
+		@global::items = @this;
+	}
+	
+	private void addItem(ItemID id, string name, string desc, int maxStack, Sprite @icon)
+	{
+		@data[id] = @ItemData(name, desc, maxStack, @icon);
+	}
+	
+	ItemData @opIndex(int idx)
+	{
+		return @data[idx];
+	}
+	
+	ItemData @getItem(ItemID id)
+	{
+		return @data[id];
+	}
 }
