@@ -46,6 +46,6 @@ class TimeOfDay : GameObject
 	
 	void draw()
 	{
-		arial.draw(@global::batches[global::UITEXT], Vector2(500.0f, 12.0f), formatInt(getHour(), "0", 2) + ":" + formatInt(getMinute(), "0", 2));
+		global::arial12.draw(@global::batches[global::UITEXT], Vector2(500.0f, 12.0f), formatInt(getHour(), "0", 2) + ":" + formatInt(getMinute(), "0", 2));
 	}
 }

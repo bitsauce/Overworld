@@ -1,196 +1,195 @@
 const int TILE_SIZE = 16;
 
-enum Direction
-{
-	NORTH		= 1,
-	SOUTH		= 2,
-	EAST		= 4,
-	WEST		= 8
-}
-
 enum Tile
 {
-	NULL_TILE = 0,
+	NULL_TILE = 0,
+	
+	// SCENE_TILES BEGIN
 	GRASS_TILE,
-	STONE_TILE,
+	STONE_TILE,
+	// SCENE_TILES END
+	
+	SCENE_TILES,
+	
+	// BACKGROUND_TILES BEGIN
+	TREE_TILE,
+	// BACKGROUND_TILES END
+	
+	BACKGROUND_TILES,
+	
+	// FOREGROUND_TILES BEGIN
+	LEAF_TILE,
+	// FOREGROUND_TILES END
+	
+	FOREGROUND_TILES,
+	
 	MAX_TILES
+}
+
+bool isValidTile(Tile tile)
+{
+	return tile != SCENE_TILES && tile != BACKGROUND_TILES &&
+			tile != FOREGROUND_TILES && tile != MAX_TILES;
+}
+
+enum TerrainLayer
+{
+	TERRAIN_BACKGROUND,
+	TERRAIN_SCENE,
+	TERRAIN_FOREGROUND,
+	TERRAIN_LAYERS_MAX
 }
 
-namespace global {
-	Terrain @terrain;
-}
-
-class Terrain //: GameObject
+class Terrain : GameObject
 {
-	grid<Tile> tiles;
 	grid<b2Fixture@> fixtures;
-	b2Body @body;
+	b2Body @body;
+	
+	array<TileGrid@> layers(TERRAIN_LAYERS_MAX);
 	
-	array<Animation@> tileAnims(MAX_TILES);
-	array<SpriteBatch@> batches(MAX_TILES);
-	private int width = 0;
-	private int height = 0;
+	private int width;
+	private int height;
+		
+	TerrainGen gen();
 	
 	Terrain(const int width, const int height)
-	{
-		@TILE_TEXTURES[GRASS_TILE] = @Texture(":/sprites/tiles/grass_tile.png");
-		@TILE_TEXTURES[STONE_TILE] = @Texture(":/sprites/tiles/stone_tile.png");
+	{
+		// Set size
+		this.width = width;
+		this.height = height;
 		
-		// Load tile animations
-		for(int i = NULL_TILE + 1; i < MAX_TILES; i++) {
-			@tileAnims[i] = @Animation(@TILE_TEXTURES[i], 1, 21);
-			@batches[i] = @SpriteBatch();
-		}
-		
-		@global::terrain = @this;
-		
-		tiles.resize(width, height);
+		// Load tile textures
+		array<Texture@> tileTextures(MAX_TILES);
+		@tileTextures[GRASS_TILE]	=	@Texture(":/sprites/tiles/grass_tile.png");
+		@tileTextures[STONE_TILE]	=	@Texture(":/sprites/tiles/stone_tile.png");
+		@tileTextures[LEAF_TILE]	=	@Texture(":/sprites/tiles/leaf_tile.png");
+		@tileTextures[TREE_TILE]	=	@Texture(":/sprites/tiles/tree_tile.png");
+		
+		// Create terrain layers
+		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
+		{
+			int start = 0;
+			int end = 0;
+			switch(i) {
+			case TERRAIN_SCENE: start = NULL_TILE + 1; end = SCENE_TILES; break;
+			case TERRAIN_BACKGROUND: start = SCENE_TILES + 1; end = BACKGROUND_TILES; break;
+			case TERRAIN_FOREGROUND: start = BACKGROUND_TILES + 1; end = FOREGROUND_TILES; break;
+			}
+			
+			array<Texture@> textures;
+			for(; start < end; start++) {
+				textures.insertLast(@tileTextures[start]);
+			}
+			
+			@layers[i] = @TileGrid(width, height, textures);
+		}
+		
+		// Resize fixture grid
 		fixtures.resize(width, height);
-		
-		// Initialize terrain buffers
-		for(int y = 0; y < height; y++) {
-			for(int x = 0; x < width; x++) {
-				for(int i = NULL_TILE + 1; i < MAX_TILES; i++) {
-					Sprite @tile = @Sprite(tileAnims[i].getKeyFrame(0));
-					tile.setPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
-					batches[i].add(@tile);
-				}
-				tiles[x, y] = NULL_TILE;
-			}
-		}
-		
-		for(int i = NULL_TILE + 1; i < MAX_TILES; i++) {
-			batches[i].makeStatic();
-		}
-		
-		this.width = width;
-		this.height = height;
-		
+		
+		// Setup b2Body
 		b2BodyDef def;
 		def.type = b2_staticBody;
 		def.position.set(0.0f, 0.0f);
 		def.allowSleep = true;
 		@body = b2Body(def);
-		
-		for(int x = 0; x < width; x++) {
-			float h = 25;//(Math.sin(x*0.05f)) * 20;
-			for(int y = height - 1; y >= 0 && y > h; y--) {
-				addTile(x, y, GRASS_TILE);
-			}
-		}
+		
+		// Generate a terrain
+		gen.generate(@this);
+		
+		// Set global terrain handle
+		@global::terrain = @this;
 	}
-	
-	bool isValid(const int x, const int y)
+	
+	// Getters/setters/validators
+	int getWidth()
 	{
-		return x >= 0 && x < width && y >= 0 && y < height;
+		return width;
 	}
 	
-	Tile getTileAt(const int x, const int y)
+	int getHeight()
+	{
+		return height;
+	}
+	
+	bool isValid(const int x, const int y)
+	{
+		return x >= 0 && x < width && y >= 0 && y < height;
+	}
+	
+	Tile getTileAt(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
 	{
 		if(!isValid(x, y))
-			return NULL_TILE;
-		return tiles[x, y];
+			return NULL_TILE;
+		return getTileValue(layer, layers[layer].getTileAt(x, y));
 	}
 	
-	bool isTileAt(const int x, const int y)
+	bool isTileAt(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
 	{
-		return getTileAt(x, y) != NULL_TILE;
+		return getTileAt(x, y, layer) != NULL_TILE;
+	}
+	
+	// Layer helper functions
+	TerrainLayer getLayerByTile(Tile tile)
+	{
+		if(tile < SCENE_TILES) return TERRAIN_SCENE;
+		if(tile < BACKGROUND_TILES) return TERRAIN_BACKGROUND;
+		return TERRAIN_FOREGROUND;
+	}
+	
+	int getTileIndex(TerrainLayer layer, Tile tile)
+	{
+		switch(layer)
+		{
+		case TERRAIN_SCENE: return tile - NULL_TILE; break;
+		case TERRAIN_BACKGROUND: return tile - SCENE_TILES; break;
+		case TERRAIN_FOREGROUND: return tile - BACKGROUND_TILES; break;
+		}
+		return -1;
+	}
+	
+	Tile getTileValue(TerrainLayer layer, int tile)
+	{
+		if(tile == 0) return NULL_TILE;
+		switch(layer)
+		{
+		case TERRAIN_SCENE: return Tile(tile + NULL_TILE); break;
+		case TERRAIN_BACKGROUND: return Tile(tile + SCENE_TILES); break;
+		case TERRAIN_FOREGROUND: return Tile(tile + BACKGROUND_TILES); break;
+		}
+		return NULL_TILE;
 	}
-	
+	
+	// Terrain modification
 	void addTile(const int x, const int y, Tile tile)
-	{
-		// Make sure we can add a tile here
-		if(!isValid(x, y) || isTileAt(x, y)) // Last check probably optional
-			return;
+	{
+		// Get terrain layer
+		TerrainLayer layer = getLayerByTile(tile);
+		
+		// Create a fixture
+		if(layer == TERRAIN_SCENE && layers[layer].isValid(x, y) && @fixtures[x, y] == null) {
+			@fixtures[x, y] = @body.createFixture(Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE), 32.0f);
+		}
 		
-		// Show this tile
-		int i = (y*width + x);
-		batches[tile].get(i).setColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
-		
-		// Set this tile
-		tiles[x, y] = tile;
-		@fixtures[x, y] = @body.createFixture(Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE), 32.0f);
-		updateTile(x, y);
-		updateTile(x+1, y);
-		updateTile(x-1, y);
-		updateTile(x, y+1);
-		updateTile(x, y-1);
+		// Add tile to tile grid
+		layers[layer].addTile(x, y, getTileIndex(layer, tile));
 	}
 	
-	void removeTile(const int x, const int y)
-	{
-		// Make sure there is a tile to remove
-		if(!isValid(x, y) || !isTileAt(x, y))
-			return;
-		
-		// Hide this tile (by setting its vertices alpha channels to 0)
-		int i = (y*width + x);
-		batches[getTileAt(x, y)].get(i).setColor(Vector4(1.0f, 1.0f, 1.0f, 0.0f));
-		
-		// Mark as a null tile
-		tiles[x, y] = NULL_TILE;
-		body.removeFixture(@fixtures[x, y]);
-		@fixtures[x, y] = null;
-		updateTile(x+1, y);
-		updateTile(x-1, y);
-		updateTile(x, y+1);
-		updateTile(x, y-1);
+	void removeTile(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
+	{
+		// Remove the fixture
+		if(layer == TERRAIN_SCENE && layers[layer].isValid(x, y) && @fixtures[x, y] != null) {
+			body.removeFixture(@fixtures[x, y]);
+			@fixtures[x, y] = null;
+		}
+		
+		// Remove tile from tile grid
+		layers[layer].removeTile(x, y);
 	}
-	
-	private uint getTileState(const int x, const int y)
-	{
-		// Set state
-		uint state = 0;
-		if(!isTileAt(x, y-1)) state |= NORTH;
-		if(!isTileAt(x, y+1)) state |= SOUTH;
-		if(!isTileAt(x+1, y)) state |= EAST;
-		if(!isTileAt(x-1, y)) state |= WEST;
-		return state;
-	}
-	
-	private uint getTileFrame(const uint state)
-	{
-		// Get block frame
-		bool r = (state & EAST) == 0;
-		bool t = (state & NORTH) == 0;
-		bool l = (state & WEST) == 0;
-		bool b = (state & SOUTH) == 0;
-		if(r) if(t) if(l) if(b)			return 1;
-                             else		return 6;
-                       else if(b)		return 8;
-                       else				return 7;
-                  else if(l) if(b)		return 2;
-                             else		return 10;
-                  else if(b)			return 9;
-                  else					return 12;
-		else if(t) if(l) if(b)			return 4;
-                            else		return 5;
-                      else if(b)		return 13;
-		           else					return 15;
-		     else if(l) if(b)			return 3;
-		     else						return 11;
-		else if(b)						return 14;
-		else							return 16;
-	}
-	
-	void updateTile(const int x, const int y)
-	{
-		if(!isTileAt(x, y)) return;
-		
-		// Update texture region
-		Tile tile = getTileAt(x, y);
-		int i = (y*width + x);
-		TextureRegion @region = tileAnims[tile].getKeyFrame(getTileFrame(getTileState(x, y)));
-		batches[tile].get(i).setRegion(@region);
-	}
-	
-	void draw()
-	{
-		Matrix4 mat;
-		mat.translate(-camera.x, -camera.y, 0.0f);
-		for(int i = NULL_TILE + 1; i < MAX_TILES; i++) {
-			batches[i].setProjectionMatrix(mat);
-			batches[i].draw();
-		}
+	
+	// Drawing
+	void draw(TerrainLayer layer, Matrix4 mat)
+	{
+		layers[layer].draw(mat);
 	}
 }

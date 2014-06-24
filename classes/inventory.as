@@ -99,7 +99,6 @@ class Inventory : GameObject
 			slot.amount -= amount;
 			if(slot.amount <= 0) {
 				@slot.data = null;
-				Console.log("outf");
 			}
 			return true;
 		}
@@ -165,7 +164,7 @@ class Inventory : GameObject
 		}
 		
 		if(hoveredItemSlot >= 0 && @slots[hoveredItemSlot, 0].data != null) {
-			arial.draw(global::batches[global::UITEXT], Input.position + Vector2(16.0f, 0.0f), slots[hoveredItemSlot, 0].data.desc);
+			global::arial12.draw(global::batches[global::UITEXT], Input.position + Vector2(16.0f, 0.0f), slots[hoveredItemSlot, 0].data.desc);
 		}
 	}
 }

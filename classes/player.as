@@ -21,7 +21,7 @@ class Player : GameObject, Body
 	
 	Player()
 	{
-		@inventory = @Inventory(@this);
+		@inventory = @Inventory(@this);
 		inventory.addItem(@global::items[PICKAXE_IRON]);
 		
 		b2BodyDef def;
@@ -93,41 +93,47 @@ class Player : GameObject, Body
 			jumping = false;
 		}
 		
-		if(Input.getKeyState(KEY_LMB)) {
-			ItemID id = global::items.find(inventory.getSelectedItem());
-			switch(id)
-			{
-			case PICKAXE_IRON:
-			{
-				Vector2 dt = Input.position+camera - getCenter();
-				if(dt.length() <= ITEM_PICKUP_RADIUS)
-				{
-					Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
-					Tile tile = global::terrain.getTileAt(pos.x, pos.y);
-					global::terrain.removeTile(pos.x, pos.y);
-					
-					switch(tile)
+		if(Input.getKeyState(KEY_LMB))
+		{
+			ItemID id = global::items.find(inventory.getSelectedItem());
+			switch(id)
+			{
+			case PICKAXE_IRON:
+			{
+				Vector2 dt = Input.position+camera - getCenter();
+				if(dt.length() <= ITEM_PICKUP_RADIUS)
+				{
+					Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
+					Tile tile = global::terrain.getTileAt(pos.x, pos.y);
+					global::terrain.removeTile(pos.x, pos.y);
+					
+					switch(tile)
+					{
+					case GRASS_TILE:
 					{
-					case GRASS_TILE: {Item item(); item.setPosition(Vector2(pos)*TILE_SIZE);} break;
+						Item item();
+						item.setPosition(Vector2(pos)*TILE_SIZE);
 					}
-				}
-			}
-			break;
-			
-			case GRASS_BLOCK:
-			{
-				Vector2 dt = Input.position+camera - getCenter();
-				if(dt.length() <= ITEM_PICKUP_RADIUS)
-				{
-					Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
-					Tile tile = global::terrain.getTileAt(pos.x, pos.y);
-					if(tile == NULL_TILE && inventory.removeItem(@global::items[GRASS_BLOCK]))
-					{
-						global::terrain.addTile(pos.x, pos.y, GRASS_TILE);
-					}
-				}
-			}
-			break;
+					break;
+					}
+				}
+			}
+			break;
+			
+			case GRASS_BLOCK:
+			{
+				Vector2 dt = Input.position+camera - getCenter();
+				if(dt.length() <= ITEM_PICKUP_RADIUS)
+				{
+					Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
+					Tile tile = global::terrain.getTileAt(pos.x, pos.y);
+					if(tile == NULL_TILE && inventory.removeItem(@global::items[GRASS_BLOCK]))
+					{
+						global::terrain.addTile(pos.x, pos.y, GRASS_TILE);
+					}
+				}
+			}
+			break;
 			}
 		}
 	
