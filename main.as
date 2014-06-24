@@ -4,11 +4,13 @@
 #include "scripts/includes.as"
 
 void main()
-{
+{
+	Console.log("Creating stuffs");
+	
 	Box2D.scale = TILE_SIZE;
 	
 	TimeOfDay();
-	Terrain(50, 50);
+	Terrain(250, 250);
 	Background();
 	Player();
 	
@@ -22,7 +24,17 @@ void draw()
 {
 	Matrix4 mat;
 	mat.translate(-camera.x, -camera.y, 0.0f);
-	global::batches[global::FOREGROUND].setProjectionMatrix(mat);
+	global::batches[global::FOREGROUND].setProjectionMatrix(mat);
+	
+	/*if(Input.getKeyState(KEY_W))
+		camera.y += 0.5f;
+	if(Input.getKeyState(KEY_S))
+		camera.y -= 0.5f;
+	if(Input.getKeyState(KEY_D))
+		camera.x += 0.5f;
+	if(Input.getKeyState(KEY_A))
+		camera.x -= 0.5f;*/
+		
 		
 	// Clear batches
 	for(int i = 0; i < global::batches.size; i++) {
@@ -34,7 +46,8 @@ void draw()
 	}
 	
 	global::arial12.setColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-	global::arial12.draw(@global::batches[global::UITEXT], Vector2(730.0f, 12.0f), "FPS: " + Graphics.FPS);
+	global::arial12.draw(@global::batches[global::UITEXT], Vector2(730.0f, 12.0f), "FPS: " + Graphics.FPS);
+	//global::arial12.draw(@global::batches[global::UITEXT], Vector2(12.0f, 12.0f), "Camera: (" + camera.x + ", " +camera.y+")");
 	
 	global::batches[global::BACKGROUND].draw();
 	

@@ -86,7 +86,7 @@ class Player : GameObject, Body
 		Vector2 position = body.getPosition();
 		
 		if(Input.getKeyState(KEY_A))
-			body.applyImpulse(Vector2(-1000.0f, 0.0f), position + size/2.0f);
+			body.applyImpulse(Vector2(-10.0f, 0.0f), position + size/2.0f);
 		if(Input.getKeyState(KEY_D))
 			body.applyImpulse(Vector2(1000.0f, 0.0f), position + size/2.0f);
 		if(Input.getKeyState(KEY_SPACE)) {
@@ -137,20 +137,20 @@ class Player : GameObject, Body
 				}
 			}
 			break;
-			
-			case WOOD_BLOCK:
-			{
-				Vector2 dt = Input.position+camera - getCenter();
-				if(dt.length() <= ITEM_PICKUP_RADIUS)
-				{
-					Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
-					Tile tile = global::terrain.getTileAt(pos.x, pos.y, TERRAIN_BACKGROUND);
-					if(tile == NULL_TILE && inventory.removeItem(@global::items[id]))
-					{
-						global::terrain.addTile(pos.x, pos.y, TREE_TILE);
-					}
-				}
-			}
+			
+			case WOOD_BLOCK:
+			{
+				Vector2 dt = Input.position+camera - getCenter();
+				if(dt.length() <= ITEM_PICKUP_RADIUS)
+				{
+					Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
+					Tile tile = global::terrain.getTileAt(pos.x, pos.y, TERRAIN_BACKGROUND);
+					if(tile == NULL_TILE && inventory.removeItem(@global::items[id]))
+					{
+						global::terrain.addTile(pos.x, pos.y, TREE_TILE);
+					}
+				}
+			}
 			break;
 			case GRASS_BLOCK:
 			{
