@@ -5,20 +5,23 @@
 
 void main()
 {
-	Console.log("Creating stuffs");
+	Console.log("Overworld - void main()");
 	
 	Box2D.scale = TILE_SIZE;
 	
 	TimeOfDay();
 	Terrain(250, 250);
 	Background();
-	Player();
+	Player();
+	
+	Console.log("void main() Stage 2");
 	
 	// Create batches
 	for(int i = 0; i < global::batches.size; i++) {
 		@global::batches[i] = Batch();
 	}
-	Console.log("Done creating stuffs");
+	
+	Console.log("void main() end");
 }
 
 void draw()

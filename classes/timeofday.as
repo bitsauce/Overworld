@@ -3,7 +3,8 @@ class TimeOfDay : GameObject
 	private float time = 13.0f*60.0f;
 		
 	TimeOfDay()
-	{
+	{
+		Console.log("TimeOfDay: Constructor");
 		@global::timeOfDay = @this;
 	}
 	

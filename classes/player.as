@@ -20,20 +20,25 @@ class Player : GameObject, Body
 	bool jumping = false;
 	
 	Player()
-	{
+	{
+		Console.log("Player: Constructor (part1)");
 		@inventory = @Inventory(@this);
 		inventory.addItem(@global::items[PICKAXE_IRON]);
-		
+		
+		Console.log("Player: Constructor (part2)");
 		b2BodyDef def;
 		def.type = b2_dynamicBody;
 		def.fixedRotation = true;
-		def.position.set(200, 0);
+		def.position.set(200, 0);
+		Console.log("Player: Constructor (part3)");
 		@body = @b2Body(def);
 		@fix = @body.createFixture(Rect(0, 0, size.x, size.y), 32.0f);
-		
+		
+		Console.log("Player: Constructor (part4)");
 		body.setObject(@this);
 		body.setPreSolveCallback(ContactFunc(@collision));
-		
+		
+		Console.log("Player: Constructor (part5)");
 		global::players.insertLast(@this);
 	}
 	
