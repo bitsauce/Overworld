@@ -20,25 +20,20 @@ class Player : GameObject, Body
 	bool jumping = false;
 	
 	Player()
-	{
-		Console.log("Player: Constructor (part1)");
+	{
 		@inventory = @Inventory(@this);
 		inventory.addItem(@global::items[PICKAXE_IRON]);
-		
-		Console.log("Player: Constructor (part2)");
+		
 		b2BodyDef def;
 		def.type = b2_dynamicBody;
 		def.fixedRotation = true;
-		def.position.set(200, 0);
-		Console.log("Player: Constructor (part3)");
+		def.position.set(200, 0);
 		@body = @b2Body(def);
 		@fix = @body.createFixture(Rect(0, 0, size.x, size.y), 32.0f);
-		
-		Console.log("Player: Constructor (part4)");
+		
 		body.setObject(@this);
 		body.setPreSolveCallback(ContactFunc(@collision));
-		
-		Console.log("Player: Constructor (part5)");
+		
 		global::players.insertLast(@this);
 	}
 	
@@ -91,7 +86,7 @@ class Player : GameObject, Body
 		Vector2 position = body.getPosition();
 		
 		if(Input.getKeyState(KEY_A))
-			body.applyImpulse(Vector2(-10.0f, 0.0f), position + size/2.0f);
+			body.applyImpulse(Vector2(-1000.0f, 0.0f), position + size/2.0f);
 		if(Input.getKeyState(KEY_D))
 			body.applyImpulse(Vector2(1000.0f, 0.0f), position + size/2.0f);
 		if(Input.getKeyState(KEY_SPACE)) {
@@ -180,7 +175,7 @@ class Player : GameObject, Body
 					
 					Projectile p();
 					p.setPosition(getCenter());
-					p.body.applyImpulse(dt.normalized() * 3000, p.getPosition());
+					p.body.applyImpulse(dt.normalized() * 5000, p.getPosition());
 				}
 			}
 			break;
@@ -190,8 +185,10 @@ class Player : GameObject, Body
 		}else{
 			pressed = false;
 		}
-	
-		camera = position - Vector2(Window.getSize())/2.0f;
+		
+		// Temporary solution until i've found some other way to avoid tiling seams
+		// for example through shaders
+		camera = Vector2(Vector2i(getCenter() - Vector2(Window.getSize())/2.0f));
 	}
 	
 	bool pressed = false;

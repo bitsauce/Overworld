@@ -53,21 +53,17 @@ class Terrain : GameObject
 	TerrainGen gen();
 	
 	Terrain(const int width, const int height)
-	{
-		Console.log("Terrain: Constructor (part1)");
-		
+	{
 		// Set size
 		this.width = width;
 		this.height = height;
-		
-		Console.log("Terrain: Constructor (part2)");
+		
 		// Load tile textures
 		array<Texture@> tileTextures(MAX_TILES);
 		@tileTextures[GRASS_TILE]	=	@Texture(":/sprites/tiles/grass_tile.png");
 		@tileTextures[STONE_TILE]	=	@Texture(":/sprites/tiles/stone_tile.png");
 		@tileTextures[LEAF_TILE]	=	@Texture(":/sprites/tiles/leaf_tile.png");
-		@tileTextures[TREE_TILE]	=	@Texture(":/sprites/tiles/tree_tile.png");
-		Console.log("Terrain: Constructor (part3)");
+		@tileTextures[TREE_TILE]	=	@Texture(":/sprites/tiles/tree_tile.png");
 		
 		// Create terrain layers
 		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
@@ -86,24 +82,21 @@ class Terrain : GameObject
 			}
 			
 			@layers[i] = @TileGrid(width, height, textures);
-		}
-		Console.log("Terrain: Constructor (part4)");
+		}
 		
 		// Resize fixture grid
 		fixtures.resize(width, height);
-		
-		Console.log("Terrain: Constructor (part5)");
+		
 		// Setup b2Body
 		b2BodyDef def;
 		def.type = b2_staticBody;
 		def.position.set(0.0f, 0.0f);
 		def.allowSleep = true;
 		@body = b2Body(def);
-		
-		Console.log("Terrain: Constructor (part6)");
-		// Generate a terrain
-		gen.generate(@this);
-		Console.log("Terrain: Constructor (part7)");
+		
+		// Generate a terrain
+		Console.log("Generating world...");
+		gen.generate(@this);
 		
 		// Set global terrain handle
 		@global::terrain = @this;

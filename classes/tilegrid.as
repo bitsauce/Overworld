@@ -15,26 +15,21 @@ class TileGrid
 	private int height;
 		
 	TileGrid(const int width, const int height, array<Texture@> textures)
-	{
-		Console.log("TileGrid: Constructor (Stage 1)");
-		
+	{
 		// Set size
 		this.width = width;
-		this.height = height;
-		Console.log("TileGrid: Constructor (Stage 2)");
+		this.height = height;
 		
 		// Resize tile grid
 		tiles.resize(width, height);
-		
-		Console.log("TileGrid: Constructor (Stage 3)");
+		
 		// Load tile animations
 		for(int i = 0; i < textures.size; i++)
 		{
 			tileAnims.insertLast(@Animation(@textures[i], 1, 21));
 			batches.insertLast(@SpriteBatch());
 		}
-		
-		Console.log("TileGrid: Constructor (Stage 4)");
+		
 		// Initialize terrain buffers
 		for(int y = 0; y < height; y++)
 		{
@@ -49,8 +44,7 @@ class TileGrid
 				tiles[x, y] = 0;
 			}
 		}
-		
-		Console.log("TileGrid: Constructor (Stage 5)");
+		
 		for(int i = 0; i < textures.size; i++) {
 			batches[i].makeStatic();
 		}
