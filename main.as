@@ -17,7 +17,8 @@ void main()
 	// Create batches
 	for(int i = 0; i < global::batches.size; i++) {
 		@global::batches[i] = Batch();
-	}
+	}
+	Console.log("Done creating stuffs");
 }
 
 void draw()
