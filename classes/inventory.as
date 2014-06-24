@@ -29,7 +29,7 @@ class ItemSlot
 	
 	bool contains(ItemData @data)
 	{
-		return @data == @data;
+		return @this.data == @data;
 	}
 }
 
@@ -48,11 +48,11 @@ class Inventory : GameObject
 	Inventory(Player @player)
 	{
 		@this.player = @player;
-	}
-	
-	ItemData @getSelectedItem()
-	{
-		return @slots[selectedSlot, 0].data;
+	}
+	
+	ItemData @getSelectedItem()
+	{
+		return @slots[selectedSlot, 0].data;
 	}
 	
 	int addItem(ItemData @data, int amount = 1)
@@ -121,7 +121,7 @@ class Inventory : GameObject
 		if(Input.getKeyState(KEY_Q))
 		{
 			removeItem(@global::items[GRASS_BLOCK], 1, selectedSlot, 0);
-			Item item();
+			Item item(@global::items[GRASS_BLOCK]);
 			item.setPosition(player.getCenter());
 			item.body.applyImpulse(Vector2(1.0f,-1.0f)*5000.0f, item.getCenter());
 		}

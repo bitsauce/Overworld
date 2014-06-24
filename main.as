@@ -35,20 +35,19 @@ void draw()
 	
 	global::arial12.setColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 	global::arial12.draw(@global::batches[global::UITEXT], Vector2(730.0f, 12.0f), "FPS: " + Graphics.FPS);
-	
-	global::batches[global::BACKGROUND].draw();
-	
-	global::terrain.draw(TERRAIN_BACKGROUND, mat);
-	global::terrain.draw(TERRAIN_SCENE, mat);
-	
-	global::batches[global::FOREGROUND].draw();
-	
-	global::terrain.draw(TERRAIN_FOREGROUND, mat);
-	
-	for(int i = global::FOREGROUND + 1; i < global::batches.size; i++) {
-		global::batches[i].draw();
-	}
 	
+	global::batches[global::BACKGROUND].draw();
+	
+	global::terrain.draw(TERRAIN_BACKGROUND, mat);
+	global::terrain.draw(TERRAIN_SCENE, mat);
+	
+	global::batches[global::FOREGROUND].draw();
+	
+	global::terrain.draw(TERRAIN_FOREGROUND, mat);
+	
+	for(int i = global::FOREGROUND + 1; i < global::batches.size; i++) {
+		global::batches[i].draw();
+	}
 	
 	//Box2D.draw();
 }

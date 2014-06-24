@@ -65,6 +65,7 @@ class Player : GameObject, Body
 	void collision(b2Contact @contact)
 	{
 		Item @item;
+		Projectile @proj;
 		if(contact.other.getObject(@item)) {
 			contact.setEnabled(false);
 			if(item.canPickup()) {
@@ -75,6 +76,8 @@ class Player : GameObject, Body
 					item.amount = result;
 				}
 			}
+		}else if(contact.other.getObject(@proj)) {
+			contact.setEnabled(false);
 		}
 	}
 	
@@ -93,7 +96,7 @@ class Player : GameObject, Body
 			jumping = false;
 		}
 		
-		if(Input.getKeyState(KEY_LMB))
+		if(Input.getKeyState(KEY_LMB))
 		{
 			ItemID id = global::items.find(inventory.getSelectedItem());
 			switch(id)
@@ -104,22 +107,51 @@ class Player : GameObject, Body
 				if(dt.length() <= ITEM_PICKUP_RADIUS)
 				{
 					Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
+					
 					Tile tile = global::terrain.getTileAt(pos.x, pos.y);
-					global::terrain.removeTile(pos.x, pos.y);
+					if(tile == NULL_TILE)
+					{
+						tile = global::terrain.getTileAt(pos.x, pos.y, TERRAIN_BACKGROUND);
+						global::terrain.removeTile(pos.x, pos.y, TERRAIN_BACKGROUND);
+					}else{
+						global::terrain.removeTile(pos.x, pos.y);
+					}
 					
 					switch(tile)
 					{
-					case GRASS_TILE:
-					{
-						Item item();
-						item.setPosition(Vector2(pos)*TILE_SIZE);
-					}
+					case GRASS_TILE:
+					{
+						Item item(@global::items[GRASS_BLOCK]);
+						item.setPosition(Vector2(pos)*TILE_SIZE);
+					}
+					break;
+					case TREE_TILE:
+					{
+						Item item1(@global::items[STICK]);
+						item1.setPosition(Vector2(pos)*TILE_SIZE);
+						Item item2(@global::items[WOOD_BLOCK]);
+						item2.setPosition(Vector2(pos)*TILE_SIZE);
+					}
 					break;
 					}
 				}
 			}
 			break;
-			
+			
+			case WOOD_BLOCK:
+			{
+				Vector2 dt = Input.position+camera - getCenter();
+				if(dt.length() <= ITEM_PICKUP_RADIUS)
+				{
+					Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
+					Tile tile = global::terrain.getTileAt(pos.x, pos.y, TERRAIN_BACKGROUND);
+					if(tile == NULL_TILE && inventory.removeItem(@global::items[id]))
+					{
+						global::terrain.addTile(pos.x, pos.y, TREE_TILE);
+					}
+				}
+			}
+			break;
 			case GRASS_BLOCK:
 			{
 				Vector2 dt = Input.position+camera - getCenter();
@@ -127,18 +159,37 @@ class Player : GameObject, Body
 				{
 					Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
 					Tile tile = global::terrain.getTileAt(pos.x, pos.y);
-					if(tile == NULL_TILE && inventory.removeItem(@global::items[GRASS_BLOCK]))
+					if(tile == NULL_TILE && inventory.removeItem(@global::items[id]))
 					{
 						global::terrain.addTile(pos.x, pos.y, GRASS_TILE);
 					}
 				}
 			}
 			break;
+			
+			case STICK:
+			{
+				if(!pressed && inventory.removeItem(@global::items[id]))
+				{
+					Vector2 dt = Input.position+camera - getCenter();
+					
+					Projectile p();
+					p.setPosition(getCenter());
+					p.body.applyImpulse(dt.normalized() * 3000, p.getPosition());
+				}
 			}
+			break;
+			}
+			
+			pressed = true;
+		}else{
+			pressed = false;
 		}
 	
 		camera = position - Vector2(Window.getSize())/2.0f;
 	}
+	
+	bool pressed = false;
 	
 	void draw()
 	{

@@ -8,15 +8,17 @@ class Item : GameObject, Body
 	b2Body @body;
 	b2Fixture @fix;
 	
-	ItemData @data = @global::items[GRASS_BLOCK];
+	ItemData @data;
 	int amount = 1;
 	
 	float cooldown = 2.0f;
 	
 	bool jumping = false;
 	
-	Item()
-	{
+	Item(ItemData @data)
+	{
+		@this.data = @data;
+		
 		b2BodyDef def;
 		def.type = b2_dynamicBody;
 		def.fixedRotation = true;
