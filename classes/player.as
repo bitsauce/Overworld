@@ -9,7 +9,6 @@ interface Body
 
 class Player : GameObject, Body
 {
-	Vector2 velocity;
 	Vector2 size = Vector2(24.0f, 42.0f);
 	float moveSpeed = 7.0f;
 	b2Body @body;
@@ -17,7 +16,8 @@ class Player : GameObject, Body
 	
 	Inventory @inventory;
 	
-	bool jumping = false;
+	bool jumping = false;
+	bool pressed = false;
 	
 	Player()
 	{
@@ -113,8 +113,6 @@ class Player : GameObject, Body
 		// for example through shaders or texture arrays
 		camera = Vector2(Vector2i(getCenter() - Vector2(Window.getSize())/2.0f));
 	}
-	
-	bool pressed = false;
 	
 	void draw()
 	{
