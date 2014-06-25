@@ -135,15 +135,17 @@ class Inventory : GameObject
 			for(int x = 0; x < INV_WIDTH; x++)
 			{
 				// Draw item icon
-				ItemSlot @slot = slots[x, y];
+				ItemSlot @slot = slots[x, y];
+				global::arial8.setColor(Vector4(1.0f)); // Set white font color
 				if(slot.data != null)
 				{
 					Sprite @icon = slot.data.icon;
 					icon.setPosition(Vector2(5 + 34*x, 5 + 34*y) + Vector2(8, 8));
-					icon.draw(global::batches[global::GUI]);
-					global::arial8.setColor(Vector4(1.0f));
-					string str = formatInt(slot.amount, "");
-					global::arial8.draw(global::batches[global::UITEXT], Vector2(5 + 34*x, 5 + 34*y) + Vector2(28 - global::arial8.getStringWidth(str), 20), str);
+					icon.draw(global::batches[global::GUI]);
+					if(slot.data.maxStack > 1) {
+						string str = formatInt(slot.amount, "");
+						global::arial8.draw(global::batches[global::UITEXT], Vector2(5 + 34*x, 5 + 34*y) + Vector2(28 - global::arial8.getStringWidth(str), 20), str);
+					}
 				}
 				
 				// Draw slot sprite

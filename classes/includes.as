@@ -10,5 +10,7 @@
 
 // Items
 #include "items/item.as"
-#include "items/itemdrop.as"
+#include "items/itemdrop.as"
+#include "items/arrow.as"
+#include "items/block.as"
 #include "items/pickaxe.as"
