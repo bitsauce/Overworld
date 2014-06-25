@@ -187,7 +187,7 @@ class Player : GameObject, Body
 		}
 		
 		// Temporary solution until i've found some other way to avoid tiling seams
-		// for example through shaders
+		// for example through shaders or texture arrays
 		camera = Vector2(Vector2i(getCenter() - Vector2(Window.getSize())/2.0f));
 	}
 	
