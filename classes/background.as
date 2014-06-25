@@ -21,8 +21,7 @@ class Background : GameObject
 	Sprite @moon = @Sprite(@Texture(":/sprites/sky/moon.png"));
 	
 	Background()
-	{
-		Console.log("Background: Constructor");
+	{
 		sun.setOrigin(sun.getCenter());
 		moon.setOrigin(moon.getCenter());
 	}
