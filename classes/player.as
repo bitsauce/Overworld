@@ -64,7 +64,7 @@ class Player : GameObject, Body
 	
 	void collision(b2Contact @contact)
 	{
-		Item @item;
+		ItemDrop @item;
 		Projectile @proj;
 		if(contact.other.getObject(@item)) {
 			contact.setEnabled(false);
@@ -97,96 +97,19 @@ class Player : GameObject, Body
 		}
 		
 		if(Input.getKeyState(KEY_LMB))
-		{
-			ItemID id = global::items.find(inventory.getSelectedItem());
-			switch(id)
-			{
-			case PICKAXE_IRON:
-			{
-				Vector2 dt = Input.position+camera - getCenter();
-				if(dt.length() <= ITEM_PICKUP_RADIUS)
-				{
-					Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
-					
-					Tile tile = global::terrain.getTileAt(pos.x, pos.y);
-					if(tile == NULL_TILE)
-					{
-						tile = global::terrain.getTileAt(pos.x, pos.y, TERRAIN_BACKGROUND);
-						global::terrain.removeTile(pos.x, pos.y, TERRAIN_BACKGROUND);
-					}else{
-						global::terrain.removeTile(pos.x, pos.y);
-					}
-					
-					switch(tile)
-					{
-					case GRASS_TILE:
-					{
-						Item item(@global::items[GRASS_BLOCK]);
-						item.setPosition(Vector2(pos)*TILE_SIZE);
-					}
-					break;
-					case TREE_TILE:
-					{
-						Item item1(@global::items[STICK]);
-						item1.setPosition(Vector2(pos)*TILE_SIZE);
-						Item item2(@global::items[WOOD_BLOCK]);
-						item2.setPosition(Vector2(pos)*TILE_SIZE);
-					}
-					break;
-					}
-				}
-			}
-			break;
-			
-			case WOOD_BLOCK:
-			{
-				Vector2 dt = Input.position+camera - getCenter();
-				if(dt.length() <= ITEM_PICKUP_RADIUS)
-				{
-					Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
-					Tile tile = global::terrain.getTileAt(pos.x, pos.y, TERRAIN_BACKGROUND);
-					if(tile == NULL_TILE && inventory.removeItem(@global::items[id]))
-					{
-						global::terrain.addTile(pos.x, pos.y, TREE_TILE);
-					}
-				}
-			}
-			break;
-			case GRASS_BLOCK:
-			{
-				Vector2 dt = Input.position+camera - getCenter();
-				if(dt.length() <= ITEM_PICKUP_RADIUS)
-				{
-					Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
-					Tile tile = global::terrain.getTileAt(pos.x, pos.y);
-					if(tile == NULL_TILE && inventory.removeItem(@global::items[id]))
-					{
-						global::terrain.addTile(pos.x, pos.y, GRASS_TILE);
-					}
-				}
-			}
-			break;
-			
-			case STICK:
-			{
-				if(!pressed && inventory.removeItem(@global::items[id]))
-				{
-					Vector2 dt = Input.position+camera - getCenter();
-					
-					Projectile p();
-					p.setPosition(getCenter());
-					p.body.applyImpulse(dt.normalized() * 5000, p.getPosition());
-				}
-			}
-			break;
+		{
+			// Use selected item
+			Item @item = inventory.getSelectedItem();
+			if(@item != null && (!item.singleShot || !pressed)) {
+				item.use(@this);
 			}
 			
 			pressed = true;
 		}else{
 			pressed = false;
 		}
-		
-		// Temporary solution until i've found some other way to avoid tiling seams
+		
+		// Temporary solution until i've found some other way to avoid tiling seams
 		// for example through shaders or texture arrays
 		camera = Vector2(Vector2i(getCenter() - Vector2(Window.getSize())/2.0f));
 	}

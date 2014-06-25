@@ -94,9 +94,12 @@ class Terrain : GameObject
 		def.allowSleep = true;
 		@body = b2Body(def);
 		
-		// Generate a terrain
+		// Generate a terrain
 		Console.log("Generating world...");
-		gen.generate(@this);
+		gen.generate(@this);
+		
+		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
+			layers[i].setInitialized(true);
 		
 		// Set global terrain handle
 		@global::terrain = @this;

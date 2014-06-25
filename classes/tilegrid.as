@@ -12,13 +12,15 @@ class TileGrid
 	private array<Animation@> tileAnims;
 	private array<SpriteBatch@> batches;
 	private int width;
-	private int height;
+	private int height;
+	private bool initialized;
 		
 	TileGrid(const int width, const int height, array<Texture@> textures)
 	{
 		// Set size
 		this.width = width;
-		this.height = height;
+		this.height = height;
+		this.initialized = false;
 		
 		// Resize tile grid
 		tiles.resize(width, height);
@@ -65,6 +67,20 @@ class TileGrid
 	bool isTileAt(const int x, const int y)
 	{
 		return getTileAt(x, y) != 0;
+	}
+	
+	void setInitialized(bool value)
+	{
+		if(initialized == false && value == true)
+		{
+			// Update all tiles
+			for(int y = 0; y < height; y++) {
+				for(int x = 0; x < width; x++) {
+					updateTile(x, y);
+				}
+			}
+		}
+		initialized = value;
 	}
 	
 	void addTile(const int x, const int y, int tile)
@@ -80,12 +96,14 @@ class TileGrid
 		// Set the tile value
 		tiles[x, y] = tile;
 		
-		// Update neighbouring tiles
-		updateTile(x, y);
-		updateTile(x+1, y);
-		updateTile(x-1, y);
-		updateTile(x, y+1);
-		updateTile(x, y-1);
+		// Update neighbouring tiles
+		if(initialized) {
+			updateTile(x, y);
+			updateTile(x+1, y);
+			updateTile(x-1, y);
+			updateTile(x, y+1);
+			updateTile(x, y-1);
+		}
 	}
 	
 	void removeTile(const int x, const int y)
@@ -101,11 +119,13 @@ class TileGrid
 		// Reset the tile value
 		tiles[x, y] = 0;
 		
-		// Update neighbouring tiles
-		updateTile(x+1, y);
-		updateTile(x-1, y);
-		updateTile(x, y+1);
-		updateTile(x, y-1);
+		// Update neighbouring tiles
+		if(initialized) {
+			updateTile(x+1, y);
+			updateTile(x-1, y);
+			updateTile(x, y+1);
+			updateTile(x, y-1);
+		}
 	}
 	
 	private uint getTileState(const int x, const int y)

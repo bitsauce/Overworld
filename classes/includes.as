@@ -1,10 +1,14 @@
-// Include files
-#include "tilegrid.as"
+// Include files
+#include "tilegrid.as"
 #include "terrain.as"
 #include "terraingen.as"
-#include "background.as"
+#include "background.as"
 #include "projectile.as"
 #include "player.as"
 #include "inventory.as"
-#include "item.as"
 #include "timeofday.as"
+
+// Items
+#include "items/item.as"
+#include "items/itemdrop.as"
+#include "items/pickaxe.as"

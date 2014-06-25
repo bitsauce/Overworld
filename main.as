@@ -9,10 +9,10 @@ void main()
 	
 	Box2D.scale = TILE_SIZE;
 	
-	TimeOfDay();
+	TimeOfDay();
 	Console.log("Creating terrain...");
 	Terrain(250, 250);
-	Background();
+	Background();
 	Console.log("Setting up player...");
 	Player();
 	

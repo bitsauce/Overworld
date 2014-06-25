@@ -1,9 +1,9 @@
 class ItemSlot
 {
-	ItemData @data;
+	Item @data;
 	int amount;
 		
-	void set(ItemData @data, int amount)
+	void set(Item @data, int amount)
 	{
 		@this.data = @data;
 		this.amount = amount;
@@ -27,7 +27,7 @@ class ItemSlot
 		return @data == null;
 	}
 	
-	bool contains(ItemData @data)
+	bool contains(Item @data)
 	{
 		return @this.data == @data;
 	}
@@ -50,12 +50,12 @@ class Inventory : GameObject
 		@this.player = @player;
 	}
 	
-	ItemData @getSelectedItem()
+	Item @getSelectedItem()
 	{
 		return @slots[selectedSlot, 0].data;
 	}
 	
-	int addItem(ItemData @data, int amount = 1)
+	int addItem(Item @data, int amount = 1)
 	{
 		for(int y = 0; y < INV_HEIGHT; y++)
 		{
@@ -86,7 +86,7 @@ class Inventory : GameObject
 		return amount; // Return remainding amount
 	}
 	
-	bool removeItem(ItemData @data, int amount = 1, int slotX = -1, int slotY = -1)
+	bool removeItem(Item @data, int amount = 1, int slotX = -1, int slotY = -1)
 	{
 		ItemSlot @slot;
 		if(slotX <= 0 || slotY <= 0) {
@@ -121,7 +121,7 @@ class Inventory : GameObject
 		if(Input.getKeyState(KEY_Q))
 		{
 			removeItem(@global::items[GRASS_BLOCK], 1, selectedSlot, 0);
-			Item item(@global::items[GRASS_BLOCK]);
+			ItemDrop item(@global::items[GRASS_BLOCK]);
 			item.setPosition(player.getCenter());
 			item.body.applyImpulse(Vector2(1.0f,-1.0f)*5000.0f, item.getCenter());
 		}
