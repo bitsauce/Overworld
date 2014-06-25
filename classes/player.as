@@ -97,11 +97,11 @@ class Player : GameObject, Body
 		}
 		
 		if(Input.getKeyState(KEY_LMB))
-		{
-			// Use selected item
-			Item @item = inventory.getSelectedItem();
-			if(@item != null && (!item.singleShot || !pressed)) {
-				item.use(@this);
+		{
+			// Use selected item
+			Item @item = inventory.getSelectedItem();
+			if(@item != null && (!item.singleShot || !pressed)) {
+				item.use(@this);
 			}
 			
 			pressed = true;
