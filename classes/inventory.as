@@ -119,11 +119,20 @@ class Inventory : GameObject
 		if(Input.getKeyState(KEY_TAB)) showBag = true;
 		else showBag = false;
 		if(Input.getKeyState(KEY_Q))
-		{
-			removeItem(@global::items[GRASS_BLOCK], 1, selectedSlot, 0);
-			ItemDrop item(@global::items[GRASS_BLOCK]);
-			item.setPosition(player.getCenter());
-			item.body.applyImpulse(Vector2(1.0f,-1.0f)*5000.0f, item.getCenter());
+		{
+			Item @item = @getSelectedItem();
+			if(item != null) {
+				removeItem(@item, 1, selectedSlot, 0);
+				ItemDrop drop(@item);
+				drop.setPosition(player.getCenter());
+				
+				Vector2 dt = Input.position+camera - player.getCenter();
+				if(dt.x >= 0.0f) {
+					drop.body.applyImpulse(Vector2(1.0f, -1.0f)*5000.0f, drop.getCenter());
+				}else{
+					drop.body.applyImpulse(Vector2(-1.0f,-1.0f)*5000.0f, drop.getCenter());
+				}
+			}
 		}
 	}
 	
@@ -133,33 +142,33 @@ class Inventory : GameObject
 		for(int y = 0; y < INV_HEIGHT; y++)
 		{
 			for(int x = 0; x < INV_WIDTH; x++)
-			{
+			{
+				// Draw slot sprite
+				Sprite @slotSprite;
+				if(y == 0 && selectedSlot == x)
+				{
+					@slotSprite = @selectedItemSlot;
+				}else{
+					@slotSprite = @itemSlot;
+				}
+				slotSprite.setPosition(Vector2(5 + 34*x, 5 + 34*y));
+				slotSprite.draw(global::batches[global::GUI]);
+				if(Rect(slotSprite.getPosition(), slotSprite.getSize()).contains(Input.position)) {
+					hoveredItemSlot = x;
+				}
+				
 				// Draw item icon
-				ItemSlot @slot = slots[x, y];
+				ItemSlot @slot = slots[x, y];
 				global::arial8.setColor(Vector4(1.0f)); // Set white font color
 				if(slot.data != null)
 				{
 					Sprite @icon = slot.data.icon;
 					icon.setPosition(Vector2(5 + 34*x, 5 + 34*y) + Vector2(8, 8));
-					icon.draw(global::batches[global::GUI]);
+					icon.draw(global::batches[global::GUI]);
 					if(slot.data.maxStack > 1) {
 						string str = formatInt(slot.amount, "");
-						global::arial8.draw(global::batches[global::UITEXT], Vector2(5 + 34*x, 5 + 34*y) + Vector2(28 - global::arial8.getStringWidth(str), 20), str);
+						global::arial8.draw(global::batches[global::UITEXT], Vector2(5 + 34*x, 5 + 34*y) + Vector2(28 - global::arial8.getStringWidth(str), 20), str);
 					}
-				}
-				
-				// Draw slot sprite
-				Sprite @slotSprite;
-				if(y == 0 && selectedSlot == x)
-				{
-					@slotSprite = @selectedItemSlot;
-				}else{
-					@slotSprite = @itemSlot;
-				}
-				slotSprite.setPosition(Vector2(5 + 34*x, 5 + 34*y));
-				slotSprite.draw(global::batches[global::GUI]);
-				if(Rect(slotSprite.getPosition(), slotSprite.getSize()).contains(Input.position)) {
-					hoveredItemSlot = x;
 				}
 			}
 			if(!showBag) break;
