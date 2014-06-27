@@ -16,8 +16,10 @@ class Player : GameObject, Body
 	
 	Inventory @inventory;
 	
-	bool jumping = false;
-	bool pressed = false;
+	bool jumping = false;
+	bool pressed = false;
+	
+	int health = 100;
 	
 	Player()
 	{
@@ -32,10 +34,16 @@ class Player : GameObject, Body
 		@fix = @body.createFixture(Rect(0, 0, size.x, size.y), 32.0f);
 		
 		body.setObject(@this);
-		body.setPreSolveCallback(ContactFunc(@collision));
+		body.setPreSolveCallback(ContactFunc(@preSolve));
 		
 		global::players.insertLast(@this);
 	}
+	
+	void remove()
+	{
+		body.destroy();
+		GameObject::remove();
+	}
 	
 	Vector2 getPosition()
 	{
@@ -62,7 +70,7 @@ class Player : GameObject, Body
 		return getPosition() + getSize()/2.0f;
 	}
 	
-	void collision(b2Contact @contact)
+	void preSolve(b2Contact @contact)
 	{
 		ItemDrop @item;
 		Projectile @proj;
@@ -79,7 +87,9 @@ class Player : GameObject, Body
 		}else if(contact.other.getObject(@proj)) {
 			contact.setEnabled(false);
 		}
-	}
+	}
+	
+	float timer = 0.0f;
 	
 	void update()
 	{
@@ -107,7 +117,15 @@ class Player : GameObject, Body
 			pressed = true;
 		}else{
 			pressed = false;
-		}
+		}
+		
+		if(global::timeOfDay.getHour() >= 21 && timer <= 0.0f)
+		{
+			Zombie z();
+			z.setPosition(Vector2(camera.x, global::terrain.gen.getGroundHeight(camera.x/TILE_SIZE)*TILE_SIZE));
+			timer = 10.0f;
+		}
+		timer -= Graphics.dt;
 		
 		// Temporary solution until i've found some other way to avoid tiling seams
 		// for example through shaders or texture arrays
@@ -118,6 +136,8 @@ class Player : GameObject, Body
 	{
 		Shape @shape = Shape(Rect(body.getPosition(), size));
 		shape.setFillColor(Vector4(1.0f, 0.0f, 0.0f, 1.0f));
-		shape.draw(global::batches[global::FOREGROUND]);
+		shape.draw(global::batches[global::FOREGROUND]);
+		
+		global::arial12.draw(@global::batches[global::UITEXT], Vector2(600.0f, 12.0f), "Health: "+formatInt(health, ""));
 	}
 }
