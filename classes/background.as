@@ -18,10 +18,22 @@ class Background : GameObject
 	Vector4 topColor = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	Vector4 bottomColor = Vector4(0.35f, 0.67f, 1.0f, 1.0f);
 	Sprite @sun = @Sprite(@Texture(":/sprites/sky/sun.png"));
-	Sprite @moon = @Sprite(@Texture(":/sprites/sky/moon.png"));
+	Sprite @moon = @Sprite(@Texture(":/sprites/sky/moon.png"));
+	
+	float exposure = 0.1f;
+	float decay = 0.97f;
+	float density = 0.98f;
+	Vector2 lightPos = Vector2(50.0f);
+	Shader @godRayShader = @Shader(":/shaders/godrays.vert", ":/shaders/godrays.frag");
+	Texture @godTexture = @Texture(800, 600);
+	Batch @fbo = @Batch();
+	Texture @fboTexture = @Texture(800, 600);
+	Batch @godRayBatch = @Batch();
 	
 	Background()
-	{
+	{
+		godRayBatch.setShader(@godRayShader);
+		
 		sun.setOrigin(sun.getCenter());
 		moon.setOrigin(moon.getCenter());
 	}
@@ -78,7 +90,7 @@ class Background : GameObject
 									 windowSize.y/2.0f - Math.sin(Math.PI*ang) * windowSize.y/2.0f));
 			moon.setRotation(180*(1.0f-ang));
 		}
-	}
+	}
 	
 	void draw()
 	{
@@ -103,9 +115,30 @@ class Background : GameObject
 		int hour = global::timeOfDay.getHour();
 		if(hour >= 6 && hour < 18)
 		{
-			sun.draw(@global::batches[global::BACKGROUND]);
+			sun.draw(@fbo);
 		}else{
-			moon.draw(@global::batches[global::BACKGROUND]);
-		}
+			moon.draw(@fbo);
+		}
+		
+		fboTexture.clear();
+		fbo.renderToTexture(@fboTexture);
+		Shape @shape = @Shape(Rect(Vector2(0.0f), Vector2(Window.getSize())));
+		shape.setFillTexture(@fboTexture);
+		shape.draw(@godRayBatch);
+		
+		lightPos = sun.getPosition();
+		
+		// Set god ray uniforms
+		godRayShader.setUniform1f("exposure", exposure);
+		godRayShader.setUniform1f("decay", decay);
+		godRayShader.setUniform1f("density", density);
+		godRayShader.setUniform2f("lightPos", lightPos.x, lightPos.y);
+
+		// Draw texture
+		godRayShader.setSampler2D("texture", @fboTexture);
+		
+		godRayBatch.draw();
+		godRayBatch.clear();
+		fbo.clear();
 	}
 }

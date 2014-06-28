@@ -8,11 +8,11 @@ void main()
 	Console.log("Loading game...");
 	
 	Box2D.scale = TILE_SIZE;
-	
+	
+	Background();
 	TimeOfDay();
 	Console.log("Creating terrain...");
 	Terrain(250, 250);
-	Background();
 	Console.log("Setting up player...");
 	Player();
 	
@@ -60,23 +60,23 @@ void draw()
 Vector2 camera;
 float cameraSpeed = 16.0f;
 
-bool profilerToggled = false;
+bool profilerToggled = false;
 bool itoggled = false;
 
 void update()
 {
 	for(int i = 0; i < global::gameObjects.size; i++) {
 		global::gameObjects[i].update();
-	}
-	
-	if(Input.getKeyState(KEY_I)) {
-		if(!itoggled) {
-			Zombie z();
-			z.setPosition(Input.position+camera);
-		}
-		itoggled = true;
-	}else{
-		itoggled = false;
+	}
+	
+	if(Input.getKeyState(KEY_I)) {
+		if(!itoggled) {
+			Zombie z();
+			z.setPosition(Input.position+camera);
+		}
+		itoggled = true;
+	}else{
+		itoggled = false;
 	}
 	
 	if(Input.getKeyState(KEY_P)) {
