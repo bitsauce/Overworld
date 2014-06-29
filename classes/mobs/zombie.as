@@ -20,8 +20,8 @@ class Zombie : GameObject, Body
 	float moveSpeed = 7.0f;
 	float maxMovementSpeed = 50.0f;
 	b2Body @body;
-	b2Fixture @fix;
-	int health = 2;
+	b2Fixture @fix;
+	int health = 5;
 	
 	Zombie()
 	{
@@ -34,12 +34,12 @@ class Zombie : GameObject, Body
 		
 		body.setObject(@this);
 		body.setPreSolveCallback(ContactFunc(@preSolve));
-	}
-	
-	void remove()
-	{
-		body.destroy();
-		GameObject::remove();
+	}
+	
+	void remove()
+	{
+		body.destroy();
+		GameObject::remove();
 	}
 	
 	Vector2 getPosition()
@@ -69,26 +69,26 @@ class Zombie : GameObject, Body
 	
 	void preSolve(b2Contact @contact)
 	{
-		Player @player;
+		Player @player;
 		Projectile @proj;
 		if(contact.other.getObject(@player)) {
-			contact.setEnabled(false);
-			player.health--;
-			if(player.health <= 0) {
-				player.remove();
+			contact.setEnabled(false);
+			player.health -= 100;
+			if(player.health <= 0) {
+				player.remove();
 			}
-		}else if(contact.other.getObject(@proj)) {
-			float speed = contact.other.getLinearVelocity().length();
-			if(speed >= 100.0f)
-			{
-				health--;
-				if(health <= 0)
-				{
-					remove();
-				}
-			}else{
-				contact.setEnabled(false);
-			}
+		}else if(contact.other.getObject(@proj)) {
+			float speed = contact.other.getLinearVelocity().length();
+			if(speed >= 100.0f)
+			{
+				health--;
+				if(health <= 0)
+				{
+					remove();
+				}
+			}else{
+				contact.setEnabled(false);
+			}
 		}
 	}
 	
@@ -122,6 +122,6 @@ class Zombie : GameObject, Body
 	{
 		Shape @shape = Shape(Rect(getPosition(), size));
 		shape.setFillColor(Vector4(0.0f, 1.0f, 0.0f, 1.0f));
-		shape.draw(global::batches[global::FOREGROUND]);
+		shape.draw(global::batches[global::SCENE]);
 	}
 }

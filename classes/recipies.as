@@ -1,0 +1,7 @@
+
+grid<ItemID> sword = {
+	{NULL_ITEM, WOOD_BLOCK, NULL_ITEM},
+	{NULL_ITEM, WOOD_BLOCK, NULL_ITEM},
+	{NULL_ITEM, STICK, NULL_ITEM}
+};
+

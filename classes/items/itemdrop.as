@@ -9,15 +9,16 @@ class ItemDrop : GameObject, Body
 	b2Fixture @fix;
 	
 	Item @data;
-	int amount = 1;
+	int amount;
 	
 	float cooldown = 2.0f;
 	
 	bool jumping = false;
 	
-	ItemDrop(Item @data)
+	ItemDrop(Item @data, int amount = 1)
 	{
-		@this.data = @data;
+		@this.data = @data;
+		this.amount = amount;
 		
 		b2BodyDef def;
 		def.type = b2_dynamicBody;
@@ -95,6 +96,6 @@ class ItemDrop : GameObject, Body
 	{
 		Sprite @sprite = @data.icon;
 		sprite.setPosition(getPosition());
-		sprite.draw(global::batches[global::FOREGROUND]);
+		sprite.draw(global::batches[global::SCENE]);
 	}
 }

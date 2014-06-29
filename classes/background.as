@@ -18,21 +18,24 @@ class Background : GameObject
 	Vector4 topColor = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	Vector4 bottomColor = Vector4(0.35f, 0.67f, 1.0f, 1.0f);
 	Sprite @sun = @Sprite(@Texture(":/sprites/sky/sun.png"));
-	Sprite @moon = @Sprite(@Texture(":/sprites/sky/moon.png"));
-	
-	float exposure = 0.1f;
-	float decay = 0.97f;
-	float density = 0.98f;
-	Vector2 lightPos = Vector2(50.0f);
-	Shader @godRayShader = @Shader(":/shaders/godrays.vert", ":/shaders/godrays.frag");
-	Texture @godTexture = @Texture(800, 600);
-	Batch @fbo = @Batch();
-	Texture @fboTexture = @Texture(800, 600);
-	Batch @godRayBatch = @Batch();
+	Sprite @moon = @Sprite(@Texture(":/sprites/sky/moon.png"));
+	
+	float exposure = 0.1f;
+	float decay = 0.97f;
+	float density = 0.98f;
+	Shader @godRayShader = @Shader(":/shaders/godrays.vert", ":/shaders/godrays.frag");
+	Batch @fbo = @Batch();
+	Texture @fboTexture = @Texture(800, 600);
 	
 	Background()
-	{
-		godRayBatch.setShader(@godRayShader);
+	{
+		// Set god ray uniforms
+		godRayShader.setUniform1f("exposure", exposure);
+		godRayShader.setUniform1f("decay", decay);
+		godRayShader.setUniform1f("density", density);
+
+		// Draw texture
+		godRayShader.setSampler2D("texture", @fboTexture);
 		
 		sun.setOrigin(sun.getCenter());
 		moon.setOrigin(moon.getCenter());
@@ -90,7 +93,7 @@ class Background : GameObject
 									 windowSize.y/2.0f - Math.sin(Math.PI*ang) * windowSize.y/2.0f));
 			moon.setRotation(180*(1.0f-ang));
 		}
-	}
+	}
 	
 	void draw()
 	{
@@ -110,35 +113,52 @@ class Background : GameObject
 		vertices[3].color = bottomColor;
 		
 		global::batches[global::BACKGROUND].addVertices(vertices, QUAD_INDICES);
-		
-		// Draw sun/moon
-		int hour = global::timeOfDay.getHour();
-		if(hour >= 6 && hour < 18)
-		{
-			sun.draw(@fbo);
+		
+		if(!Input.getKeyState(KEY_G))
+		{
+			int hour = global::timeOfDay.getHour();
+			if(hour >= 6 && hour < 18)
+			{
+				sun.draw(@global::batches[global::BACKGROUND]);
+			}else{
+				moon.draw(@global::batches[global::BACKGROUND]);
+			}
 		}else{
-			moon.draw(@fbo);
+			// Draw sun/moon
+			Vector2 lightPos;
+			int hour = global::timeOfDay.getHour();
+			if(hour >= 6 && hour < 18)
+			{
+				sun.draw(@fbo);
+				lightPos = sun.getCenter();
+			}else{
+				moon.draw(@fbo);
+				lightPos = moon.getCenter();
+			}
+			
+			// Erase terrain
+			//fbo.setBlendFunc(BLEND_ZERO, BLEND_ONE_MINUS_SRC_ALPHA);
+			Shape @screen = @Shape(Rect(Vector2(0.0f), Vector2(Window.getSize())));
+			//shape.setFillTexture(@terrainTexture);
+			//shape.draw(@fbo);
+			
+			// Clear fbo and render celestial body to texture
+			fboTexture.clear();
+			fbo.renderToTexture(@fboTexture);
+			
+			// Draw fullscreen rect with godray shader
+			global::batches[global::BACKGROUND].setShader(@godRayShader);
+			screen.draw(@global::batches[global::BACKGROUND]);
+			global::batches[global::BACKGROUND].setShader(null);
+			
+			// Set light pos
+			lightPos.x /= 800;
+			lightPos.y = 600 - lightPos.y;
+			lightPos.y /= 600;
+			godRayShader.setUniform2f("lightPos", lightPos.x, lightPos.y);
+			
+			// Clear fbo buffer
+			fbo.clear();
 		}
-		
-		fboTexture.clear();
-		fbo.renderToTexture(@fboTexture);
-		Shape @shape = @Shape(Rect(Vector2(0.0f), Vector2(Window.getSize())));
-		shape.setFillTexture(@fboTexture);
-		shape.draw(@godRayBatch);
-		
-		lightPos = sun.getPosition();
-		
-		// Set god ray uniforms
-		godRayShader.setUniform1f("exposure", exposure);
-		godRayShader.setUniform1f("decay", decay);
-		godRayShader.setUniform1f("density", density);
-		godRayShader.setUniform2f("lightPos", lightPos.x, lightPos.y);
-
-		// Draw texture
-		godRayShader.setSampler2D("texture", @fboTexture);
-		
-		godRayBatch.draw();
-		godRayBatch.clear();
-		fbo.clear();
 	}
 }

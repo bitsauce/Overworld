@@ -136,7 +136,7 @@ class Player : GameObject, Body
 	{
 		Shape @shape = Shape(Rect(body.getPosition(), size));
 		shape.setFillColor(Vector4(1.0f, 0.0f, 0.0f, 1.0f));
-		shape.draw(global::batches[global::FOREGROUND]);
+		shape.draw(global::batches[global::SCENE]);
 		
 		global::arial12.draw(@global::batches[global::UITEXT], Vector2(600.0f, 12.0f), "Health: "+formatInt(health, ""));
 	}

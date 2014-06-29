@@ -50,10 +50,22 @@ class Terrain : GameObject
 	private int width;
 	private int height;
 		
-	TerrainGen gen();
+	TerrainGen gen();
+	
+	// Shader uniform
+	int radius = 5; // px
+	int steps = 5; // px
+	float falloff = 10.0f;
+	//Texture @shadowTexture = @Texture(800, 600);
+	Shader @shadowShader = @Shader(":/shaders/terrainshadows.vert", ":/shaders/terrainshadows.frag");
 	
 	Terrain(const int width, const int height)
-	{
+	{
+		shadowShader.setUniform1i("radius", radius);
+		shadowShader.setUniform1i("steps", steps);
+		shadowShader.setUniform1f("falloff", falloff);
+		shadowShader.setUniform2f("texsize", 800, 600);
+		
 		// Set size
 		this.width = width;
 		this.height = height;
@@ -96,10 +108,10 @@ class Terrain : GameObject
 		
 		// Generate a terrain
 		Console.log("Generating world...");
-		gen.generate(@this);
-		
-		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
-			layers[i].setInitialized(true);
+		gen.generate(@this);
+		
+		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
+			layers[i].setInitialized(true);
 		
 		// Set global terrain handle
 		@global::terrain = @this;
@@ -192,8 +204,19 @@ class Terrain : GameObject
 	}
 	
 	// Drawing
-	void draw(TerrainLayer layer, Matrix4 mat)
+	void draw(Texture @texture, TerrainLayer layer)
 	{
-		layers[layer].draw(mat);
+		Matrix4 mat;
+		mat.translate(-camera.x, -camera.y, 0.0f);
+		layers[layer].draw(texture, mat);
+	}
+	
+	void drawShadows()
+	{
+		global::batches[global::FOREGROUND].setShader(@shadowShader);
+		shadowShader.setSampler2D("texture", @terrainTexture);
+		Shape @screen = @Shape(Rect(Vector2(0.0f), Vector2(Window.getSize())));
+		screen.draw(@global::batches[global::FOREGROUND]);
+		global::batches[global::FOREGROUND].setShader(null);
 	}
 }

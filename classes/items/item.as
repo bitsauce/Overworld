@@ -1,5 +1,7 @@
 enum ItemID
-{
+{
+	//NULL_ITEM,
+	
 	GRASS_BLOCK,
 	WOOD_BLOCK,
 	LEAF_BLOCK,
@@ -15,7 +17,8 @@ enum ItemID
 // it has the unfortunate downside of requiring 
 // manual maintinance of the script writer each
 // time a item is added to ItemID.
-grid<string> ITEM_STRINGS = {
+grid<string> ITEM_STRINGS = {
+	//{ "NULL", "" },
 	{ "Grass block", "A block of grass" },
 	{ "Wooden block", "A block of wood" },
 	{ "Leaf block", "A block of leaves" },
@@ -24,7 +27,8 @@ grid<string> ITEM_STRINGS = {
 	{ "Stick", "A stick" }
 };
 
-array<Sprite@> ITEM_ICONS = {
+array<Sprite@> ITEM_ICONS = {
+	//null,
 	@Sprite(@TextureRegion(@Texture(":/sprites/tiles/grass_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)),
 	@Sprite(@TextureRegion(@Texture(":/sprites/tiles/tree_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)),
 	@Sprite(@TextureRegion(@Texture(":/sprites/tiles/leaf_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)),
