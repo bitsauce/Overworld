@@ -8,12 +8,12 @@ class ItemSlot
 		@this.data = @data;
 		this.amount = amount;
 	}
-	
-	void clear()
-	{
-		@this.data = null;
-		this.amount = 0;
-	}
+	
+	void clear()
+	{
+		@this.data = null;
+		this.amount = 0;
+	}
 	
 	int fill(int amount)
 	{
@@ -26,19 +26,19 @@ class ItemSlot
 			this.amount = data.maxStack;
 		}
 		return dt;
-	}
-	
-	int remove(int amount)
-	{
-		int dt = amount;
-		this.amount -= amount;
-		if(this.amount <= 0)
-		{
-			dt = amount + this.amount;
-			@this.data = null;
-			this.amount = 0;
-		}
-		return dt;
+	}
+	
+	int remove(int amount)
+	{
+		int dt = amount;
+		this.amount -= amount;
+		if(this.amount <= 0)
+		{
+			dt = amount + this.amount;
+			@this.data = null;
+			this.amount = 0;
+		}
+		return dt;
 	}
 	
 	bool isEmpty()
@@ -56,18 +56,42 @@ const int INV_WIDTH = 9;
 const int INV_HEIGHT = 3;
 
 class Inventory : GameObject
-{
-	Player @player;
+{
+	// Owner
+	Player @player;
+	
+	// Slot sprites
 	Sprite @itemSlot = @Sprite(@Texture(":/sprites/inventory/item_slot.png"));
-	Sprite @selectedItemSlot = @Sprite(@Texture(":/sprites/inventory/item_slot_selected.png"));
-	int selectedSlot = 0;
-	grid<ItemSlot> slots(INV_WIDTH, INV_HEIGHT);
+	Sprite @selectedItemSlot = @Sprite(@Texture(":/sprites/inventory/item_slot_selected.png"));
+	
+	// Selected hot-bar slot
+	int selectedSlot = 0;
+	
+	// Inventory slots
+	grid<ItemSlot> slots(INV_WIDTH, INV_HEIGHT);
+	
+	// Show bag flag
 	bool showBag = false;
-	ItemSlot heldSlot;
+	
+	// Held item slot
+	ItemSlot heldSlot;
+	
+	// Crafting slots
+	grid<ItemSlot> craftingSlots(3, 3);
+	
+	array<Recipie@> recipies;
 	
 	Inventory(Player @player)
 	{
-		@this.player = @player;
+		@this.player = @player;
+		
+		recipies.insertLast(@Recipie(
+				NULL_ITEM, WOOD_BLOCK, NULL_ITEM,
+				NULL_ITEM, WOOD_BLOCK, NULL_ITEM,
+				NULL_ITEM, STICK, NULL_ITEM,
+				SHORTSWORD_WOODEN
+			)
+		);
 	}
 	
 	Item @getSelectedItem()
@@ -76,33 +100,33 @@ class Inventory : GameObject
 	}
 	
 	int addItem(Item @data, int amount = 1)
-	{
-		// Search for slots containing the same type of item
-		for(int y = 0; y < INV_HEIGHT; y++)
-		{
-			for(int x = 0; x < INV_WIDTH; x++)
-			{
-				ItemSlot @slot = @slots[x, y];
-				if(slot.contains(@data))
-				{
-					// This slot contains the same item.
-					// Fill this slot with 'amount'.
-					amount = slot.fill(amount);
-				}
-				
-				// No more left, break
-				if(amount == 0)
-					break;
-			}
-			if(amount == 0)
-				break;
-		}
-		
+	{
+		// Search for slots containing the same type of item
+		for(int y = 0; y < INV_HEIGHT; y++)
+		{
+			for(int x = 0; x < INV_WIDTH; x++)
+			{
+				ItemSlot @slot = @slots[x, y];
+				if(slot.contains(@data))
+				{
+					// This slot contains the same item.
+					// Fill this slot with 'amount'.
+					amount = slot.fill(amount);
+				}
+				
+				// No more left, break
+				if(amount == 0)
+					break;
+			}
+			if(amount == 0)
+				break;
+		}
+		
 		// Search for empty slots
 		for(int y = 0; y < INV_HEIGHT; y++)
 		{
 			for(int x = 0; x < INV_WIDTH; x++)
-			{
+			{
 				ItemSlot @slot = @slots[x, y];
 				if(slot.isEmpty())
 				{
@@ -118,8 +142,8 @@ class Inventory : GameObject
 			}
 			if(amount == 0)
 				break;
-		}
-		
+		}
+		
 		// Return remainding amount
 		return amount; 
 	}
@@ -141,9 +165,9 @@ class Inventory : GameObject
 			return true;
 		}
 		return false;
-	}
-	
-	bool lmbPressed = false;
+	}
+	
+	bool lmbPressed = false;
 	bool rmbPressed = false;
 	
 	void update()
@@ -163,159 +187,260 @@ class Inventory : GameObject
 		{
 			Item @item = @getSelectedItem();
 			if(item != null) {
-				removeItem(@item, 1, selectedSlot, 0);
+				removeItem(@item, 1, selectedSlot, 0);
 				createItemDrop(@item, 1);
 			}
-		}
-		
-		if(Input.getKeyState(KEY_LMB))
-		{
-			if(!lmbPressed)
-			{
-				bool escape = false;
-				for(int y = 0; y < INV_HEIGHT; y++)
-				{
-					for(int x = 0; x < INV_WIDTH; x++)
+		}
+		
+		if(Input.getKeyState(KEY_LMB))
+		{
+			if(!lmbPressed)
+			{
+				bool escape = false;
+				for(int y = 0; y < INV_HEIGHT; y++)
+				{
+					for(int x = 0; x < INV_WIDTH; x++)
 					{
-						// Draw slot sprite
-						if(Rect(5 + 34*x, 5 + 34*y, 32, 32).contains(Input.position))
-						{
-							if(heldSlot.isEmpty()) {
-								heldSlot = slots[x, y];
-								slots[x, y].clear();
-							}else{
-								if(slots[x, y].isEmpty())
-								{
-									slots[x, y].set(heldSlot.data, heldSlot.amount);
-									heldSlot.clear();
-								}else if(@heldSlot.data == @slots[x, y].data){
-									heldSlot.amount = slots[x, y].fill(heldSlot.amount);
-									if(heldSlot.amount == 0)
-										heldSlot.clear();
-								}else{
-									ItemSlot tmp = slots[x, y];
-									slots[x, y] = heldSlot;
-									heldSlot = tmp;
-								}
-							}
-							escape = true;
-						}
-						if(escape)
-							break;
-					}
-					if(escape)
-						break;
+						// Check if slot was clicked
+						if(Rect(5 + 34*x, 5 + 34*y, 32, 32).contains(Input.position)) {
+							leftClickSlot(@slots[x, y]);
+							escape = true;
+						}
+						if(escape)
+							break;
+					}
+					if(escape)
+						break;
 				}
 				
-				if(!heldSlot.isEmpty() && !escape)
-				{
-					createItemDrop(heldSlot.data, heldSlot.amount);
-					heldSlot.clear();
-				}
-			}
-			lmbPressed = true;
-		}else
-		{
-			lmbPressed = false;
-		}
-		
-		if(Input.getKeyState(KEY_RMB))
-		{
-			if(!rmbPressed)
-			{
-				bool escape = false;
-				for(int y = 0; y < INV_HEIGHT; y++)
-				{
-					for(int x = 0; x < INV_WIDTH; x++)
+				if(!escape){
+					for(int y = 0; y < 3; y++)
 					{
-						// Draw slot sprite
-						if(Rect(5 + 34*x, 5 + 34*y, 32, 32).contains(Input.position))
+						for(int x = 0; x < 3; x++)
 						{
-							if(heldSlot.isEmpty()) {
-								heldSlot.set(slots[x, y].data, 1);
-								slots[x, y].remove(1);
-							}else if(@heldSlot.data == @slots[x, y].data){
-								heldSlot.amount += 1;
-								slots[x, y].remove(1);
+							// Check if slot was clicked
+							if(Rect(5 + 34*x, 256 + 34*y, 32, 32).contains(Input.position)) {
+								leftClickSlot(@craftingSlots[x, y]);
+								escape = true;
+								updateCrafing();
 							}
-							escape = true;
+							if(escape)
+								break;
 						}
 						if(escape)
 							break;
 					}
-					if(escape)
-						break;
+				}
+				
+				if(!heldSlot.isEmpty() && !escape)
+				{
+					createItemDrop(heldSlot.data, heldSlot.amount);
+					heldSlot.clear();
+				}
+			}
+			lmbPressed = true;
+		}else
+		{
+			lmbPressed = false;
+		}
+		
+		if(Input.getKeyState(KEY_RMB))
+		{
+			if(!rmbPressed)
+			{
+				bool escape = false;
+				for(int y = 0; y < INV_HEIGHT; y++)
+				{
+					for(int x = 0; x < INV_WIDTH; x++)
+					{
+						// Draw slot sprite
+						if(Rect(5 + 34*x, 5 + 34*y, 32, 32).contains(Input.position))
+						{
+							rightClickSlot(@slots[x, y]);
+							escape = true;
+						}
+						if(escape)
+							break;
+					}
+					if(escape)
+						break;
 				}
-			}
-			rmbPressed = true;
+				
+				if(!escape){
+					for(int y = 0; y < 3; y++)
+					{
+						for(int x = 0; x < 3; x++)
+						{
+							// Check if slot was clicked
+							if(Rect(5 + 34*x, 256 + 34*y, 32, 32).contains(Input.position)) {
+								rightClickSlot(@craftingSlots[x, y]);
+								escape = true;
+								updateCrafing();
+							}
+							if(escape)
+								break;
+						}
+						if(escape)
+							break;
+					}
+				}
+			}
+			rmbPressed = true;
+		}else{
+			rmbPressed = false;
+		}
+	}
+	
+	void leftClickSlot(ItemSlot @slot)
+	{			
+		if(heldSlot.isEmpty()) {
+			heldSlot = slot;
+			slot.clear();
 		}else{
-			rmbPressed = false;
+			if(slot.isEmpty())
+			{
+				slot.set(heldSlot.data, heldSlot.amount);
+				heldSlot.clear();
+			}else if(@heldSlot.data == @slot.data){
+				heldSlot.amount = slot.fill(heldSlot.amount);
+				if(heldSlot.amount == 0)
+					heldSlot.clear();
+			}else{
+				ItemSlot tmp = slot;
+				slot = heldSlot;
+				heldSlot = tmp;
+			}
+		}
+	}
+	
+	void rightClickSlot(ItemSlot @slot)
+	{
+		if(heldSlot.isEmpty()) {
+			heldSlot.set(slot.data, 1);
+			slot.remove(1);
+		}else if(@heldSlot.data == @slot.data){
+			heldSlot.amount += 1;
+			slot.remove(1);
+		}else if(slot.isEmpty()) {
+			slot.set(heldSlot.data, 1);
+			heldSlot.remove(1);
+		}
+	}
+	
+	void updateCrafing()
+	{
+		for(int i = 0; i < recipies.size; i++)
+		{
+			bool match = true;
+			for(int y = 0; y < 3; y++)
+			{
+				for(int x = 0; x < 3; x++)
+				{
+					ItemID id = global::items.find(craftingSlots[x, y].data);
+					if(id != recipies[i].recipie[x, y])
+					{
+						match = false;
+						break;
+					}
+				}
+				if(!match)
+					break;
+			}
+			if(match)
+			{
+				addItem(@global::items[recipies[i].result]);
+				
+				
+				for(int y = 0; y < 3; y++) {
+					for(int x = 0; x < 3; x++) {
+						craftingSlots[x, y].clear();
+					}
+				}
+				
+				break;
+			}
+		}
+	}
+	
+	void createItemDrop(Item @item, int amount)
+	{
+		ItemDrop drop(@item, amount);
+		drop.setPosition(player.getCenter());
+		Vector2 dt = Input.position+camera - player.getCenter();
+		if(dt.x >= 0.0f) {
+			drop.body.applyImpulse(Vector2(1.0f, -1.0f)*5000.0f, drop.getCenter());
+		}else{
+			drop.body.applyImpulse(Vector2(-1.0f,-1.0f)*5000.0f, drop.getCenter());
 		}
 	}
 	
-	void createItemDrop(Item @item, int amount)
-	{
-		ItemDrop drop(@item, amount);
-		drop.setPosition(player.getCenter());
-		Vector2 dt = Input.position+camera - player.getCenter();
-		if(dt.x >= 0.0f) {
-			drop.body.applyImpulse(Vector2(1.0f, -1.0f)*5000.0f, drop.getCenter());
+	ItemSlot @hoveredItemSlot;
+	void drawSlot(const Vector2 position, ItemSlot @slot)
+	{	
+		// Draw slot sprite
+		Sprite @slotSprite;
+		if(@slot == @slots[selectedSlot, 0])
+		{
+			@slotSprite = @selectedItemSlot;
 		}else{
-			drop.body.applyImpulse(Vector2(-1.0f,-1.0f)*5000.0f, drop.getCenter());
+			@slotSprite = @itemSlot;
+		}
+		slotSprite.setPosition(position);
+		slotSprite.draw(global::batches[global::GUI]);
+		
+		// Set as hovered if cursor is contained within the rectangle
+		if(Rect(slotSprite.getPosition(), slotSprite.getSize()).contains(Input.position)) {
+			@hoveredItemSlot = @slot;
+		}
+		
+		// Draw slot content
+		global::arial8.setColor(Vector4(1.0f)); // Set white font color
+		if(slot.data != null)
+		{
+			// Draw item icon
+			Sprite @icon = @slot.data.icon;
+			icon.setPosition(position + Vector2(8, 8));
+			icon.draw(global::batches[global::GUI]);
+			
+			// Draw quantity text
+			if(slot.amount > 1) {
+				string str = formatInt(slot.amount, "");
+				global::arial8.draw(global::batches[global::UITEXT], position + Vector2(28 - global::arial8.getStringWidth(str), 20), str);
+			}
 		}
 	}
 	
 	void draw()
-	{
-		int hoveredItemSlot = -1;
-		for(int y = 0; y < INV_HEIGHT; y++)
-		{
-			for(int x = 0; x < INV_WIDTH; x++)
-			{
-				// Draw slot sprite
-				Sprite @slotSprite;
-				if(y == 0 && selectedSlot == x)
-				{
-					@slotSprite = @selectedItemSlot;
-				}else{
-					@slotSprite = @itemSlot;
-				}
-				slotSprite.setPosition(Vector2(5 + 34*x, 5 + 34*y));
-				slotSprite.draw(global::batches[global::GUI]);
-				if(Rect(slotSprite.getPosition(), slotSprite.getSize()).contains(Input.position)) {
-					hoveredItemSlot = x;
-				}
-				
-				// Draw item icon
-				ItemSlot @slot = slots[x, y];
-				global::arial8.setColor(Vector4(1.0f)); // Set white font color
-				if(slot.data != null)
-				{
-					Sprite @icon = @slot.data.icon;
-					icon.setPosition(Vector2(5 + 34*x, 5 + 34*y) + Vector2(8, 8));
-					icon.draw(global::batches[global::GUI]);
-					if(slot.data.maxStack > 1) {
-						string str = formatInt(slot.amount, "");
-						global::arial8.draw(global::batches[global::UITEXT], Vector2(5 + 34*x, 5 + 34*y) + Vector2(28 - global::arial8.getStringWidth(str), 20), str);
-					}
-				}
+	{
+		@hoveredItemSlot = null;
+		for(int y = 0; y < INV_HEIGHT; y++) {
+			for(int x = 0; x < INV_WIDTH; x++) {
+				Vector2 position(5 + 34*x, 5 + 34*y);
+				drawSlot(position, @slots[x, y]);
 			}
 			if(!showBag) break;
-		}
-		
-		if(hoveredItemSlot >= 0 && @slots[hoveredItemSlot, 0].data != null) {
-			global::arial12.draw(global::batches[global::UITEXT], Input.position + Vector2(0.0f, 16.0f), slots[hoveredItemSlot, 0].data.desc);
 		}
 		
-		if(!heldSlot.isEmpty())
-		{
-			Sprite @icon = @heldSlot.data.icon;
-			icon.setPosition(Input.position + Vector2(-16, -16));
-			icon.draw(global::batches[global::GUI]);
-			if(heldSlot.data.maxStack > 1) {
-				string str = formatInt(heldSlot.amount, "");
-				global::arial8.draw(global::batches[global::UITEXT], Input.position + Vector2(4 - global::arial8.getStringWidth(str), -4), str);
+		for(int y = 0; y < 3; y++) {
+			for(int x = 0; x < 3; x++) {
+				Vector2 position(5 + 34*x, 256 + 34*y);
+				drawSlot(position, craftingSlots[x, y]);
 			}
+		}
+		
+		if(@hoveredItemSlot != null && @hoveredItemSlot.data != null) {
+			global::arial12.draw(global::batches[global::UITEXT], Input.position + Vector2(0.0f, 16.0f), hoveredItemSlot.data.desc);
+		}
+		
+		if(!heldSlot.isEmpty())
+		{
+			Sprite @icon = @heldSlot.data.icon;
+			icon.setPosition(Input.position + Vector2(-16, -16));
+			icon.draw(global::batches[global::GUI]);
+			if(heldSlot.data.maxStack > 1) {
+				string str = formatInt(heldSlot.amount, "");
+				global::arial8.draw(global::batches[global::UITEXT], Input.position + Vector2(4 - global::arial8.getStringWidth(str), -4), str);
+			}
 		}
 	}
 }

@@ -7,7 +7,8 @@
 #include "player.as"
 #include "inventory.as"
 #include "timeofday.as"
-
+#include "recipies.as"
+
 // Mobds
 #include "mobs/zombie.as"
 
