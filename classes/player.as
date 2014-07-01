@@ -9,7 +9,7 @@ interface Body
 
 class Player : GameObject, Body
 {
-	Vector2 size = Vector2(24.0f, 42.0f);
+	Vector2 size = Vector2(42.0f, 62.0f);
 	float moveSpeed = 7.0f;
 	b2Body @body;
 	b2Fixture @fix;
@@ -19,6 +19,8 @@ class Player : GameObject, Body
 	bool jumping = false;
 	bool pressed = false;
 	
+	Texture @playerTexture = @Texture(":/sprites/characters/character_test.png");
+	
 	int health = 100;
 	
 	Player()
@@ -38,12 +40,12 @@ class Player : GameObject, Body
 		
 		global::players.insertLast(@this);
 	}
-	
-	void remove()
-	{
-		body.destroy();
-		GameObject::remove();
-	}
+	
+	void remove()
+	{
+		body.destroy();
+		GameObject::remove();
+	}
 	
 	Vector2 getPosition()
 	{
@@ -87,8 +89,8 @@ class Player : GameObject, Body
 		}else if(contact.other.getObject(@proj)) {
 			contact.setEnabled(false);
 		}
-	}
-	
+	}
+	
 	float timer = 0.0f;
 	
 	void update()
@@ -117,14 +119,14 @@ class Player : GameObject, Body
 			pressed = true;
 		}else{
 			pressed = false;
-		}
-		
-		if(global::timeOfDay.getHour() >= 21 && timer <= 0.0f)
-		{
-			Zombie z();
-			z.setPosition(Vector2(camera.x, global::terrain.gen.getGroundHeight(camera.x/TILE_SIZE)*TILE_SIZE));
-			timer = 10.0f;
-		}
+		}
+		
+		if(global::timeOfDay.getHour() >= 21 && timer <= 0.0f)
+		{
+			Zombie z();
+			z.setPosition(Vector2(camera.x, global::terrain.gen.getGroundHeight(camera.x/TILE_SIZE)*TILE_SIZE));
+			timer = 10.0f;
+		}
 		timer -= Graphics.dt;
 		
 		// Temporary solution until i've found some other way to avoid tiling seams
@@ -135,9 +137,9 @@ class Player : GameObject, Body
 	void draw()
 	{
 		Shape @shape = Shape(Rect(body.getPosition(), size));
-		shape.setFillColor(Vector4(1.0f, 0.0f, 0.0f, 1.0f));
-		shape.draw(global::batches[global::SCENE]);
-		
+		shape.setFillTexture(@playerTexture);
+		shape.draw(global::batches[global::SCENE]);
+		
 		global::arial12.draw(@global::batches[global::UITEXT], Vector2(600.0f, 12.0f), "Health: "+formatInt(health, ""));
 	}
 }
