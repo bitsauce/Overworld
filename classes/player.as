@@ -19,7 +19,11 @@ class Player : GameObject, Body
 	bool jumping = false;
 	bool pressed = false;
 	
-	Texture @playerTexture = @Texture(":/sprites/characters/full/character_ver3.png");
+	Texture @playerTexture = @Texture(":/sprites/characters/full/character_ver3.png");
+	
+	spSkeleton @skeleton = @spSkeleton(":/sprites/characters/spineboy/spineboy.json", ":/sprites/characters/spineboy/spineboy.atlas", 0.125f);
+	spAnimationState @animation;
+	spAnimation @currentAnim;
 	
 	int health = 100;
 	
@@ -36,7 +40,15 @@ class Player : GameObject, Body
 		@fix = @body.createFixture(Rect(0, 0, size.x, size.y), 32.0f);
 		
 		body.setObject(@this);
-		body.setPreSolveCallback(ContactFunc(@preSolve));
+		body.setPreSolveCallback(ContactFunc(@preSolve));
+		
+		spAnimationStateData @data = @spAnimationStateData(@skeleton);
+		data.setMix("idle", "walk", 0.2f);
+		data.setMix("walk", "idle", 0.5f);
+		
+		@animation = @spAnimationState(@data);
+		animation.looping = true;
+		animation.setAnimation("idle");
 		
 		global::players.insertLast(@this);
 	}
@@ -89,6 +101,16 @@ class Player : GameObject, Body
 		}else if(contact.other.getObject(@proj)) {
 			contact.setEnabled(false);
 		}
+	}
+	
+	void changeAnimation(string name)
+	{
+		spAnimation @anim = @skeleton.findAnimation(name);
+		if(@currentAnim != @anim) {
+			Console.log("change anim to: "+name);
+			animation.setAnimation(@anim);
+			@currentAnim = @anim;
+		}
 	}
 	
 	float timer = 0.0f;
@@ -106,6 +128,20 @@ class Player : GameObject, Body
 			jumping = true;
 		}else{
 			jumping = false;
+		}
+		
+		if(body.getLinearVelocity().x >= 0.01f)
+		{
+			changeAnimation("walk");
+			skeleton.setFlipX(false);
+		}else if(body.getLinearVelocity().x <= -0.01f){
+			changeAnimation("walk");
+			skeleton.setFlipX(true);
+		}else{
+			changeAnimation("idle");
+			Vector2 vel = body.getLinearVelocity();
+			vel.x = 0.0f;
+			body.setLinearVelocity(vel);
 		}
 		
 		if(Input.getKeyState(KEY_LMB))
@@ -127,7 +163,10 @@ class Player : GameObject, Body
 			z.setPosition(Vector2(camera.x, global::terrain.gen.getGroundHeight(camera.x/TILE_SIZE)*TILE_SIZE));
 			timer = 10.0f;
 		}
-		timer -= Graphics.dt;
+		timer -= Graphics.dt;
+		
+		skeleton.setPosition(position + Vector2(size.x/2, size.y));
+		animation.update(Graphics.dt);
 		
 		// Temporary solution until i've found some other way to avoid tiling seams
 		// for example through shaders or texture arrays
@@ -136,9 +175,11 @@ class Player : GameObject, Body
 	
 	void draw()
 	{
-		Shape @shape = Shape(Rect(body.getPosition(), size));
+		/*Shape @shape = Shape(Rect(body.getPosition(), size));
 		shape.setFillTexture(@playerTexture);
-		shape.draw(global::batches[global::SCENE]);
+		shape.draw(global::batches[global::SCENE]);*/
+		
+		skeleton.draw(@global::batches[global::SCENE]);
 		
 		global::arial12.draw(@global::batches[global::UITEXT], Vector2(600.0f, 12.0f), "Health: "+formatInt(health, ""));
 	}
