@@ -17,9 +17,9 @@ class Player : GameObject, Body
 	Inventory @inventory;
 	
 	bool jumping = false;
-	bool pressed = false;
-	
-	Texture @playerTexture = @Texture(":/sprites/characters/character_test.png");
+	bool pressed = false;
+	
+	Texture @playerTexture = @Texture(":/sprites/characters/full/character_ver3.png");
 	
 	int health = 100;
 	
