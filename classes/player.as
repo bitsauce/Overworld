@@ -10,20 +10,25 @@ interface Body
 class Player : GameObject, Body
 {
 	Vector2 size = Vector2(42.0f, 62.0f);
-	float moveSpeed = 7.0f;
 	b2Body @body;
 	b2Fixture @fix;
 	
 	Inventory @inventory;
 	
-	bool jumping = false;
+	bool falling = false;
 	bool pressed = false;
 	
-	Texture @playerTexture = @Texture(":/sprites/characters/full/character_ver3.png");
+	Texture @playerTexture = @Texture(":/sprites/characters/full/character_ver3.png");
+	
+	spSkeleton @skeleton = @spSkeleton(":/sprites/characters/anim/skeleton.json", ":/sprites/characters/anim/skeleton.atlas", 1.0f);
+	spAnimationState @animation;
+	spAnimation @currentAnim;
 	
-	spSkeleton @skeleton = @spSkeleton(":/sprites/characters/spineboy/spineboy.json", ":/sprites/characters/spineboy/spineboy.atlas", 0.125f);
-	spAnimationState @animation;
-	spAnimation @currentAnim;
+	// Movement
+	float maxRunSpeed = 256.0f;
+	float moveForce = 5000.0f;
+	float jumpForce = 6800.0f;
+	float accel = 0.1f; // factor
 	
 	int health = 100;
 	
@@ -35,20 +40,26 @@ class Player : GameObject, Body
 		b2BodyDef def;
 		def.type = b2_dynamicBody;
 		def.fixedRotation = true;
-		def.position.set(200, 0);
+		def.position.set(200, 0);
+		def.linearDamping = 1.0f;
 		@body = @b2Body(def);
-		@fix = @body.createFixture(Rect(0, 0, size.x, size.y), 32.0f);
+		@fix = @body.createFixture(Vector2(0.0f, size.x/2.0f), size.x, 5.0f);
+		fix.setFriction(0.9f);
 		
 		body.setObject(@this);
-		body.setPreSolveCallback(ContactFunc(@preSolve));
-		
-		spAnimationStateData @data = @spAnimationStateData(@skeleton);
-		data.setMix("idle", "walk", 0.2f);
+		body.setPreSolveCallback(ContactFunc(@preSolve));
+		
+		spAnimationStateData @data = @spAnimationStateData(@skeleton);
+		data.setMix("idle", "walk", 0.2f);
 		data.setMix("walk", "idle", 0.5f);
-		
-		@animation = @spAnimationState(@data);
-		animation.looping = true;
-		animation.setAnimation("idle");
+		data.setMix("jump", "idle", 0.1f);
+		data.setMix("walk", "jump", 0.1f);
+		data.setMix("jump", "idle", 0.1f);
+		data.setMix("idle", "jump", 0.2f);
+		
+		@animation = @spAnimationState(@data);
+		animation.looping = true;
+		changeAnimation("idle");
 		
 		global::players.insertLast(@this);
 	}
@@ -87,7 +98,8 @@ class Player : GameObject, Body
 	void preSolve(b2Contact @contact)
 	{
 		ItemDrop @item;
-		Projectile @proj;
+		Projectile @proj;
+		Terrain @terrain;
 		if(contact.other.getObject(@item)) {
 			contact.setEnabled(false);
 			if(item.canPickup()) {
@@ -100,48 +112,80 @@ class Player : GameObject, Body
 			}
 		}else if(contact.other.getObject(@proj)) {
 			contact.setEnabled(false);
+		}else if(contact.other.getObject(@terrain)) {
+			falling = false;
 		}
-	}
-	
-	void changeAnimation(string name)
-	{
-		spAnimation @anim = @skeleton.findAnimation(name);
-		if(@currentAnim != @anim) {
-			Console.log("change anim to: "+name);
-			animation.setAnimation(@anim);
-			@currentAnim = @anim;
-		}
 	}
 	
-	float timer = 0.0f;
+	void changeAnimation(string name)
+	{
+		spAnimation @anim = @skeleton.findAnimation(name);
+		if(@currentAnim != @anim) {
+			animation.setAnimation(@anim);
+			@currentAnim = @anim;
+		}
+	}
+	
+	float timer = 0.0f;
+	
+	Vector2 getFeetPosition() const
+	{
+		return getPosition() + Vector2(size.x/2.0f, size.y);
+	}
+	
+	float jumpTimer = 0.0f;
 	
 	void update()
 	{
-		Vector2 position = body.getPosition();
+		Vector2 position = body.getPosition();
+		Vector2 velocity = body.getLinearVelocity();
 		
-		if(Input.getKeyState(KEY_A))
-			body.applyImpulse(Vector2(-1000.0f, 0.0f), position + size/2.0f);
-		if(Input.getKeyState(KEY_D))
-			body.applyImpulse(Vector2(1000.0f, 0.0f), position + size/2.0f);
-		if(Input.getKeyState(KEY_SPACE)) {
-			if(!jumping) body.applyImpulse(Vector2(0.0f, -20000.0f), position + size/2.0f);
-			jumping = true;
-		}else{
-			jumping = false;
+		if(Input.getKeyState(KEY_A)) {
+			float impulse = (maxRunSpeed + velocity.x);
+			if(impulse > maxRunSpeed*accel) impulse = maxRunSpeed*accel;
+			body.applyImpulse(Vector2(-impulse * body.getMass(), 0.0f), getFeetPosition());
+		}
+		
+		if(Input.getKeyState(KEY_D)) {
+			float impulse = (maxRunSpeed - velocity.x);
+			if(impulse > maxRunSpeed*accel) impulse = maxRunSpeed*accel;
+			body.applyImpulse(Vector2(impulse * body.getMass(), 0.0f), getFeetPosition());
+		}
+		
+		if(Input.getKeyState(KEY_SPACE) && !falling) {
+			if(jumpTimer < 0.1f) {
+				body.applyImpulse(Vector2(0.0f, -jumpForce), getCenter());
+			}else{
+				falling = true;
+			}
+			jumpTimer += Graphics.dt;
+		}else{
+			jumpTimer = 0.0f;
 		}
 		
-		if(body.getLinearVelocity().x >= 0.01f)
+		velocity = body.getLinearVelocity();
+		
+		animation.timeScale = Math.abs(velocity.x/128.0f);
+		if(!falling)
 		{
-			changeAnimation("walk");
-			skeleton.setFlipX(false);
-		}else if(body.getLinearVelocity().x <= -0.01f){
-			changeAnimation("walk");
-			skeleton.setFlipX(true);
+			animation.looping = true;
+			if(velocity.x >= 0.01f)
+			{
+				changeAnimation("walk");
+				skeleton.flipX = false;
+			}else if(velocity.x <= -0.01f){
+				changeAnimation("walk");
+				skeleton.flipX = true;
+			}else{
+				changeAnimation("idle");
+				velocity.x = 0.0f;
+				body.setLinearVelocity(velocity);
+				animation.timeScale = 1.0f;
+			}
 		}else{
-			changeAnimation("idle");
-			Vector2 vel = body.getLinearVelocity();
-			vel.x = 0.0f;
-			body.setLinearVelocity(vel);
+			animation.looping = false;
+			animation.timeScale = 1.0f;
+			changeAnimation("jump");
 		}
 		
 		if(Input.getKeyState(KEY_LMB))
@@ -163,9 +207,9 @@ class Player : GameObject, Body
 			z.setPosition(Vector2(camera.x, global::terrain.gen.getGroundHeight(camera.x/TILE_SIZE)*TILE_SIZE));
 			timer = 10.0f;
 		}
-		timer -= Graphics.dt;
-		
-		skeleton.setPosition(position + Vector2(size.x/2, size.y));
+		timer -= Graphics.dt;
+		
+		skeleton.position = position + Vector2(0.0f, size.y);
 		animation.update(Graphics.dt);
 		
 		// Temporary solution until i've found some other way to avoid tiling seams
@@ -177,10 +221,13 @@ class Player : GameObject, Body
 	{
 		/*Shape @shape = Shape(Rect(body.getPosition(), size));
 		shape.setFillTexture(@playerTexture);
-		shape.draw(global::batches[global::SCENE]);*/
-		
+		shape.draw(global::batches[global::SCENE]);*/
+		
 		skeleton.draw(@global::batches[global::SCENE]);
 		
-		global::arial12.draw(@global::batches[global::UITEXT], Vector2(600.0f, 12.0f), "Health: "+formatInt(health, ""));
+		global::arial12.draw(@global::batches[global::UITEXT], Vector2(600.0f, 12.0f), "Health: "+formatInt(health, ""));
+		global::arial12.draw(@global::batches[global::UITEXT], Vector2(25.0f, 100.0f), "maxRunSpeed: "+maxRunSpeed);
+		global::arial12.draw(@global::batches[global::UITEXT], Vector2(25.0f, 125.0f), "jumpForce: "+jumpForce);
+		global::arial12.draw(@global::batches[global::UITEXT], Vector2(25.0f, 150.0f), "accel: "+accel);
 	}
 }

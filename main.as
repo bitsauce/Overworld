@@ -6,25 +6,26 @@
 void main()
 {
 	Console.log("Loading game...");
-	
-	// Set b2d world scale
+	
+	// Set b2d world scale
+	Box2D.gravity = Vector2(0.0f, 40.0f);
 	Box2D.scale = TILE_SIZE;
 	
 	// Create batches
 	for(int i = 0; i < global::batches.size; i++) {
 		@global::batches[i] = Batch();
-	}
-	
-	// Create time manager
-	TimeOfDay();
-	
+	}
+	
+	// Create time manager
+	TimeOfDay();
+	
 	// Create background
-	Background();
-	
+	Background();
+	
 	// Create terrain
 	Console.log("Creating terrain...");
-	Terrain(250, 250);
-	
+	Terrain(250, 50);
+	
 	// Create player
 	Console.log("Setting up player...");
 	Player();
@@ -68,20 +69,20 @@ void draw()
 	global::terrain.draw(@terrainTexture, TERRAIN_FOREGROUND);
 	
 	screen.setFillTexture(@terrainTexture);
-	screen.draw(@global::batches[global::FOREGROUND]);
-	
+	screen.draw(@global::batches[global::FOREGROUND]);
+	
 	global::terrain.drawShadows();
 	
 	global::batches[global::FOREGROUND].draw();
 	
 	screen.setFillTexture(@terrainTexture);
-	screen.draw(@global::batches[global::FOREGROUND]);
-	
-	// Draw debug text to screen
-	global::arial12.setColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-	global::arial12.draw(@global::batches[global::UITEXT], Vector2(730.0f, 12.0f), "FPS: " + Graphics.FPS);
+	screen.draw(@global::batches[global::FOREGROUND]);
+	
+	// Draw debug text to screen
+	global::arial12.setColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+	global::arial12.draw(@global::batches[global::UITEXT], Vector2(730.0f, 12.0f), "FPS: " + Graphics.FPS);
 	//global::arial12.draw(@global::batches[global::UITEXT], Vector2(12.0f, 150.0f), "Camera: (" + camera.x + ", " +camera.y+")");
-	
+	
 	// Draw remaining batches
 	for(int i = global::FOREGROUND + 1; i < global::batches.size; i++) {
 		global::batches[i].draw();

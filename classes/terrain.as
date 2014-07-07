@@ -50,21 +50,21 @@ class Terrain : GameObject
 	private int width;
 	private int height;
 		
-	TerrainGen gen();
-	
-	// Shader uniform
-	int radius = 5; // px
-	int steps = 5; // px
-	float falloff = 10.0f;
-	//Texture @shadowTexture = @Texture(800, 600);
+	TerrainGen gen();
+	
+	// Shader uniform
+	int radius = 5; // px
+	int steps = 5; // px
+	float falloff = 10.0f;
+	//Texture @shadowTexture = @Texture(800, 600);
 	Shader @shadowShader = @Shader(":/shaders/terrainshadows.vert", ":/shaders/terrainshadows.frag");
 	
 	Terrain(const int width, const int height)
-	{
-		shadowShader.setUniform1i("radius", radius);
-		shadowShader.setUniform1i("steps", steps);
-		shadowShader.setUniform1f("falloff", falloff);
-		shadowShader.setUniform2f("texsize", 800, 600);
+	{
+		shadowShader.setUniform1i("radius", radius);
+		shadowShader.setUniform1i("steps", steps);
+		shadowShader.setUniform1f("falloff", falloff);
+		shadowShader.setUniform2f("texsize", 800, 600);
 		
 		// Set size
 		this.width = width;
@@ -103,8 +103,10 @@ class Terrain : GameObject
 		b2BodyDef def;
 		def.type = b2_staticBody;
 		def.position.set(0.0f, 0.0f);
-		def.allowSleep = true;
-		@body = b2Body(def);
+		def.allowSleep = true;
+		
+		@body = b2Body(def);
+		body.setObject(@this);
 		
 		// Generate a terrain
 		Console.log("Generating world...");
@@ -184,7 +186,9 @@ class Terrain : GameObject
 		
 		// Create a fixture
 		if(layer == TERRAIN_SCENE && layers[layer].isValid(x, y) && @fixtures[x, y] == null) {
-			@fixtures[x, y] = @body.createFixture(Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE), 32.0f);
+			b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE), 0.0f);
+			fixture.setFriction(0.5f);
+			@fixtures[x, y] = @fixture;
 		}
 		
 		// Add tile to tile grid
@@ -209,14 +213,14 @@ class Terrain : GameObject
 		Matrix4 mat;
 		mat.translate(-camera.x, -camera.y, 0.0f);
 		layers[layer].draw(texture, mat);
-	}
-	
-	void drawShadows()
-	{
-		global::batches[global::FOREGROUND].setShader(@shadowShader);
-		shadowShader.setSampler2D("texture", @terrainTexture);
-		Shape @screen = @Shape(Rect(Vector2(0.0f), Vector2(Window.getSize())));
-		screen.draw(@global::batches[global::FOREGROUND]);
-		global::batches[global::FOREGROUND].setShader(null);
+	}
+	
+	void drawShadows()
+	{
+		global::batches[global::FOREGROUND].setShader(@shadowShader);
+		shadowShader.setSampler2D("texture", @terrainTexture);
+		Shape @screen = @Shape(Rect(Vector2(0.0f), Vector2(Window.getSize())));
+		screen.draw(@global::batches[global::FOREGROUND]);
+		global::batches[global::FOREGROUND].setShader(null);
 	}
 }
