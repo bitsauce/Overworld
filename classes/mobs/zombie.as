@@ -71,14 +71,14 @@ class Zombie : GameObject, Body
 	{
 		Player @player;
 		Projectile @proj;
-		if(contact.other.getObject(@player)) {
+		if(contact.bodyB.getObject(@player)) {
 			contact.setEnabled(false);
 			player.health -= 100;
 			if(player.health <= 0) {
 				player.remove();
 			}
-		}else if(contact.other.getObject(@proj)) {
-			float speed = contact.other.getLinearVelocity().length();
+		}else if(contact.bodyB.getObject(@proj)) {
+			float speed = contact.bodyB.getLinearVelocity().length();
 			if(speed >= 100.0f)
 			{
 				health--;

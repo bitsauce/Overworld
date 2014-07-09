@@ -17,7 +17,7 @@ class ItemDrop : GameObject, Body
 	
 	ItemDrop(Item @data, int amount = 1)
 	{
-		@this.data = @data;
+		@this.data = @data;
 		this.amount = amount;
 		
 		b2BodyDef def;
@@ -43,7 +43,7 @@ class ItemDrop : GameObject, Body
 	void preSolve(b2Contact @contact)
 	{
 		ItemDrop @item;
-		if(contact.other.getObject(@item)) {
+		if(contact.bodyB.getObject(@item)) {
 			contact.setEnabled(false);
 		}
 	}

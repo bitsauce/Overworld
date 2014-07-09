@@ -7,7 +7,7 @@ void main()
 {
 	Console.log("Loading game...");
 	
-	// Set b2d world scale
+	// Set b2d world scale
 	Box2D.gravity = Vector2(0.0f, 40.0f);
 	Box2D.scale = TILE_SIZE;
 	
@@ -58,7 +58,12 @@ void draw()
 	screen.setFillTexture(@terrainTexture);
 	screen.draw(@global::batches[global::BACKGROUND]);
 	
-	global::batches[global::BACKGROUND].draw();
+	global::batches[global::BACKGROUND].draw();
+	
+	// Box2D debug draw
+	if(Input.getKeyState(KEY_B)) {
+		Box2D.draw(@global::batches[global::SCENE]);
+	}
 	
 	// Draw scene content
 	global::batches[global::SCENE].draw();
@@ -87,8 +92,6 @@ void draw()
 	for(int i = global::FOREGROUND + 1; i < global::batches.size; i++) {
 		global::batches[i].draw();
 	}
-	
-	//Box2D.draw();
 }
 
 Vector2 camera;

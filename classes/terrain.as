@@ -103,9 +103,9 @@ class Terrain : GameObject
 		b2BodyDef def;
 		def.type = b2_staticBody;
 		def.position.set(0.0f, 0.0f);
-		def.allowSleep = true;
+		def.allowSleep = true;
 		
-		@body = b2Body(def);
+		@body = b2Body(def);
 		body.setObject(@this);
 		
 		// Generate a terrain
@@ -186,8 +186,8 @@ class Terrain : GameObject
 		
 		// Create a fixture
 		if(layer == TERRAIN_SCENE && layers[layer].isValid(x, y) && @fixtures[x, y] == null) {
-			b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE), 0.0f);
-			fixture.setFriction(0.5f);
+			b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE), 0.0f);
+			fixture.setFriction(0.5f);
 			@fixtures[x, y] = @fixture;
 		}
 		
