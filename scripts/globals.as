@@ -1,16 +1,6 @@
 namespace global
 {
-	enum Layer
-	{
-		BACKGROUND,
-		SCENE,
-		FOREGROUND,
-		GUI,
-		UITEXT,
-		NUM_LAYERS
-	}
-	
-	array<Batch@> batches(NUM_LAYERS);
+	array<Batch@> batches(LAYERS_MAX);
 	
 	array<Player@> players;
 	array<GameObject@> gameObjects;

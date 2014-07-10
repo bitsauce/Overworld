@@ -96,6 +96,6 @@ class ItemDrop : GameObject, Body
 	{
 		Sprite @sprite = @data.icon;
 		sprite.setPosition(getPosition());
-		sprite.draw(global::batches[global::SCENE]);
+		sprite.draw(global::batches[SCENE]);
 	}
 }

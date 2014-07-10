@@ -32,14 +32,6 @@ bool isValidTile(Tile tile)
 			tile != FOREGROUND_TILES && tile != MAX_TILES;
 }
 
-enum TerrainLayer
-{
-	TERRAIN_BACKGROUND,
-	TERRAIN_SCENE,
-	TERRAIN_FOREGROUND,
-	TERRAIN_LAYERS_MAX
-}
-
 class Terrain : GameObject
 {
 	grid<b2Fixture@> fixtures;
@@ -54,17 +46,27 @@ class Terrain : GameObject
 	
 	// Shader uniform
 	int radius = 5; // px
-	int steps = 5; // px
+	int steps = 6; // px
 	float falloff = 10.0f;
 	//Texture @shadowTexture = @Texture(800, 600);
 	Shader @shadowShader = @Shader(":/shaders/terrainshadows.vert", ":/shaders/terrainshadows.frag");
 	
+	Texture @terrainTexture;
+	
+	int get_padding() const
+	{
+		return radius*steps*2;
+	}
+	
 	Terrain(const int width, const int height)
 	{
+		
+		@terrainTexture = @Texture(800 + padding, 600 + padding);
+		
 		shadowShader.setUniform1i("radius", radius);
 		shadowShader.setUniform1i("steps", steps);
 		shadowShader.setUniform1f("falloff", falloff);
-		shadowShader.setUniform2f("texsize", 800, 600);
+		shadowShader.setUniform2f("texsize", 800 + padding, 600 + padding);
 		
 		// Set size
 		this.width = width;
@@ -208,19 +210,19 @@ class Terrain : GameObject
 	}
 	
 	// Drawing
-	void draw(Texture @texture, TerrainLayer layer)
+	void draw(TerrainLayer layer)
 	{
 		Matrix4 mat;
-		mat.translate(-camera.x, -camera.y, 0.0f);
-		layers[layer].draw(texture, mat);
+		mat.translate(-camera.x + padding/2.0f, -camera.y + padding/2.0f, 0.0f);
+		layers[layer].draw(@terrainTexture, mat);
 	}
 	
 	void drawShadows()
 	{
-		global::batches[global::FOREGROUND].setShader(@shadowShader);
+		global::batches[FOREGROUND].setShader(@shadowShader);
 		shadowShader.setSampler2D("texture", @terrainTexture);
-		Shape @screen = @Shape(Rect(Vector2(0.0f), Vector2(Window.getSize())));
-		screen.draw(@global::batches[global::FOREGROUND]);
-		global::batches[global::FOREGROUND].setShader(null);
+		Shape @screen = @Shape(Rect(Vector2(-padding/2.0f), Vector2(Window.getSize()) + Vector2(padding)));
+		screen.draw(@global::batches[FOREGROUND]);
+		global::batches[FOREGROUND].setShader(null);
 	}
 }

@@ -386,7 +386,7 @@ class Inventory : GameObject
 			@slotSprite = @itemSlot;
 		}
 		slotSprite.setPosition(position);
-		slotSprite.draw(global::batches[global::GUI]);
+		slotSprite.draw(global::batches[GUI]);
 		
 		// Set as hovered if cursor is contained within the rectangle
 		if(Rect(slotSprite.getPosition(), slotSprite.getSize()).contains(Input.position)) {
@@ -400,12 +400,12 @@ class Inventory : GameObject
 			// Draw item icon
 			Sprite @icon = @slot.data.icon;
 			icon.setPosition(position + Vector2(8, 8));
-			icon.draw(global::batches[global::GUI]);
+			icon.draw(global::batches[GUI]);
 			
 			// Draw quantity text
 			if(slot.amount > 1) {
 				string str = formatInt(slot.amount, "");
-				global::arial8.draw(global::batches[global::UITEXT], position + Vector2(28 - global::arial8.getStringWidth(str), 20), str);
+				global::arial8.draw(global::batches[UITEXT], position + Vector2(28 - global::arial8.getStringWidth(str), 20), str);
 			}
 		}
 	}
@@ -429,17 +429,17 @@ class Inventory : GameObject
 		}
 		
 		if(@hoveredItemSlot != null && @hoveredItemSlot.data != null) {
-			global::arial12.draw(global::batches[global::UITEXT], Input.position + Vector2(0.0f, 16.0f), hoveredItemSlot.data.desc);
+			global::arial12.draw(global::batches[UITEXT], Input.position + Vector2(0.0f, 16.0f), hoveredItemSlot.data.desc);
 		}
 		
 		if(!heldSlot.isEmpty())
 		{
 			Sprite @icon = @heldSlot.data.icon;
 			icon.setPosition(Input.position + Vector2(-16, -16));
-			icon.draw(global::batches[global::GUI]);
+			icon.draw(global::batches[GUI]);
 			if(heldSlot.data.maxStack > 1) {
 				string str = formatInt(heldSlot.amount, "");
-				global::arial8.draw(global::batches[global::UITEXT], Input.position + Vector2(4 - global::arial8.getStringWidth(str), -4), str);
+				global::arial8.draw(global::batches[UITEXT], Input.position + Vector2(4 - global::arial8.getStringWidth(str), -4), str);
 			}
 		}
 	}

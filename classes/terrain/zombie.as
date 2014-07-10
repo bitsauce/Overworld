@@ -73,7 +73,7 @@ class Zombie : GameObject, Body
 		Projectile @proj;
 		if(contact.bodyB.getObject(@player)) {
 			contact.setEnabled(false);
-			player.health--;
+			player.health -= 100;
 			if(player.health <= 0) {
 				player.remove();
 			}
@@ -122,6 +122,6 @@ class Zombie : GameObject, Body
 	{
 		Shape @shape = Shape(Rect(getPosition(), size));
 		shape.setFillColor(Vector4(0.0f, 1.0f, 0.0f, 1.0f));
-		shape.draw(global::batches[global::SCENE]);
+		shape.draw(global::batches[SCENE]);
 	}
 }

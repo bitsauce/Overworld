@@ -11,7 +11,7 @@ void main()
 	Box2D.gravity = Vector2(0.0f, 40.0f);
 	Box2D.scale = TILE_SIZE;
 	
-	// Create batches
+	// Create layer batches
 	for(int i = 0; i < global::batches.size; i++) {
 		@global::batches[i] = Batch();
 	}
@@ -28,17 +28,23 @@ void main()
 	
 	// Create player
 	Console.log("Setting up player...");
-	Player();
+	Player player();
+	
+	// Spawn in the middle of the world
+	int x = 250/2;
+	int y = global::terrain.gen.getGroundHeight(x);
+	player.setPosition(Vector2(x*TILE_SIZE, y*TILE_SIZE));
+	
+	// Give loadout
+	player.inventory.addItem(@global::items[PICKAXE_IRON]);
 }
-
-Texture @terrainTexture = @Texture(800, 600);
 
 void draw()
 {
 	// Create translation matrix
 	Matrix4 mat;
 	mat.translate(-camera.x, -camera.y, 0.0f);
-	global::batches[global::SCENE].setProjectionMatrix(mat);
+	global::batches[SCENE].setProjectionMatrix(mat);
 		
 	// Clear batches
 	for(int i = 0; i < global::batches.size; i++) {
@@ -51,67 +57,64 @@ void draw()
 	}
 	
 	// Render scene terrain-layer to texture
-	terrainTexture.clear();
-	global::terrain.draw(@terrainTexture, TERRAIN_BACKGROUND);
+	global::terrain.terrainTexture.clear();
+	global::terrain.draw(TERRAIN_BACKGROUND);
 	
-	Shape @screen = @Shape(Rect(Vector2(0.0f), Vector2(Window.getSize())));
-	screen.setFillTexture(@terrainTexture);
-	screen.draw(@global::batches[global::BACKGROUND]);
+	Shape @screen = @Shape(Rect(Vector2(-global::terrain.padding/2.0f), Vector2(800, 600) + Vector2(global::terrain.padding)));
+	screen.setFillTexture(@global::terrain.terrainTexture);
+	screen.draw(@global::batches[BACKGROUND]);
 	
-	global::batches[global::BACKGROUND].draw();
-	
-	// Box2D debug draw
-	if(Input.getKeyState(KEY_B)) {
-		Box2D.draw(@global::batches[global::SCENE]);
+	global::batches[BACKGROUND].draw();
+	
+	// Box2D debug draw
+	if(Input.getKeyState(KEY_B)) {
+		Box2D.draw(@global::batches[SCENE]);
 	}
 	
 	// Draw scene content
-	global::batches[global::SCENE].draw();
+	global::batches[SCENE].draw();
 	
 	// Draw terrain scene and foreground layer to texture
-	terrainTexture.clear();
-	global::terrain.draw(@terrainTexture, TERRAIN_SCENE);
-	global::terrain.draw(@terrainTexture, TERRAIN_FOREGROUND);
+	global::terrain.terrainTexture.clear();
+	global::terrain.draw(TERRAIN_SCENE);
+	global::terrain.draw(TERRAIN_FOREGROUND);
 	
-	screen.setFillTexture(@terrainTexture);
-	screen.draw(@global::batches[global::FOREGROUND]);
+	screen.setFillTexture(@global::terrain.terrainTexture);
+	screen.draw(@global::batches[FOREGROUND]);
 	
 	global::terrain.drawShadows();
 	
-	global::batches[global::FOREGROUND].draw();
-	
-	screen.setFillTexture(@terrainTexture);
-	screen.draw(@global::batches[global::FOREGROUND]);
+	global::batches[FOREGROUND].draw();
 	
 	// Draw debug text to screen
 	global::arial12.setColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-	global::arial12.draw(@global::batches[global::UITEXT], Vector2(730.0f, 12.0f), "FPS: " + Graphics.FPS);
-	//global::arial12.draw(@global::batches[global::UITEXT], Vector2(12.0f, 150.0f), "Camera: (" + camera.x + ", " +camera.y+")");
+	global::arial12.draw(@global::batches[UITEXT], Vector2(730.0f, 12.0f), "FPS: " + Graphics.FPS);
 	
 	// Draw remaining batches
-	for(int i = global::FOREGROUND + 1; i < global::batches.size; i++) {
+	for(int i = FOREGROUND + 1; i < global::batches.size; i++) {
 		global::batches[i].draw();
 	}
 }
 
 Vector2 camera;
-float cameraSpeed = 16.0f;
 
 bool profilerToggled = false;
-bool itoggled = false;
 
 void update()
-{
+{
+	// Update all game objects
 	for(int i = 0; i < global::gameObjects.size; i++) {
 		global::gameObjects[i].update();
 	}
-	
+	
+	// Profiler toggle
 	if(Input.getKeyState(KEY_P)) {
 		if(!profilerToggled) Engine.toggleProfiler();
 		profilerToggled = true;
 	}else{
 		profilerToggled = false;
 	}
-	
+	
+	// Step Box2D
 	Box2D.step(Graphics.dt);
 }

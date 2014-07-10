@@ -1,15 +1,12 @@
 // Include files
-#include "tilegrid.as"
-#include "terrain.as"
-#include "terraingen.as"
 #include "background.as"
 #include "projectile.as"
 #include "player.as"
 #include "inventory.as"
-#include "timeofday.as"
+#include "timeofday.as"
 #include "recipies.as"
 
-// Mobds
+// Mobs
 #include "mobs/zombie.as"
 
 // Items
@@ -17,4 +14,9 @@
 #include "items/itemdrop.as"
 #include "items/arrow.as"
 #include "items/block.as"
-#include "items/pickaxe.as"
+#include "items/pickaxe.as"
+
+// Terrain
+#include "terrain/terrain.as"
+#include "terrain/terraingen.as"
+#include "terrain/tilegrid.as"

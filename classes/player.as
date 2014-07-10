@@ -29,37 +29,40 @@ class Player : GameObject, Body
 	float jumpForce = 6800.0f;
 	float accel = 0.1f; // factor
 	float mass = 18.0f;
-	
+	
+	int maxHealth = 100;
 	int health = 100;
 	
 	Player()
 	{
+		// Create an inventory for the player
 		@inventory = @Inventory(@this);
-		inventory.addItem(@global::items[PICKAXE_IRON]);
 		
+		// Create body defintion
 		b2BodyDef def;
 		def.type = b2_bulletBody;
 		def.fixedRotation = true;
 		def.allowSleep = false;
-		def.position.set(200, 0);
 		def.linearDamping = 1.0f;
 		
+		// Create player body
 		@body = @b2Body(def);
-		
-		b2Fixture @fixture = @body.createFixture(Vector2(0.0f, -size.x/4.0f), size.x/2.0f, mass);
-		fixture.setFriction(0.0f);
-		@fixture = @body.createFixture(Vector2(0.0f,  size.x/4.0f), size.x/2.0f, mass);
-		fixture.setFriction(0.0f);
-		
-		// Foot sensor
-		@footSensor = @body.createFixture(Rect(-4, size.x/4.0f+12, 8, 8), 0.0f);
-		footSensor.setSensor(true);
-		
 		body.setObject(@this);
 		body.setBeginContactCallback(ContactFunc(@beginContact));
 		body.setEndContactCallback(ContactFunc(@endContact));
 		body.setPreSolveCallback(ContactFunc(@preSolve));
 		
+		// Create upper and lower circle fixtures
+		b2Fixture @fixture = @body.createFixture(Vector2(0.0f, -size.x/4.0f), size.x/2.0f, mass);
+		fixture.setFriction(0.0f);
+		@fixture = @body.createFixture(Vector2(0.0f,  size.x/4.0f), size.x/2.0f, mass);
+		fixture.setFriction(0.0f);
+		
+		// Create foot sensor
+		@footSensor = @body.createFixture(Rect(-4, size.x/4.0f+12, 8, 8), 0.0f);
+		footSensor.setSensor(true);
+		
+		// Setup spine animations
 		spAnimationStateData @data = @spAnimationStateData(@skeleton);
 		data.setMix("idle", "walk", 0.2f);
 		data.setMix("walk", "idle", 0.5f);
@@ -68,10 +71,12 @@ class Player : GameObject, Body
 		data.setMix("jump", "idle", 0.1f);
 		data.setMix("idle", "jump", 0.2f);
 		
+		// Create spine animation
 		@animation = @spAnimationState(@data);
 		animation.looping = true;
 		changeAnimation("idle");
 		
+		// Add to list of players
 		global::players.insertLast(@this);
 	}
 	
@@ -146,13 +151,13 @@ class Player : GameObject, Body
 			}
 		}else if(contact.bodyB.getObject(@proj)) {
 			contact.setEnabled(false);
-		}
-		
-		Terrain @terrain;
-		if(contact.bodyB.getObject(@terrain) && numGroundContact > 0) {
-			contact.setFriction(0.9f);
-		}else{
-			contact.resetFriction();
+		}
+		
+		Terrain @terrain;
+		if(contact.bodyB.getObject(@terrain) && numGroundContact > 0) {
+			contact.setFriction(0.9f);
+		}else{
+			contact.resetFriction();
 		}
 	}
 	
@@ -190,15 +195,7 @@ class Player : GameObject, Body
 		}
 		
 		if(Input.getKeyState(KEY_SPACE) && numGroundContact > 0) {
-			//if(jumpTimer < 0.1f) {
-				body.applyImpulse(Vector2(0.0f, -jumpForce), getCenter());
-			//}
-			//jumpTimer += Graphics.dt;
-		}else{
-			//if(jumpTimer > 0.0f) {
-			//	falling = true;
-			//}
-			//jumpTimer = 0.0f;
+			body.applyImpulse(Vector2(0.0f, -jumpForce), getCenter());
 		}
 		
 		velocity = body.getLinearVelocity();
@@ -238,8 +235,9 @@ class Player : GameObject, Body
 		}else{
 			pressed = false;
 		}
-		
-		if(global::timeOfDay.getHour() >= 21 && timer <= 0.0f)
+		
+		// TODO: Create and move to MobSpawner
+		if(global::timeOfDay.getHour() >= 21 && timer <= 0.0f) // TODO: Implement timeOfDay.isNight();
 		{
 			Zombie z();
 			z.setPosition(Vector2(camera.x, global::terrain.gen.getGroundHeight(camera.x/TILE_SIZE)*TILE_SIZE));
@@ -256,9 +254,14 @@ class Player : GameObject, Body
 	}
 	
 	void draw()
-	{
-		skeleton.draw(@global::batches[global::SCENE]);
-		
-		global::arial12.draw(@global::batches[global::UITEXT], Vector2(600.0f, 12.0f), "Health: "+formatInt(health, ""));
+	{
+		// Draw skeleton
+		skeleton.draw(@global::batches[SCENE]);
+		
+		// Draw debug health bar
+		float p = (health/float(maxHealth));
+		Shape healthBar(Rect(getPosition().x-size.x/2.0f, getPosition().y-size.y/2.0f-24, size.x*p, 4));
+		healthBar.setFillColor(Vector4(1.0f*(1-p), 1.0f*p, 0.0f, 1.0f));
+		healthBar.draw(@global::batches[SCENE]);
 	}
 }

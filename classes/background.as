@@ -112,17 +112,17 @@ class Background : GameObject
 		vertices[3].position.set(0, Window.getSize().y);
 		vertices[3].color = bottomColor;
 		
-		global::batches[global::BACKGROUND].addVertices(vertices, QUAD_INDICES);
-		
-		if(!Input.getKeyState(KEY_G))
-		{
-			int hour = global::timeOfDay.getHour();
-			if(hour >= 6 && hour < 18)
-			{
-				sun.draw(@global::batches[global::BACKGROUND]);
-			}else{
-				moon.draw(@global::batches[global::BACKGROUND]);
-			}
+		global::batches[BACKGROUND].addVertices(vertices, QUAD_INDICES);
+		
+		if(!Input.getKeyState(KEY_G))
+		{
+			int hour = global::timeOfDay.getHour();
+			if(hour >= 6 && hour < 18)
+			{
+				sun.draw(@global::batches[BACKGROUND]);
+			}else{
+				moon.draw(@global::batches[BACKGROUND]);
+			}
 		}else{
 			// Draw sun/moon
 			Vector2 lightPos;
@@ -147,9 +147,9 @@ class Background : GameObject
 			fbo.renderToTexture(@fboTexture);
 			
 			// Draw fullscreen rect with godray shader
-			global::batches[global::BACKGROUND].setShader(@godRayShader);
-			screen.draw(@global::batches[global::BACKGROUND]);
-			global::batches[global::BACKGROUND].setShader(null);
+			global::batches[SCENE].setShader(@godRayShader);
+			screen.draw(@global::batches[BACKGROUND]);
+			global::batches[SCENE].setShader(null);
 			
 			// Set light pos
 			lightPos.x /= 800;
@@ -159,6 +159,6 @@ class Background : GameObject
 			
 			// Clear fbo buffer
 			fbo.clear();
-		}
+		}
 	}
 }
