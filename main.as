@@ -28,24 +28,27 @@ void main()
 	
 	// Create player
 	Console.log("Setting up player...");
-	Player player();
-	
-	// Spawn in the middle of the world
-	int x = 250/2;
-	int y = global::terrain.gen.getGroundHeight(x);
-	player.setPosition(Vector2(x*TILE_SIZE, y*TILE_SIZE));
-	
-	// Give loadout
+	Player player();
+	
+	// Spawn in the middle of the world
+	int x = 250/2;
+	int y = global::terrain.gen.getGroundHeight(x);
+	player.setPosition(Vector2(x*TILE_SIZE, y*TILE_SIZE));
+	
+	// Give loadout
 	player.inventory.addItem(@global::items[PICKAXE_IRON]);
 }
 
 void draw()
-{
+{
+	if(Input.getKeyState(KEY_I))
+		global::camera.zoom += 0.1f;
+	else if(Input.getKeyState(KEY_O))
+		global::camera.zoom -= 0.1f;
+	
 	// Create translation matrix
-	Matrix4 mat;
-	mat.translate(-camera.x, -camera.y, 0.0f);
-	global::batches[SCENE].setProjectionMatrix(mat);
-		
+	global::batches[SCENE].setProjectionMatrix(global::camera.getProjectionMatrix());
+	
 	// Clear batches
 	for(int i = 0; i < global::batches.size; i++) {
 		global::batches[i].clear();
@@ -96,17 +99,18 @@ void draw()
 	}
 }
 
-Vector2 camera;
-
 bool profilerToggled = false;
 
 void update()
 {
+	// Step Box2D
+	Box2D.step(Graphics.dt);
+	
 	// Update all game objects
 	for(int i = 0; i < global::gameObjects.size; i++) {
 		global::gameObjects[i].update();
 	}
-	
+	
 	// Profiler toggle
 	if(Input.getKeyState(KEY_P)) {
 		if(!profilerToggled) Engine.toggleProfiler();
@@ -114,7 +118,4 @@ void update()
 	}else{
 		profilerToggled = false;
 	}
-	
-	// Step Box2D
-	Box2D.step(Graphics.dt);
 }

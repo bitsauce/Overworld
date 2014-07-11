@@ -7,8 +7,8 @@ enum ItemID
 	LEAF_BLOCK,
 	STONE_BLOCK,
 	
-	PICKAXE_IRON,
-	
+	PICKAXE_IRON,
+	
 	SHORTSWORD_WOODEN,
 	
 	STICK,
@@ -25,7 +25,7 @@ grid<string> ITEM_STRINGS = {
 	{ "Wooden block", "A block of wood" },
 	{ "Leaf block", "A block of leaves" },
 	{ "Stone block", "A block of stone" },
-	{ "Iron Pickaxe", "A iron pickaxe" },
+	{ "Iron Pickaxe", "A iron pickaxe" },
 	{ "Wooden Shortsword", "A crappy sword" },
 	{ "Stick", "A stick" }
 };
@@ -36,7 +36,7 @@ array<Sprite@> ITEM_ICONS = {
 	@Sprite(@TextureRegion(@Texture(":/sprites/tiles/tree_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)),
 	@Sprite(@TextureRegion(@Texture(":/sprites/tiles/leaf_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)),
 	@Sprite(@TextureRegion(@Texture(":/sprites/tiles/stone_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)),
-	@Sprite(@Texture(":/sprites/pickaxes/pickaxe_iron_icon.png")),
+	@Sprite(@Texture(":/sprites/pickaxes/pickaxe_iron_icon.png")),
 	@Sprite(@Texture(":/sprites/weapons/shortsword_wooden_item.png")),
 	@Sprite(@Texture(":/sprites/items/stick.png"))
 };
@@ -71,10 +71,10 @@ class ItemManager
 		addItem(WOOD_BLOCK, @BlockItem(WOOD_BLOCK, TREE_TILE));
 		addItem(LEAF_BLOCK, @BlockItem(LEAF_BLOCK, LEAF_TILE));
 		addItem(STONE_BLOCK, @BlockItem(STONE_BLOCK, STONE_TILE));
-		addItem(PICKAXE_IRON, @Pickaxe(PICKAXE_IRON));
+		addItem(PICKAXE_IRON, @Pickaxe(PICKAXE_IRON));
 		addItem(SHORTSWORD_WOODEN, @ArrowItem(SHORTSWORD_WOODEN));
 		addItem(STICK, @ArrowItem(STICK));
-		@global::items = @this;
+		//@global::items = @this;
 	}
 	
 	private void addItem(ItemID id, Item @item)

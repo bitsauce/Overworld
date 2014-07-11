@@ -56,41 +56,41 @@ const int INV_WIDTH = 9;
 const int INV_HEIGHT = 3;
 
 class Inventory : GameObject
-{
+{
 	// Owner
-	Player @player;
-	
+	Player @player;
+	
 	// Slot sprites
 	Sprite @itemSlot = @Sprite(@Texture(":/sprites/inventory/item_slot.png"));
-	Sprite @selectedItemSlot = @Sprite(@Texture(":/sprites/inventory/item_slot_selected.png"));
-	
+	Sprite @selectedItemSlot = @Sprite(@Texture(":/sprites/inventory/item_slot_selected.png"));
+	
 	// Selected hot-bar slot
-	int selectedSlot = 0;
-	
+	int selectedSlot = 0;
+	
 	// Inventory slots
-	grid<ItemSlot> slots(INV_WIDTH, INV_HEIGHT);
-	
+	grid<ItemSlot> slots(INV_WIDTH, INV_HEIGHT);
+	
 	// Show bag flag
-	bool showBag = false;
-	
+	bool showBag = false;
+	
 	// Held item slot
-	ItemSlot heldSlot;
-	
-	// Crafting slots
-	grid<ItemSlot> craftingSlots(3, 3);
-	
+	ItemSlot heldSlot;
+	
+	// Crafting slots
+	grid<ItemSlot> craftingSlots(3, 3);
+	
 	array<Recipie@> recipies;
 	
 	Inventory(Player @player)
 	{
-		@this.player = @player;
-		
-		recipies.insertLast(@Recipie(
-				NULL_ITEM, WOOD_BLOCK, NULL_ITEM,
-				NULL_ITEM, WOOD_BLOCK, NULL_ITEM,
-				NULL_ITEM, STICK, NULL_ITEM,
-				SHORTSWORD_WOODEN
-			)
+		@this.player = @player;
+		
+		recipies.insertLast(@Recipie(
+				NULL_ITEM, WOOD_BLOCK, NULL_ITEM,
+				NULL_ITEM, WOOD_BLOCK, NULL_ITEM,
+				NULL_ITEM, STICK, NULL_ITEM,
+				SHORTSWORD_WOODEN
+			)
 		);
 	}
 	
@@ -200,10 +200,10 @@ class Inventory : GameObject
 				for(int y = 0; y < INV_HEIGHT; y++)
 				{
 					for(int x = 0; x < INV_WIDTH; x++)
-					{
+					{
 						// Check if slot was clicked
 						if(Rect(5 + 34*x, 5 + 34*y, 32, 32).contains(Input.position)) {
-							leftClickSlot(@slots[x, y]);
+							leftClickSlot(@slots[x, y]);
 							escape = true;
 						}
 						if(escape)
@@ -211,25 +211,25 @@ class Inventory : GameObject
 					}
 					if(escape)
 						break;
-				}
-				
-				if(!escape){
-					for(int y = 0; y < 3; y++)
-					{
-						for(int x = 0; x < 3; x++)
-						{
-							// Check if slot was clicked
-							if(Rect(5 + 34*x, 256 + 34*y, 32, 32).contains(Input.position)) {
-								leftClickSlot(@craftingSlots[x, y]);
-								escape = true;
-								updateCrafing();
-							}
-							if(escape)
-								break;
-						}
-						if(escape)
-							break;
-					}
+				}
+				
+				if(!escape){
+					for(int y = 0; y < 3; y++)
+					{
+						for(int x = 0; x < 3; x++)
+						{
+							// Check if slot was clicked
+							if(Rect(5 + 34*x, 256 + 34*y, 32, 32).contains(Input.position)) {
+								leftClickSlot(@craftingSlots[x, y]);
+								escape = true;
+								updateCrafing();
+							}
+							if(escape)
+								break;
+						}
+						if(escape)
+							break;
+					}
 				}
 				
 				if(!heldSlot.isEmpty() && !escape)
@@ -264,25 +264,25 @@ class Inventory : GameObject
 					}
 					if(escape)
 						break;
-				}
-				
-				if(!escape){
-					for(int y = 0; y < 3; y++)
-					{
-						for(int x = 0; x < 3; x++)
-						{
-							// Check if slot was clicked
-							if(Rect(5 + 34*x, 256 + 34*y, 32, 32).contains(Input.position)) {
-								rightClickSlot(@craftingSlots[x, y]);
-								escape = true;
-								updateCrafing();
-							}
-							if(escape)
-								break;
-						}
-						if(escape)
-							break;
-					}
+				}
+				
+				if(!escape){
+					for(int y = 0; y < 3; y++)
+					{
+						for(int x = 0; x < 3; x++)
+						{
+							// Check if slot was clicked
+							if(Rect(5 + 34*x, 256 + 34*y, 32, 32).contains(Input.position)) {
+								rightClickSlot(@craftingSlots[x, y]);
+								escape = true;
+								updateCrafing();
+							}
+							if(escape)
+								break;
+						}
+						if(escape)
+							break;
+					}
 				}
 			}
 			rmbPressed = true;
@@ -290,142 +290,142 @@ class Inventory : GameObject
 			rmbPressed = false;
 		}
 	}
-	
-	void leftClickSlot(ItemSlot @slot)
-	{			
-		if(heldSlot.isEmpty()) {
-			heldSlot = slot;
-			slot.clear();
-		}else{
-			if(slot.isEmpty())
-			{
-				slot.set(heldSlot.data, heldSlot.amount);
-				heldSlot.clear();
-			}else if(@heldSlot.data == @slot.data){
-				heldSlot.amount = slot.fill(heldSlot.amount);
-				if(heldSlot.amount == 0)
-					heldSlot.clear();
-			}else{
-				ItemSlot tmp = slot;
-				slot = heldSlot;
-				heldSlot = tmp;
-			}
-		}
-	}
-	
-	void rightClickSlot(ItemSlot @slot)
-	{
-		if(heldSlot.isEmpty()) {
-			heldSlot.set(slot.data, 1);
-			slot.remove(1);
-		}else if(@heldSlot.data == @slot.data){
-			heldSlot.amount += 1;
-			slot.remove(1);
-		}else if(slot.isEmpty()) {
-			slot.set(heldSlot.data, 1);
-			heldSlot.remove(1);
-		}
-	}
-	
-	void updateCrafing()
-	{
-		for(int i = 0; i < recipies.size; i++)
-		{
-			bool match = true;
-			for(int y = 0; y < 3; y++)
-			{
-				for(int x = 0; x < 3; x++)
-				{
-					ItemID id = global::items.find(craftingSlots[x, y].data);
-					if(id != recipies[i].recipie[x, y])
-					{
-						match = false;
-						break;
-					}
-				}
-				if(!match)
-					break;
-			}
-			if(match)
-			{
-				addItem(@global::items[recipies[i].result]);
-				
-				
-				for(int y = 0; y < 3; y++) {
-					for(int x = 0; x < 3; x++) {
-						craftingSlots[x, y].clear();
-					}
-				}
-				
-				break;
-			}
-		}
-	}
+	
+	void leftClickSlot(ItemSlot @slot)
+	{			
+		if(heldSlot.isEmpty()) {
+			heldSlot = slot;
+			slot.clear();
+		}else{
+			if(slot.isEmpty())
+			{
+				slot.set(heldSlot.data, heldSlot.amount);
+				heldSlot.clear();
+			}else if(@heldSlot.data == @slot.data){
+				heldSlot.amount = slot.fill(heldSlot.amount);
+				if(heldSlot.amount == 0)
+					heldSlot.clear();
+			}else{
+				ItemSlot tmp = slot;
+				slot = heldSlot;
+				heldSlot = tmp;
+			}
+		}
+	}
+	
+	void rightClickSlot(ItemSlot @slot)
+	{
+		if(heldSlot.isEmpty()) {
+			heldSlot.set(slot.data, 1);
+			slot.remove(1);
+		}else if(@heldSlot.data == @slot.data){
+			heldSlot.amount += 1;
+			slot.remove(1);
+		}else if(slot.isEmpty()) {
+			slot.set(heldSlot.data, 1);
+			heldSlot.remove(1);
+		}
+	}
+	
+	void updateCrafing()
+	{
+		for(int i = 0; i < recipies.size; i++)
+		{
+			bool match = true;
+			for(int y = 0; y < 3; y++)
+			{
+				for(int x = 0; x < 3; x++)
+				{
+					ItemID id = global::items.find(craftingSlots[x, y].data);
+					if(id != recipies[i].recipie[x, y])
+					{
+						match = false;
+						break;
+					}
+				}
+				if(!match)
+					break;
+			}
+			if(match)
+			{
+				addItem(@global::items[recipies[i].result]);
+				
+				
+				for(int y = 0; y < 3; y++) {
+					for(int x = 0; x < 3; x++) {
+						craftingSlots[x, y].clear();
+					}
+				}
+				
+				break;
+			}
+		}
+	}
 	
 	void createItemDrop(Item @item, int amount)
 	{
 		ItemDrop drop(@item, amount);
 		drop.setPosition(player.getCenter());
-		Vector2 dt = Input.position+camera - player.getCenter();
+		Vector2 dt = Input.position + global::camera.position - player.getCenter();
 		if(dt.x >= 0.0f) {
 			drop.body.applyImpulse(Vector2(1.0f, -1.0f)*5000.0f, drop.getCenter());
 		}else{
 			drop.body.applyImpulse(Vector2(-1.0f,-1.0f)*5000.0f, drop.getCenter());
 		}
-	}
-	
-	ItemSlot @hoveredItemSlot;
-	void drawSlot(const Vector2 position, ItemSlot @slot)
-	{	
-		// Draw slot sprite
-		Sprite @slotSprite;
-		if(@slot == @slots[selectedSlot, 0])
-		{
-			@slotSprite = @selectedItemSlot;
-		}else{
-			@slotSprite = @itemSlot;
-		}
-		slotSprite.setPosition(position);
-		slotSprite.draw(global::batches[GUI]);
-		
-		// Set as hovered if cursor is contained within the rectangle
-		if(Rect(slotSprite.getPosition(), slotSprite.getSize()).contains(Input.position)) {
-			@hoveredItemSlot = @slot;
-		}
-		
-		// Draw slot content
-		global::arial8.setColor(Vector4(1.0f)); // Set white font color
-		if(slot.data != null)
-		{
-			// Draw item icon
-			Sprite @icon = @slot.data.icon;
-			icon.setPosition(position + Vector2(8, 8));
-			icon.draw(global::batches[GUI]);
-			
-			// Draw quantity text
-			if(slot.amount > 1) {
-				string str = formatInt(slot.amount, "");
-				global::arial8.draw(global::batches[UITEXT], position + Vector2(28 - global::arial8.getStringWidth(str), 20), str);
-			}
-		}
+	}
+	
+	ItemSlot @hoveredItemSlot;
+	void drawSlot(const Vector2 position, ItemSlot @slot)
+	{	
+		// Draw slot sprite
+		Sprite @slotSprite;
+		if(@slot == @slots[selectedSlot, 0])
+		{
+			@slotSprite = @selectedItemSlot;
+		}else{
+			@slotSprite = @itemSlot;
+		}
+		slotSprite.setPosition(position);
+		slotSprite.draw(global::batches[GUI]);
+		
+		// Set as hovered if cursor is contained within the rectangle
+		if(Rect(slotSprite.getPosition(), slotSprite.getSize()).contains(Input.position)) {
+			@hoveredItemSlot = @slot;
+		}
+		
+		// Draw slot content
+		global::arial8.setColor(Vector4(1.0f)); // Set white font color
+		if(slot.data != null)
+		{
+			// Draw item icon
+			Sprite @icon = @slot.data.icon;
+			icon.setPosition(position + Vector2(8, 8));
+			icon.draw(global::batches[GUI]);
+			
+			// Draw quantity text
+			if(slot.amount > 1) {
+				string str = formatInt(slot.amount, "");
+				global::arial8.draw(global::batches[UITEXT], position + Vector2(28 - global::arial8.getStringWidth(str), 20), str);
+			}
+		}
 	}
 	
 	void draw()
-	{
+	{
 		@hoveredItemSlot = null;
 		for(int y = 0; y < INV_HEIGHT; y++) {
-			for(int x = 0; x < INV_WIDTH; x++) {
-				Vector2 position(5 + 34*x, 5 + 34*y);
+			for(int x = 0; x < INV_WIDTH; x++) {
+				Vector2 position(5 + 34*x, 5 + 34*y);
 				drawSlot(position, @slots[x, y]);
 			}
 			if(!showBag) break;
-		}
-		
-		for(int y = 0; y < 3; y++) {
-			for(int x = 0; x < 3; x++) {
-				Vector2 position(5 + 34*x, 256 + 34*y);
-				drawSlot(position, craftingSlots[x, y]);
-			}
+		}
+		
+		for(int y = 0; y < 3; y++) {
+			for(int x = 0; x < 3; x++) {
+				Vector2 position(5 + 34*x, 256 + 34*y);
+				drawSlot(position, craftingSlots[x, y]);
+			}
 		}
 		
 		if(@hoveredItemSlot != null && @hoveredItemSlot.data != null) {

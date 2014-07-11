@@ -11,10 +11,10 @@ class Pickaxe : Item
 	
 	void use(Player @player)
 	{
-		Vector2 dt = Input.position+camera - player.getCenter();
+		Vector2 dt = Input.position + global::camera.position - player.getCenter();
 		if(dt.length() <= ITEM_PICKUP_RADIUS)
 		{
-			Vector2i pos = Vector2i((Input.position+camera)/TILE_SIZE);
+			Vector2i pos = Vector2i((Input.position + global::camera.position)/TILE_SIZE);
 			Tile tile = global::terrain.getTileAt(pos.x, pos.y);
 			TerrainLayer layer = TERRAIN_SCENE;
 			if(tile == NULL_TILE) { layer = TERRAIN_FOREGROUND; tile = global::terrain.getTileAt(pos.x, pos.y, layer); }

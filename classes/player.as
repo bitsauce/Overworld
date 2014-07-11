@@ -29,9 +29,11 @@ class Player : GameObject, Body
 	float jumpForce = 6800.0f;
 	float accel = 0.1f; // factor
 	float mass = 18.0f;
-	
+	
 	int maxHealth = 100;
-	int health = 100;
+	int health = 100;
+	
+	int numGroundContact = 0;
 	
 	Player()
 	{
@@ -111,8 +113,6 @@ class Player : GameObject, Body
 		return getPosition() + getSize()/2.0f;
 	}
 	
-	int numGroundContact = 0;
-	
 	void beginContact(b2Contact @contact)
 	{
 		Terrain @terrain;
@@ -169,8 +169,6 @@ class Player : GameObject, Body
 			@currentAnim = @anim;
 		}
 	}
-	
-	float timer = 0.0f;
 	
 	Vector2 getFeetPosition() const
 	{
@@ -235,33 +233,24 @@ class Player : GameObject, Body
 		}else{
 			pressed = false;
 		}
-		
-		// TODO: Create and move to MobSpawner
-		if(global::timeOfDay.getHour() >= 21 && timer <= 0.0f) // TODO: Implement timeOfDay.isNight();
-		{
-			Zombie z();
-			z.setPosition(Vector2(camera.x, global::terrain.gen.getGroundHeight(camera.x/TILE_SIZE)*TILE_SIZE));
-			timer = 10.0f;
-		}
-		timer -= Graphics.dt;
 		
 		skeleton.position = position + Vector2(0.0f, size.y/2.0f);
 		animation.update(Graphics.dt);
 		
 		// Temporary solution until i've found some other way to avoid tiling seams
 		// for example through shaders or texture arrays
-		camera = Vector2(Vector2i(getCenter() - Vector2(Window.getSize())/2.0f));
+		global::camera.position = Vector2(/*Vector2i*/(body.getPosition() - Vector2(Window.getSize())/(2.0f * global::camera.zoom)));
 	}
 	
 	void draw()
-	{
+	{
 		// Draw skeleton
-		skeleton.draw(@global::batches[SCENE]);
-		
-		// Draw debug health bar
-		float p = (health/float(maxHealth));
-		Shape healthBar(Rect(getPosition().x-size.x/2.0f, getPosition().y-size.y/2.0f-24, size.x*p, 4));
-		healthBar.setFillColor(Vector4(1.0f*(1-p), 1.0f*p, 0.0f, 1.0f));
+		skeleton.draw(@global::batches[SCENE]);
+		
+		// Draw debug health bar
+		float p = (health/float(maxHealth));
+		Shape healthBar(Rect(getPosition().x-size.x/2.0f, getPosition().y-size.y/2.0f-24, size.x*p, 4));
+		healthBar.setFillColor(Vector4(1.0f*(1-p), 1.0f*p, 0.0f, 1.0f));
 		healthBar.draw(@global::batches[SCENE]);
 	}
 }

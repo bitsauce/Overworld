@@ -49,7 +49,7 @@ class Background : GameObject
 		float time = global::timeOfDay.getTime();
 		
 		// Change background depending on time
-		if(hour >= 6 && hour < 18)
+		if(global::timeOfDay.isDay())
 		{
 			// Apply sunrise from 6:00 to 9:00
 			if(hour >= 6 && hour < 9)

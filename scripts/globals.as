@@ -9,7 +9,9 @@ namespace global
 	Font @arial12 = @Font("Arial Bold", 12);
 	Font @arial8 = @Font("Arial", 8);
 	
-	ItemManager @items = @ItemManager();
-	
 	Terrain @terrain;
+	
+	Camera camera;
+	
+	ItemManager items;
 }

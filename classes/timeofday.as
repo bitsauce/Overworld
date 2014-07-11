@@ -20,6 +20,16 @@ class TimeOfDay : GameObject
 	int getMinute()
 	{
 		return int(time-getHour()*60.0f);
+	}
+	
+	bool isDay()
+	{
+		return hour >= 6 && hour < 18;
+	}
+	
+	bool isNight()
+	{
+		return !isDay();
 	}
 	
 	void update()
@@ -42,7 +52,7 @@ class TimeOfDay : GameObject
 		{
 			time = 1440.0f;
 		}
-	}
+	}
 	
 	void draw()
 	{

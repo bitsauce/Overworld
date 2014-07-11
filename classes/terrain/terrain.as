@@ -213,7 +213,8 @@ class Terrain : GameObject
 	void draw(TerrainLayer layer)
 	{
 		Matrix4 mat;
-		mat.translate(-camera.x + padding/2.0f, -camera.y + padding/2.0f, 0.0f);
+		mat.translate(-global::camera.position.x + padding/(2.0f * global::camera.zoom), -global::camera.position.y + padding/(2.0f * global::camera.zoom), 0.0f);
+		mat.scale(global::camera.zoom);
 		layers[layer].draw(@terrainTexture, mat);
 	}
 	
