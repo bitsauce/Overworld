@@ -4,7 +4,7 @@ Player @getClosestPlayer(Vector2 position)
 	float minDist = -1.0f;
 	for(int i = 0; i < global::players.size; i++)
 	{
-		float dist = (global::players[i].getCenter() - position).length();
+		float dist = (global::players[i].body.getPosition() - position).length();
 		if(dist <= minDist || minDist < 0.0f)
 		{
 			@closestPlayer = @global::players[i];
@@ -95,7 +95,7 @@ class Zombie : GameObject, Body
 	void update()
 	{
 		Player @target = @getClosestPlayer(getCenter());
-		Vector2 dt = target.getCenter() - getCenter();
+		Vector2 dt = target.body.getPosition() - getCenter();
 		
 		if(dt.x < 0.0f)
 			body.applyImpulse(Vector2(-1000.0f, 0.0f), getCenter());

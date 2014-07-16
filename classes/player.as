@@ -7,7 +7,7 @@ interface Body
 	Vector2 getCenter();
 }
 
-class Player : GameObject, Body
+class Player : GameObject
 {
 	Vector2 size = Vector2(28.0f, 44.0f);
 	b2Body @body;
@@ -31,9 +31,11 @@ class Player : GameObject, Body
 	float mass = 18.0f;
 	
 	int maxHealth = 100;
-	int health = 100;
+	int health = 100;
+	
+	int numGroundContact = 0;
 	
-	int numGroundContact = 0;
+	AudioSource @footStepsSound = @AudioSource(":/sounds/step.wav");
 	
 	Player()
 	{
@@ -76,7 +78,9 @@ class Player : GameObject, Body
 		// Create spine animation
 		@animation = @spAnimationState(@data);
 		animation.looping = true;
-		changeAnimation("idle");
+		changeAnimation("idle");
+		
+		footStepsSound.looping = true;
 		
 		// Add to list of players
 		global::players.insertLast(@this);
@@ -86,31 +90,6 @@ class Player : GameObject, Body
 	{
 		body.destroy();
 		GameObject::remove();
-	}
-	
-	Vector2 getPosition()
-	{
-		return body.getPosition();
-	}
-	
-	void setPosition(Vector2 position)
-	{
-		body.setTransform(position, 0.0f);
-	}
-	
-	Vector2 getSize()
-	{
-		return size;
-	}
-	
-	void setSize(Vector2)
-	{
-		// NO
-	}
-	
-	Vector2 getCenter()
-	{
-		return getPosition() + getSize()/2.0f;
 	}
 	
 	void beginContact(b2Contact @contact)
@@ -172,7 +151,7 @@ class Player : GameObject, Body
 	
 	Vector2 getFeetPosition() const
 	{
-		return getPosition() + Vector2(size.x/2.0f, size.y);
+		return body.getPosition() + Vector2(0.0f, size.y/2.0f);
 	}
 	
 	void update()
@@ -193,7 +172,7 @@ class Player : GameObject, Body
 		}
 		
 		if(Input.getKeyState(KEY_SPACE) && numGroundContact > 0) {
-			body.applyImpulse(Vector2(0.0f, -jumpForce), getCenter());
+			body.applyImpulse(Vector2(0.0f, -jumpForce), position);
 		}
 		
 		velocity = body.getLinearVelocity();
@@ -205,20 +184,32 @@ class Player : GameObject, Body
 			if(velocity.x >= 0.01f)
 			{
 				changeAnimation("walk");
-				skeleton.flipX = false;
+				skeleton.flipX = false;
+				
+				if(!footStepsSound.isPlaying()) {
+					footStepsSound.play();
+				}
 			}else if(velocity.x <= -0.01f){
 				changeAnimation("walk");
-				skeleton.flipX = true;
+				skeleton.flipX = true;
+				
+				if(!footStepsSound.isPlaying()) {
+					footStepsSound.play();
+				}
 			}else{
 				changeAnimation("idle");
 				velocity.x = 0.0f;
 				body.setLinearVelocity(velocity);
-				animation.timeScale = 1.0f;
+				animation.timeScale = 1.0f;
+				
+				footStepsSound.stop();
 			}
 		}else{
 			animation.looping = false;
 			animation.timeScale = 1.0f;
-			changeAnimation("jump");
+			changeAnimation("jump");
+			
+			footStepsSound.stop();
 		}
 		
 		if(Input.getKeyState(KEY_LMB))
@@ -234,12 +225,42 @@ class Player : GameObject, Body
 			pressed = false;
 		}
 		
+		// Clamp to world
+		if(position.x < 0.0f)
+		{
+			position.x = 0.0f;
+			body.setLinearVelocity(Vector2(0.0f, velocity.y));
+			body.setPosition(position);
+		}else if(position.x > global::terrain.getWidth()*TILE_SIZE)
+		{
+			position.x = global::terrain.getWidth()*TILE_SIZE;
+			body.setLinearVelocity(Vector2(0.0f, velocity.y));
+			body.setPosition(position);
+		}
+		
+		if(position.y < 0.0f)
+		{
+			position.y = 0.0f;
+			body.setLinearVelocity(Vector2(velocity.x, 0.0f));
+			body.setPosition(position);
+		}else if(position.y > global::terrain.getHeight()*TILE_SIZE)
+		{
+			position.y = global::terrain.getHeight()*TILE_SIZE;
+			body.setLinearVelocity(Vector2(velocity.x, 0.0f));
+			body.setPosition(position);
+		}
+		
 		skeleton.position = position + Vector2(0.0f, size.y/2.0f);
 		animation.update(Graphics.dt);
 		
-		// Temporary solution until i've found some other way to avoid tiling seams
-		// for example through shaders or texture arrays
-		global::camera.position = Vector2(/*Vector2i*/(body.getPosition() - Vector2(Window.getSize())/(2.0f * global::camera.zoom)));
+		// Update camera
+		global::camera.lookAt(position);
+		
+		// Update audio listener
+		Audio.position = position;
+		
+		footStepsSound.position = getFeetPosition();
+		footStepsSound.gain = 100.0f;
 	}
 	
 	void draw()
@@ -249,7 +270,7 @@ class Player : GameObject, Body
 		
 		// Draw debug health bar
 		float p = (health/float(maxHealth));
-		Shape healthBar(Rect(getPosition().x-size.x/2.0f, getPosition().y-size.y/2.0f-24, size.x*p, 4));
+		Shape healthBar(Rect(body.getPosition().x-size.x/2.0f, body.getPosition().y-size.y/2.0f-24, size.x*p, 4));
 		healthBar.setFillColor(Vector4(1.0f*(1-p), 1.0f*p, 0.0f, 1.0f));
 		healthBar.draw(@global::batches[SCENE]);
 	}

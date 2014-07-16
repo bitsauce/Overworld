@@ -1,5 +1,3 @@
-const int TILE_SIZE = 16;
-
 enum Tile
 {
 	NULL_TILE = 0,
@@ -48,7 +46,6 @@ class Terrain : GameObject
 	int radius = 5; // px
 	int steps = 6; // px
 	float falloff = 10.0f;
-	//Texture @shadowTexture = @Texture(800, 600);
 	Shader @shadowShader = @Shader(":/shaders/terrainshadows.vert", ":/shaders/terrainshadows.frag");
 	
 	Texture @terrainTexture;
@@ -58,15 +55,22 @@ class Terrain : GameObject
 		return radius*steps*2;
 	}
 	
+	void windowResized()
+	{
+		Vector2i size = Window.getSize();
+		@terrainTexture = @Texture(size.x + padding, size.y + padding);
+		shadowShader.setUniform2f("texsize", size.x + padding, size.y + padding);
+	}
+	
 	Terrain(const int width, const int height)
 	{
+		// Update texture object
+		windowResized();
 		
-		@terrainTexture = @Texture(800 + padding, 600 + padding);
-		
+		// Set shader uniforms
 		shadowShader.setUniform1i("radius", radius);
 		shadowShader.setUniform1i("steps", steps);
 		shadowShader.setUniform1f("falloff", falloff);
-		shadowShader.setUniform2f("texsize", 800 + padding, 600 + padding);
 		
 		// Set size
 		this.width = width;
@@ -213,7 +217,7 @@ class Terrain : GameObject
 	void draw(TerrainLayer layer)
 	{
 		Matrix4 mat;
-		mat.translate(-global::camera.position.x + padding/(2.0f * global::camera.zoom), -global::camera.position.y + padding/(2.0f * global::camera.zoom), 0.0f);
+		mat.translate(-global::camera.position.x + padding/(2.0f * global::camera.zoom), -global::camera.position.y + padding/(2.0f * global::camera.zoom), 0.0f);
 		mat.scale(global::camera.zoom);
 		layers[layer].draw(@terrainTexture, mat);
 	}

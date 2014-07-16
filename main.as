@@ -7,6 +7,13 @@ void main()
 {
 	Console.log("Loading game...");
 	
+	// Set fullscreen
+	/*array<Vector2i> @resolutions = Window.getResolutionList();
+	if(resolutions.size != 0) {
+		Window.enableFullscreen();
+		Window.setSize(resolutions[resolutions.size-1]);
+	}*/
+	
 	// Set b2d world scale
 	Box2D.gravity = Vector2(0.0f, 40.0f);
 	Box2D.scale = TILE_SIZE;
@@ -33,18 +40,18 @@ void main()
 	// Spawn in the middle of the world
 	int x = 250/2;
 	int y = global::terrain.gen.getGroundHeight(x);
-	player.setPosition(Vector2(x*TILE_SIZE, y*TILE_SIZE));
+	player.body.setPosition(Vector2(x*TILE_SIZE, y*TILE_SIZE));
 	
 	// Give loadout
 	player.inventory.addItem(@global::items[PICKAXE_IRON]);
 }
 
 void draw()
-{
-	if(Input.getKeyState(KEY_I))
-		global::camera.zoom += 0.1f;
-	else if(Input.getKeyState(KEY_O))
-		global::camera.zoom -= 0.1f;
+{
+	if(Input.getKeyState(KEY_I))
+		global::camera.zoom += 0.1f;
+	else if(Input.getKeyState(KEY_O))
+		global::camera.zoom -= 0.1f;
 	
 	// Create translation matrix
 	global::batches[SCENE].setProjectionMatrix(global::camera.getProjectionMatrix());
@@ -63,7 +70,7 @@ void draw()
 	global::terrain.terrainTexture.clear();
 	global::terrain.draw(TERRAIN_BACKGROUND);
 	
-	Shape @screen = @Shape(Rect(Vector2(-global::terrain.padding/2.0f), Vector2(800, 600) + Vector2(global::terrain.padding)));
+	Shape @screen = @Shape(Rect(Vector2(-global::terrain.padding/2.0f), Vector2(Window.getSize()) + Vector2(global::terrain.padding)));
 	screen.setFillTexture(@global::terrain.terrainTexture);
 	screen.draw(@global::batches[BACKGROUND]);
 	
@@ -89,9 +96,8 @@ void draw()
 	
 	global::batches[FOREGROUND].draw();
 	
-	// Draw debug text to screen
-	global::arial12.setColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-	global::arial12.draw(@global::batches[UITEXT], Vector2(730.0f, 12.0f), "FPS: " + Graphics.FPS);
+	// Draw debug text to screen
+	global::debug.addVariable("FPS", ""+Graphics.FPS);
 	
 	// Draw remaining batches
 	for(int i = FOREGROUND + 1; i < global::batches.size; i++) {
@@ -102,9 +108,9 @@ void draw()
 bool profilerToggled = false;
 
 void update()
-{
-	// Step Box2D
-	Box2D.step(Graphics.dt);
+{
+	// Step Box2D
+	Box2D.step(Graphics.dt);
 	
 	// Update all game objects
 	for(int i = 0; i < global::gameObjects.size; i++) {
@@ -117,5 +123,15 @@ void update()
 		profilerToggled = true;
 	}else{
 		profilerToggled = false;
+	}
+}
+
+void windowResized(int width, int height)
+{
+	Console.log("Window resized: " + width + ", " + height);
+	
+	// Call resize event on all game objects
+	for(int i = 0; i < global::gameObjects.size; i++) {
+		global::gameObjects[i].windowResized();
 	}
 }

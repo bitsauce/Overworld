@@ -83,7 +83,7 @@ class ItemDrop : GameObject, Body
 		
 		for(int i = 0; i < global::players.size; i++)
 		{
-			Vector2 dt = global::players[i].getCenter() - getCenter();
+			Vector2 dt = global::players[i].body.getPosition() - getCenter();
 			if(dt.length() <= ITEM_PICKUP_RADIUS)
 			{
 				Vector2 impulse = dt.normalized() * ITEM_SPEED;

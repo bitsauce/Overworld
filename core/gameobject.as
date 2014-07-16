@@ -13,5 +13,6 @@ class GameObject
 	}
 	
 	void draw() {}
-	void update() {}
+	void update() {}
+	void windowResized() {}
 }

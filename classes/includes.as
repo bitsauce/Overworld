@@ -4,8 +4,9 @@
 #include "player.as"
 #include "inventory.as"
 #include "timeofday.as"
-#include "recipies.as"
-#include "camera.as"
+#include "recipies.as"
+#include "camera.as"
+#include "debug.as"
 
 // Mobs
 #include "mobs/zombie.as"

@@ -11,7 +11,7 @@ class Pickaxe : Item
 	
 	void use(Player @player)
 	{
-		Vector2 dt = Input.position + global::camera.position - player.getCenter();
+		Vector2 dt = Input.position + global::camera.position - player.body.getPosition();
 		if(dt.length() <= ITEM_PICKUP_RADIUS)
 		{
 			Vector2i pos = Vector2i((Input.position + global::camera.position)/TILE_SIZE);

@@ -20,16 +20,17 @@ class TimeOfDay : GameObject
 	int getMinute()
 	{
 		return int(time-getHour()*60.0f);
-	}
-	
-	bool isDay()
-	{
-		return hour >= 6 && hour < 18;
-	}
-	
-	bool isNight()
-	{
-		return !isDay();
+	}
+	
+	bool isDay()
+	{
+		int hour = getHour();
+		return hour >= 6 && hour < 18;
+	}
+	
+	bool isNight()
+	{
+		return !isDay();
 	}
 	
 	void update()
@@ -52,10 +53,10 @@ class TimeOfDay : GameObject
 		{
 			time = 1440.0f;
 		}
-	}
+	}
 	
 	void draw()
-	{
-		global::arial12.draw(@global::batches[UITEXT], Vector2(500.0f, 12.0f), formatInt(getHour(), "0", 2) + ":" + formatInt(getMinute(), "0", 2));
+	{
+		global::debug.addVariable("Time", formatInt(getHour(), "0", 2) + ":" + formatInt(getMinute(), "0", 2));
 	}
 }

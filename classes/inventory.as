@@ -365,8 +365,8 @@ class Inventory : GameObject
 	void createItemDrop(Item @item, int amount)
 	{
 		ItemDrop drop(@item, amount);
-		drop.setPosition(player.getCenter());
-		Vector2 dt = Input.position + global::camera.position - player.getCenter();
+		drop.setPosition(player.body.getPosition());
+		Vector2 dt = Input.position + global::camera.position - player.body.getPosition();
 		if(dt.x >= 0.0f) {
 			drop.body.applyImpulse(Vector2(1.0f, -1.0f)*5000.0f, drop.getCenter());
 		}else{
@@ -420,12 +420,14 @@ class Inventory : GameObject
 			}
 			if(!showBag) break;
 		}
-		
-		for(int y = 0; y < 3; y++) {
-			for(int x = 0; x < 3; x++) {
-				Vector2 position(5 + 34*x, 256 + 34*y);
-				drawSlot(position, craftingSlots[x, y]);
-			}
+		
+		if(showBag) {
+			for(int y = 0; y < 3; y++) {
+				for(int x = 0; x < 3; x++) {
+					Vector2 position(5 + 34*x, Window.getSize().y/2.0f + 34*y);
+					drawSlot(position, craftingSlots[x, y]);
+				}
+			}
 		}
 		
 		if(@hoveredItemSlot != null && @hoveredItemSlot.data != null) {
@@ -437,7 +439,7 @@ class Inventory : GameObject
 			Sprite @icon = @heldSlot.data.icon;
 			icon.setPosition(Input.position + Vector2(-16, -16));
 			icon.draw(global::batches[GUI]);
-			if(heldSlot.data.maxStack > 1) {
+			if(heldSlot.amount > 1) {
 				string str = formatInt(heldSlot.amount, "");
 				global::arial8.draw(global::batches[UITEXT], Input.position + Vector2(4 - global::arial8.getStringWidth(str), -4), str);
 			}

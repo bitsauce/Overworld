@@ -10,7 +10,7 @@ class BlockItem : Item
 	
 	void use(Player @player)
 	{
-		Vector2 dt = Input.position + global::camera.position - player.getCenter();
+		Vector2 dt = Input.position + global::camera.position - player.body.getPosition();
 		if(dt.length() <= ITEM_PICKUP_RADIUS)
 		{
 			TerrainLayer layer = global::terrain.getLayerByTile(tile);

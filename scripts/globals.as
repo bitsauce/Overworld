@@ -13,5 +13,7 @@ namespace global
 	
 	Camera camera;
 	
-	ItemManager items;
+	ItemManager items;
+	
+	DebugTextDrawer debug;
 }
