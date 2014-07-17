@@ -33,9 +33,9 @@ class Player : GameObject
 	int maxHealth = 100;
 	int health = 100;
 	
-	int numGroundContact = 0;
-	
-	AudioSource @footStepsSound = @AudioSource(":/sounds/step.wav");
+	int numGroundContact = 0;
+	
+	array<AudioSource@> walkDirtSounds;
 	
 	Player()
 	{
@@ -76,11 +76,18 @@ class Player : GameObject
 		data.setMix("idle", "jump", 0.2f);
 		
 		// Create spine animation
-		@animation = @spAnimationState(@data);
+		@animation = @spAnimationState(@data);
+		animation.setEventCallback(spEventCallback(@animationEvent));
 		animation.looping = true;
-		changeAnimation("idle");
+		changeAnimation("idle");
 		
-		footStepsSound.looping = true;
+		walkDirtSounds.resize(4);
+		for(int i = 0; i < 4; i++) {
+			@walkDirtSounds[i] = @AudioSource(":/sounds/player/walk_dirt_"+(i+1)+".wav");
+			walkDirtSounds[i].looping = false;
+		}
+		
+		skeleton.texture.setFiltering(LINEAR);
 		
 		// Add to list of players
 		global::players.insertLast(@this);
@@ -152,6 +159,17 @@ class Player : GameObject
 	Vector2 getFeetPosition() const
 	{
 		return body.getPosition() + Vector2(0.0f, size.y/2.0f);
+	}
+	
+	void animationEvent(spEvent @event)
+	{
+		// Play footstep sound
+		if(event.string == "step")
+		{
+			AudioSource @stepSound = @walkDirtSounds[Math.getRandomInt(0, 3)];
+			stepSound.play();
+			stepSound.position = body.getPosition();
+		}
 	}
 	
 	void update()
@@ -184,32 +202,20 @@ class Player : GameObject
 			if(velocity.x >= 0.01f)
 			{
 				changeAnimation("walk");
-				skeleton.flipX = false;
-				
-				if(!footStepsSound.isPlaying()) {
-					footStepsSound.play();
-				}
+				skeleton.flipX = false;
 			}else if(velocity.x <= -0.01f){
 				changeAnimation("walk");
-				skeleton.flipX = true;
-				
-				if(!footStepsSound.isPlaying()) {
-					footStepsSound.play();
-				}
+				skeleton.flipX = true;
 			}else{
 				changeAnimation("idle");
 				velocity.x = 0.0f;
 				body.setLinearVelocity(velocity);
-				animation.timeScale = 1.0f;
-				
-				footStepsSound.stop();
+				animation.timeScale = 1.0f;
 			}
 		}else{
 			animation.looping = false;
 			animation.timeScale = 1.0f;
-			changeAnimation("jump");
-			
-			footStepsSound.stop();
+			changeAnimation("jump");
 		}
 		
 		if(Input.getKeyState(KEY_LMB))
@@ -254,13 +260,10 @@ class Player : GameObject
 		animation.update(Graphics.dt);
 		
 		// Update camera
-		global::camera.lookAt(position);
-		
-		// Update audio listener
-		Audio.position = position;
-		
-		footStepsSound.position = getFeetPosition();
-		footStepsSound.gain = 100.0f;
+		global::camera.lookAt(position);
+		
+		// Update audio listener
+		Audio.position = position;
 	}
 	
 	void draw()
