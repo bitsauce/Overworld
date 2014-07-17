@@ -52,9 +52,9 @@ class Player : GameObject
 		// Create player body
 		@body = @b2Body(def);
 		body.setObject(@this);
-		body.setBeginContactCallback(ContactFunc(@beginContact));
-		body.setEndContactCallback(ContactFunc(@endContact));
-		body.setPreSolveCallback(ContactFunc(@preSolve));
+		body.setBeginContactCallback(b2ContactCallback(@beginContact));
+		body.setEndContactCallback(b2ContactCallback(@endContact));
+		body.setPreSolveCallback(b2ContactCallback(@preSolve));
 		
 		// Create upper and lower circle fixtures
 		b2Fixture @fixture = @body.createFixture(Vector2(0.0f, -size.x/4.0f), size.x/2.0f, mass);

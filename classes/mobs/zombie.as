@@ -33,7 +33,7 @@ class Zombie : GameObject, Body
 		@fix = @body.createFixture(Rect(0, 0, size.x, size.y), 32.0f);
 		
 		body.setObject(@this);
-		body.setPreSolveCallback(ContactFunc(@preSolve));
+		body.setPreSolveCallback(b2ContactCallback(@preSolve));
 	}
 	
 	void remove()

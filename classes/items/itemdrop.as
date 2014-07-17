@@ -25,7 +25,7 @@ class ItemDrop : GameObject, Body
 		def.fixedRotation = true;
 		@body = @b2Body(def);
 		body.setObject(@this);
-		body.setPreSolveCallback(ContactFunc(@preSolve));
+		body.setPreSolveCallback(b2ContactCallback(@preSolve));
 		@fix = @body.createFixture(Rect(0, 0, size.x, size.y), 32.0f);
 	}
 	
