@@ -76,17 +76,17 @@ class Player : GameObject
 		data.setMix("idle", "jump", 0.2f);
 		
 		// Create spine animation
-		@animation = @spAnimationState(@data);
-		animation.setEventCallback(spEventCallback(@animationEvent));
+		@animation = @spAnimationState(@data);
+		@animation.eventCallback = @spEventCallback(@animationEvent);
 		animation.looping = true;
 		changeAnimation("idle");
-		
-		walkDirtSounds.resize(4);
-		for(int i = 0; i < 4; i++) {
-			@walkDirtSounds[i] = @AudioSource(":/sounds/player/walk_dirt_"+(i+1)+".wav");
-			walkDirtSounds[i].looping = false;
-		}
-		
+		
+		walkDirtSounds.resize(4);
+		for(int i = 0; i < 4; i++) {
+			@walkDirtSounds[i] = @AudioSource(":/sounds/player/walk_dirt_"+(i+1)+".wav");
+			walkDirtSounds[i].looping = false;
+		}
+		
 		skeleton.texture.setFiltering(LINEAR);
 		
 		// Add to list of players
@@ -159,17 +159,17 @@ class Player : GameObject
 	Vector2 getFeetPosition() const
 	{
 		return body.getPosition() + Vector2(0.0f, size.y/2.0f);
-	}
-	
-	void animationEvent(spEvent @event)
-	{
-		// Play footstep sound
-		if(event.string == "step")
+	}
+	
+	void animationEvent(spEvent @event)
+	{
+		if(event.string == "step")
 		{
-			AudioSource @stepSound = @walkDirtSounds[Math.getRandomInt(0, 3)];
-			stepSound.play();
-			stepSound.position = body.getPosition();
-		}
+			// Play footstep sound
+			AudioSource @stepSound = @walkDirtSounds[Math.getRandomInt(0, 3)];
+			stepSound.play();
+			stepSound.position = body.getPosition();
+		}
 	}
 	
 	void update()
