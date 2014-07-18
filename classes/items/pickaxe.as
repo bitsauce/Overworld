@@ -29,21 +29,21 @@ class Pickaxe : Item
 					case GRASS_TILE:
 					{
 						ItemDrop item(@global::items[GRASS_BLOCK]);
-						item.setPosition(Vector2(pos)*TILE_SIZE);
+						item.body.setPosition(Vector2(pos)*TILE_SIZE + item.size/2.0f);
 					}
 					break;
 					case TREE_TILE:
 					{
 						ItemDrop item1(@global::items[STICK]);
-						item1.setPosition(Vector2(pos)*TILE_SIZE);
+						item1.body.setPosition(Vector2(pos)*TILE_SIZE + item1.size/2.0f);
 						ItemDrop item2(@global::items[WOOD_BLOCK]);
-						item2.setPosition(Vector2(pos)*TILE_SIZE);
+						item2.body.setPosition(Vector2(pos)*TILE_SIZE + item2.size/2.0f);
 					}
 					break;
 					case LEAF_TILE:
 					{
 						ItemDrop item(@global::items[LEAF_BLOCK]);
-						item.setPosition(Vector2(pos)*TILE_SIZE);
+						item.body.setPosition(Vector2(pos)*TILE_SIZE + item.size/2.0f);
 					}
 					}
 				}

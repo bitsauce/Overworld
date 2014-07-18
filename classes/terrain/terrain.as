@@ -43,23 +43,38 @@ class Terrain : GameObject
 	TerrainGen gen();
 	
 	// Shader uniform
-	int radius = 5; // px
-	int steps = 6; // px
-	float falloff = 10.0f;
+	float radius = 3.0f; // px
+	float falloff = 3.0f;
+	int shadowDownsampleLevel = 16;
+	
 	Shader @shadowShader = @Shader(":/shaders/terrainshadows.vert", ":/shaders/terrainshadows.frag");
+	Batch @shadowBatch = @Batch();
+	Texture @shadowTexture;
 	
 	Texture @terrainTexture;
 	
 	int get_padding() const
 	{
-		return radius*steps*2;
+		return radius*shadowDownsampleLevel*2;
 	}
 	
 	void windowResized()
 	{
 		Vector2i size = Window.getSize();
 		@terrainTexture = @Texture(size.x + padding, size.y + padding);
-		shadowShader.setUniform2f("texsize", size.x + padding, size.y + padding);
+		terrainTexture.setFiltering(LINEAR);
+		
+		Vector2i resolution = size/shadowDownsampleLevel;
+		@shadowTexture = @Texture(resolution.x, resolution.y);
+		shadowTexture.setFiltering(LINEAR);
+		
+		shadowBatch.clear();
+		shadowBatch.setShader(@shadowShader);
+		Shape @downsampledRect = @Shape(Rect(0.0f, 0.0f, resolution.x, resolution.y));
+		downsampledRect.draw(@shadowBatch);
+		
+		shadowShader.setUniform2f("resolution", resolution.x, resolution.y);
+		shadowShader.setSampler2D("texture", @terrainTexture);
 	}
 	
 	Terrain(const int width, const int height)
@@ -68,8 +83,7 @@ class Terrain : GameObject
 		windowResized();
 		
 		// Set shader uniforms
-		shadowShader.setUniform1i("radius", radius);
-		shadowShader.setUniform1i("steps", steps);
+		shadowShader.setUniform1f("radius", radius);
 		shadowShader.setUniform1f("falloff", falloff);
 		
 		// Set size
@@ -224,10 +238,11 @@ class Terrain : GameObject
 	
 	void drawShadows()
 	{
-		global::batches[FOREGROUND].setShader(@shadowShader);
-		shadowShader.setSampler2D("texture", @terrainTexture);
+		shadowTexture.clear();
+		shadowBatch.renderToTexture(@shadowTexture);
+		
 		Shape @screen = @Shape(Rect(Vector2(-padding/2.0f), Vector2(Window.getSize()) + Vector2(padding)));
+		screen.setFillTexture(@shadowTexture);
 		screen.draw(@global::batches[FOREGROUND]);
-		global::batches[FOREGROUND].setShader(null);
 	}
 }

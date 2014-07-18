@@ -164,7 +164,7 @@ class Player : GameObject
 	void animationEvent(spEvent @event)
 	{
 		if(event.string == "step")
-		{
+		{
 			// Play footstep sound
 			AudioSource @stepSound = @walkDirtSounds[Math.getRandomInt(0, 3)];
 			stepSound.play();
@@ -229,6 +229,17 @@ class Player : GameObject
 			pressed = true;
 		}else{
 			pressed = false;
+		}
+		
+		if(Input.getKeyState(KEY_RMB))
+		{
+			for(int i = 0; i < global::interactables.size; i++)
+			{
+				Interactable @interactable = @global::interactables[i];
+				if((interactable.sprite.getPosition() - position).length() <= ITEM_PICKUP_RADIUS && interactable.isHovered()) {
+					interactable.interact(@this);
+				}
+			}
 		}
 		
 		// Clamp to world

@@ -5,14 +5,14 @@
 
 void main()
 {
-	Console.log("Loading game...");
-	
-	// Set fullscreen
-	/*array<Vector2i> @resolutions = Window.getResolutionList();
-	if(resolutions.size != 0) {
-		Window.enableFullscreen();
-		Window.setSize(resolutions[resolutions.size-1]);
-	}*/
+	Console.log("Loading game...");
+	
+	// Set some key binds
+	Input.bind(KEY_ESCAPE, @toggleFullscreen);
+	Input.bind(KEY_P, @toggleProfiler);
+	
+	// Go fullscreen
+	toggleFullscreen();
 	
 	// Set b2d world scale
 	Box2D.gravity = Vector2(0.0f, 40.0f);
@@ -96,7 +96,7 @@ void draw()
 	
 	global::batches[FOREGROUND].draw();
 	
-	// Draw debug text to screen
+	// Draw debug text to screen
 	global::debug.addVariable("FPS", ""+Graphics.FPS);
 	
 	// Draw remaining batches
@@ -104,8 +104,6 @@ void draw()
 		global::batches[i].draw();
 	}
 }
-
-bool profilerToggled = false;
 
 void update()
 {
@@ -115,14 +113,6 @@ void update()
 	// Update all game objects
 	for(int i = 0; i < global::gameObjects.size; i++) {
 		global::gameObjects[i].update();
-	}
-	
-	// Profiler toggle
-	if(Input.getKeyState(KEY_P)) {
-		if(!profilerToggled) Engine.toggleProfiler();
-		profilerToggled = true;
-	}else{
-		profilerToggled = false;
 	}
 }
 

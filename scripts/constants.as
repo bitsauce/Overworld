@@ -20,4 +20,11 @@ enum TerrainLayer
 	TERRAIN_SCENE,
 	TERRAIN_FOREGROUND,
 	TERRAIN_LAYERS_MAX
+}
+
+// Texture enum
+enum TextureId
+{
+	BERRY_BUSH_TEXTURE,
+	MAX_TEXTURES
 }

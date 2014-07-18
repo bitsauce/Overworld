@@ -5,8 +5,10 @@
 #include "inventory.as"
 #include "timeofday.as"
 #include "recipies.as"
-#include "camera.as"
+#include "camera.as"
 #include "debug.as"
+#include "bush.as"
+#include "textures.as"
 
 // Mobs
 #include "mobs/zombie.as"

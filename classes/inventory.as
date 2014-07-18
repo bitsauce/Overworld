@@ -365,12 +365,12 @@ class Inventory : GameObject
 	void createItemDrop(Item @item, int amount)
 	{
 		ItemDrop drop(@item, amount);
-		drop.setPosition(player.body.getPosition());
+		drop.body.setPosition(player.body.getPosition());
 		Vector2 dt = Input.position + global::camera.position - player.body.getPosition();
 		if(dt.x >= 0.0f) {
-			drop.body.applyImpulse(Vector2(1.0f, -1.0f)*5000.0f, drop.getCenter());
+			drop.body.applyImpulse(Vector2(1.0f, -1.0f)*5000.0f, drop.body.getCenter());
 		}else{
-			drop.body.applyImpulse(Vector2(-1.0f,-1.0f)*5000.0f, drop.getCenter());
+			drop.body.applyImpulse(Vector2(-1.0f,-1.0f)*5000.0f, drop.body.getCenter());
 		}
 	}
 	
@@ -420,14 +420,14 @@ class Inventory : GameObject
 			}
 			if(!showBag) break;
 		}
-		
+		
 		if(showBag) {
 			for(int y = 0; y < 3; y++) {
 				for(int x = 0; x < 3; x++) {
 					Vector2 position(5 + 34*x, Window.getSize().y/2.0f + 34*y);
 					drawSlot(position, craftingSlots[x, y]);
 				}
-			}
+			}
 		}
 		
 		if(@hoveredItemSlot != null && @hoveredItemSlot.data != null) {

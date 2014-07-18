@@ -1,29 +1,26 @@
 varying vec2 texcoord;
 
 uniform sampler2D texture;
-uniform int radius;
-uniform int steps;
+uniform float radius;
 uniform float falloff;
-uniform vec2 texsize;
+uniform vec2 resolution;
 
 void main()
 {
 	// Setup loop vars
-	float vx = float(steps)/texsize.x;
-	float vy = float(steps)/texsize.y;
-	
+	vec2 dtvec = 1.0f/resolution;
 	float acc = 0.0;
 	float i = 0.0;
 	
 	// Calculate shadow strength
-	for(int y = -radius; y <= radius; y++)
+	for(float y = -radius; y <= radius; y += 1.0f)
 	{
-		for(int x = -radius; x <= radius; x++)
+		for(float x = -radius; x <= radius; x += 1.0f)
 		{
-			float dist = sqrt(float(x*x)+float(y*y));
-			if(dist < float(radius))
+			float dist = sqrt(x*x+y*y);
+			if(dist < radius)
 			{
-				acc += texture2D(texture, vec2(texcoord.x+(float(x)*vx), texcoord.y+(float(y)*vy))).a;
+				acc += texture2D(texture, texcoord + dtvec*vec2(x, y)).a;
 				i += 1.0;
 			}
 		}
