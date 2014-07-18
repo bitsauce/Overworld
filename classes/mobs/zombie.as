@@ -14,7 +14,7 @@ Player @getClosestPlayer(Vector2 position)
 	return closestPlayer;
 }
 
-class Zombie : GameObject, Body
+class Zombie : GameObject
 {
 	Vector2 size = Vector2(24.0f, 42.0f);
 	float moveSpeed = 7.0f;
@@ -40,31 +40,6 @@ class Zombie : GameObject, Body
 	{
 		body.destroy();
 		GameObject::remove();
-	}
-	
-	Vector2 getPosition()
-	{
-		return body.getPosition();
-	}
-	
-	void setPosition(Vector2 position)
-	{
-		body.setTransform(position, 0.0f);
-	}
-	
-	Vector2 getSize()
-	{
-		return size;
-	}
-	
-	void setSize(Vector2)
-	{
-		// NO
-	}
-	
-	Vector2 getCenter()
-	{
-		return getPosition() + getSize()/2.0f;
 	}
 	
 	void preSolve(b2Contact @contact)
@@ -94,20 +69,20 @@ class Zombie : GameObject, Body
 	
 	void update()
 	{
-		Player @target = @getClosestPlayer(getCenter());
-		Vector2 dt = target.body.getPosition() - getCenter();
+		Player @target = @getClosestPlayer(body.getCenter());
+		Vector2 dt = target.body.getPosition() - body.getCenter();
 		
 		if(dt.x < 0.0f)
-			body.applyImpulse(Vector2(-1000.0f, 0.0f), getCenter());
+			body.applyImpulse(Vector2(-1000.0f, 0.0f), body.getCenter());
 		if(dt.x > 0.0f)
-			body.applyImpulse(Vector2(1000.0f, 0.0f), getCenter());
+			body.applyImpulse(Vector2(1000.0f, 0.0f), body.getCenter());
 		
-		Vector2i tile = Vector2i((getPosition()+Vector2(-8.0f, size.y))/TILE_SIZE);
+		Vector2i tile = Vector2i((body.getPosition()+Vector2(-8.0f, size.y))/TILE_SIZE);
 		if(global::terrain.isTileAt(tile.x, tile.y))
-			body.applyImpulse(Vector2(0.0f, -1000.0f), getCenter());
-		tile = Vector2i((getPosition()+Vector2(size.x+8.0f, size.y))/TILE_SIZE);
+			body.applyImpulse(Vector2(0.0f, -1000.0f), body.getCenter());
+		tile = Vector2i((body.getPosition()+Vector2(size.x+8.0f, size.y))/TILE_SIZE);
 		if(global::terrain.isTileAt(tile.x, tile.y))
-			body.applyImpulse(Vector2(0.0f, -1000.0f), getCenter());
+			body.applyImpulse(Vector2(0.0f, -1000.0f), body.getCenter());
 		
 		Vector2 vel = body.getLinearVelocity();
 		if(vel.x >= maxMovementSpeed) {
@@ -120,7 +95,7 @@ class Zombie : GameObject, Body
 	
 	void draw()
 	{
-		Shape @shape = Shape(Rect(getPosition(), size));
+		Shape @shape = Shape(Rect(body.getPosition(), size));
 		shape.setFillColor(Vector4(0.0f, 1.0f, 0.0f, 1.0f));
 		shape.draw(global::batches[global::SCENE]);
 	}

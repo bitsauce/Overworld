@@ -1,12 +1,3 @@
-interface Body
-{
-	Vector2 getPosition();
-	void setPosition(Vector2);
-	Vector2 getSize();
-	void setSize(Vector2);
-	Vector2 getCenter();
-}
-
 class Player : GameObject
 {
 	Vector2 size = Vector2(28.0f, 44.0f);
@@ -229,17 +220,17 @@ class Player : GameObject
 			pressed = true;
 		}else{
 			pressed = false;
-		}
-		
-		if(Input.getKeyState(KEY_RMB))
-		{
-			for(int i = 0; i < global::interactables.size; i++)
-			{
-				Interactable @interactable = @global::interactables[i];
-				if((interactable.sprite.getPosition() - position).length() <= ITEM_PICKUP_RADIUS && interactable.isHovered()) {
-					interactable.interact(@this);
-				}
-			}
+		}
+		
+		if(Input.getKeyState(KEY_RMB))
+		{
+			for(int i = 0; i < global::interactables.size; i++)
+			{
+				Interactable @interactable = @global::interactables[i];
+				if((interactable.sprite.getPosition() - position).length() <= ITEM_PICKUP_RADIUS && interactable.isHovered()) {
+					interactable.interact(@this);
+				}
+			}
 		}
 		
 		// Clamp to world

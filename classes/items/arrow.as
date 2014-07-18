@@ -13,8 +13,8 @@ class ArrowItem : Item
 			Vector2 dt = Input.position + global::camera.position - player.body.getPosition();
 			
 			Projectile p();
-			p.setPosition(player.body.getPosition());
-			p.body.applyImpulse(dt.normalized() * 5000, p.getPosition());
+			p.body.setPosition(player.body.getPosition());
+			p.body.applyImpulse(dt.normalized() * 5000, p.body.getPosition());
 		}
 	}
 }
