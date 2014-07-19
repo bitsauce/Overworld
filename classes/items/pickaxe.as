@@ -32,7 +32,7 @@ class Pickaxe : Item
 						item.body.setPosition(Vector2(pos)*TILE_SIZE + item.size/2.0f);
 					}
 					break;
-					case TREE_TILE:
+					/*case TREE_TILE:
 					{
 						ItemDrop item1(@global::items[STICK]);
 						item1.body.setPosition(Vector2(pos)*TILE_SIZE + item1.size/2.0f);
@@ -44,7 +44,7 @@ class Pickaxe : Item
 					{
 						ItemDrop item(@global::items[LEAF_BLOCK]);
 						item.body.setPosition(Vector2(pos)*TILE_SIZE + item.size/2.0f);
-					}
+					}*/
 					}
 				}
 			}else{

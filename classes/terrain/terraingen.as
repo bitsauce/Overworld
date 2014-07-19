@@ -29,7 +29,7 @@ class TerrainGen
 		}
 		
 		// Add trees
-		for(int x = 5; x < width; x += Math.getRandomInt(10, 20))
+		/*for(int x = 5; x < width; x += Math.getRandomInt(10, 20))
 		{
 			int ground = getGroundHeight(x);
 			int treeHeight = Math.getRandomInt(10, 15);
@@ -47,29 +47,29 @@ class TerrainGen
 					terrain.addTile(x + i, ground + j - treeHeight + 3, LEAF_TILE);
 				}
 			}
-		}
-		
-		// Add bushes
-		int x = 0;
-		do {
-			// Get patch x position
-			x += Math.getRandomInt(50, 120);
-			
-			// Place bush patch
-			int bushCount = Math.getRandomInt(2, 4);
-			for(int i = 0; i < width && bushCount > 0;)
-			{
-				if(isFlatStretch(x+i, 4))
-				{
-					Bush bush();
-					int y = getGroundHeight(x+i)-1;
-					bush.sprite.setPosition(Vector2((x+i)*TILE_SIZE, y*TILE_SIZE));
-					bushCount--;
-					i += Math.getRandomInt(4, 8);
-				}else{
-					i++;
-				}
-			}
+		}*/
+		
+		// Add bushes
+		int x = 0;
+		do {
+			// Get patch x position
+			x += Math.getRandomInt(50, 120);
+			
+			// Place bush patch
+			int bushCount = Math.getRandomInt(2, 4);
+			for(int i = 0; i < width && bushCount > 0;)
+			{
+				if(isFlatStretch(x+i, 4))
+				{
+					Bush bush();
+					int y = getGroundHeight(x+i)-1;
+					bush.sprite.setPosition(Vector2((x+i)*TILE_SIZE, y*TILE_SIZE - 4));
+					bushCount--;
+					i += Math.getRandomInt(4, 8);
+				}else{
+					i++;
+				}
+			}
 		} while(x < width);
 	}
 	
@@ -83,16 +83,16 @@ class TerrainGen
 			}
 		}
 		return -1;
-	}
-	
-	bool isFlatStretch(int start, int size)
-	{
-		int height = getGroundHeight(start);
-		for(int x = start+1; x < start+size; x++)
-		{
-			if(getGroundHeight(x) != height)
-				return false;
-		}
-		return true;
+	}
+	
+	bool isFlatStretch(int start, int size)
+	{
+		int height = getGroundHeight(start);
+		for(int x = start+1; x < start+size; x++)
+		{
+			if(getGroundHeight(x) != height)
+				return false;
+		}
+		return true;
 	}
 }

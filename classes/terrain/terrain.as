@@ -1,29 +1,3 @@
-enum Tile
-{
-	NULL_TILE = 0,
-	
-	// SCENE_TILES BEGIN
-	GRASS_TILE,
-	STONE_TILE,
-	// SCENE_TILES END
-	
-	SCENE_TILES,
-	
-	// BACKGROUND_TILES BEGIN
-	TREE_TILE,
-	// BACKGROUND_TILES END
-	
-	BACKGROUND_TILES,
-	
-	// FOREGROUND_TILES BEGIN
-	LEAF_TILE,
-	// FOREGROUND_TILES END
-	
-	FOREGROUND_TILES,
-	
-	MAX_TILES
-}
-
 bool isValidTile(Tile tile)
 {
 	return tile != SCENE_TILES && tile != BACKGROUND_TILES &&
@@ -92,7 +66,7 @@ class Terrain : GameObject
 		
 		// Load tile textures
 		array<Texture@> tileTextures(MAX_TILES);
-		@tileTextures[GRASS_TILE]	=	@Texture(":/sprites/tiles/grass_tile.png");
+		@tileTextures[GRASS_TILE]	=	@Texture(":/sprites/tiles/grass_tile_test.png");
 		@tileTextures[STONE_TILE]	=	@Texture(":/sprites/tiles/stone_tile.png");
 		@tileTextures[LEAF_TILE]	=	@Texture(":/sprites/tiles/leaf_tile.png");
 		@tileTextures[TREE_TILE]	=	@Texture(":/sprites/tiles/tree_tile.png");
@@ -136,7 +110,12 @@ class Terrain : GameObject
 			layers[i].setInitialized(true);
 		
 		// Set global terrain handle
-		@global::terrain = @this;
+		@global::terrain = @this;
+		
+		// NOTE TO SELF: The vertex count can be redused to 424320
+		// on-screen vertices by using texture atlases. This
+		// equates to 15.28 MB of VRAM.
+		Console.log("Vertex count: " + width*height*13*4*4 );
 	}
 	
 	// Getters/setters/validators
@@ -206,7 +185,7 @@ class Terrain : GameObject
 		
 		// Create a fixture
 		if(layer == TERRAIN_SCENE && layers[layer].isValid(x, y) && @fixtures[x, y] == null) {
-			b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE), 0.0f);
+			b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f, TILE_SIZE*2, TILE_SIZE*2), 0.0f);
 			fixture.setFriction(0.5f);
 			@fixtures[x, y] = @fixture;
 		}
