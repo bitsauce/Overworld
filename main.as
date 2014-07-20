@@ -5,13 +5,13 @@
 
 void main()
 {
-	Console.log("Loading game...");
-	
-	// Set some key binds
-	Input.bind(KEY_ESCAPE, @toggleFullscreen);
-	Input.bind(KEY_P, @toggleProfiler);
-	
-	// Go fullscreen
+	Console.log("Loading game...");
+	
+	// Set some key binds
+	Input.bind(KEY_ESCAPE, @toggleFullscreen);
+	Input.bind(KEY_P, @toggleProfiler);
+	
+	// Go fullscreen
 	toggleFullscreen();
 	
 	// Set b2d world scale
@@ -43,7 +43,8 @@ void main()
 	player.body.setPosition(Vector2(x*TILE_SIZE, y*TILE_SIZE));
 	
 	// Give loadout
-	player.inventory.addItem(@global::items[PICKAXE_IRON]);
+	player.inventory.addItem(@global::items[PICKAXE_IRON]);
+	player.inventory.addItem(@global::items[STONE_BLOCK], 50);
 }
 
 void draw()

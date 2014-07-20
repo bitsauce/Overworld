@@ -67,9 +67,9 @@ class Terrain : GameObject
 		// Load tile textures
 		array<Texture@> tileTextures(MAX_TILES);
 		@tileTextures[GRASS_TILE]	=	@Texture(":/sprites/tiles/grass_tile_test.png");
-		@tileTextures[STONE_TILE]	=	@Texture(":/sprites/tiles/stone_tile.png");
-		@tileTextures[LEAF_TILE]	=	@Texture(":/sprites/tiles/leaf_tile.png");
-		@tileTextures[TREE_TILE]	=	@Texture(":/sprites/tiles/tree_tile.png");
+		@tileTextures[STONE_TILE]	=	@Texture(":/sprites/tiles/stone_tile_test.png");
+		//@tileTextures[LEAF_TILE]	=	@Texture(":/sprites/tiles/leaf_tile.png");
+		//@tileTextures[TREE_TILE]	=	@Texture(":/sprites/tiles/tree_tile.png");
 		
 		// Create terrain layers
 		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
@@ -110,12 +110,12 @@ class Terrain : GameObject
 			layers[i].setInitialized(true);
 		
 		// Set global terrain handle
-		@global::terrain = @this;
-		
-		// NOTE TO SELF: The vertex count can be redused to 424320
-		// on-screen vertices by using texture atlases. This
-		// equates to 15.28 MB of VRAM.
-		Console.log("Vertex count: " + width*height*13*4*4 );
+		@global::terrain = @this;
+		
+		// NOTE TO SELF: The vertex count can be redused to 424320
+		// on-screen vertices by using texture atlases. This
+		// equates to 15.28 MB of VRAM. Formulae: num_tiles * quads_per_tile * verts_per_quad * floats_per_vert * float_to_bytes / size_of_megabyte
+		Console.log("Vertex count: " + width*height*13*4 + " (" + (width*height*13*4*8*4.0f/1048576.0f) + " MB)");
 	}
 	
 	// Getters/setters/validators

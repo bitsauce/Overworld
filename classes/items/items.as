@@ -1,11 +1,11 @@
-// ADDING ITEMS:
-// 1) Create an ID for the item by adding it to the ItemID enum. (for example DRAGON_TOOTH_BLADE)
-// 2) Modify ITEM_STRINGS so that the item name and description is in the correct spot
-//    relative to it's ItemID. (for example { "Dragon Tooth Blade", "Taste my steel!" })
-// 3) Create a new class that inherits the Item class, and implement its spesific behaviour
-//    in the function(s) 'void use(Player @player)'.
-// 4) Add the item to the ItemManager (see its constructor) using you're newly created item-class
-
+// ADDING ITEMS:
+// 1) Create an ID for the item by adding it to the ItemID enum. (for example DRAGON_TOOTH_BLADE)
+// 2) Modify ITEM_STRINGS so that the item name and description is in the correct spot
+//    relative to it's ItemID. (for example { "Dragon Tooth Blade", "Taste my steel!" })
+// 3) Create a new class that inherits the Item class, and implement its spesific behaviour
+//    in the function(s) 'void use(Player @player)'.
+// 4) Add the item to the ItemManager (see its constructor) using you're newly created item-class
+
 enum ItemID
 {
 	NULL_ITEM,
@@ -43,10 +43,10 @@ grid<string> ITEM_STRINGS = {
 
 array<Sprite@> ITEM_ICONS = {
 	null,
-	@Sprite(@TextureRegion(@Texture(":/sprites/tiles/grass_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)),
-	@Sprite(@TextureRegion(@Texture(":/sprites/tiles/tree_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)),
-	@Sprite(@TextureRegion(@Texture(":/sprites/tiles/leaf_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)),
-	@Sprite(@TextureRegion(@Texture(":/sprites/tiles/stone_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)),
+	@Sprite(TextureRegion(@Texture(":/sprites/tiles/grass_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)),
+	@Sprite(TextureRegion(@Texture(":/sprites/tiles/tree_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)),
+	@Sprite(TextureRegion(@Texture(":/sprites/tiles/leaf_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)),
+	@Sprite(TextureRegion(@Texture(":/sprites/tiles/stone_tile.png"), 1.0f/21.0f * 16, 0.0f, 1.0f/21.0f * (16+1), 1.0f)),
 	@Sprite(@Texture(":/sprites/pickaxes/pickaxe_iron_icon.png")),
 	@Sprite(@Texture(":/sprites/weapons/shortsword_wooden_item.png")),
 	@Sprite(@Texture(":/sprites/items/stick.png")),
@@ -82,12 +82,11 @@ class ItemManager
 		addItem(GRASS_BLOCK, @BlockItem(GRASS_BLOCK, GRASS_TILE));
 		addItem(WOOD_BLOCK, @BlockItem(WOOD_BLOCK, GRASS_TILE/*TREE_TILE*/));
 		addItem(LEAF_BLOCK, @BlockItem(LEAF_BLOCK, GRASS_TILE/*LEAF_TILE*/));
-		addItem(STONE_BLOCK, @BlockItem(STONE_BLOCK, GRASS_TILE/*STONE_TILE*/));
+		addItem(STONE_BLOCK, @BlockItem(STONE_BLOCK, STONE_TILE));
 		addItem(PICKAXE_IRON, @Pickaxe(PICKAXE_IRON));
 		addItem(SHORTSWORD_WOODEN, @ArrowItem(SHORTSWORD_WOODEN));
 		addItem(STICK, @ArrowItem(STICK));
 		addItem(BERRIES, @HealingPotion(BERRIES));
-		//@global::items = @this;
 	}
 	
 	private void addItem(ItemID id, Item @item)

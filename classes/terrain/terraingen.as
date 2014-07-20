@@ -59,11 +59,11 @@ class TerrainGen
 			int bushCount = Math.getRandomInt(2, 4);
 			for(int i = 0; i < width && bushCount > 0;)
 			{
-				if(isFlatStretch(x+i, 4))
+				if(isFlatStretch(x+i, 6))
 				{
 					Bush bush();
-					int y = getGroundHeight(x+i)-1;
-					bush.sprite.setPosition(Vector2((x+i)*TILE_SIZE, y*TILE_SIZE - 4));
+					int y = getGroundHeight(x+i+1)-1;
+					bush.sprite.setPosition(Vector2((x+i+1)*TILE_SIZE, y*TILE_SIZE - 4));
 					bushCount--;
 					i += Math.getRandomInt(4, 8);
 				}else{
