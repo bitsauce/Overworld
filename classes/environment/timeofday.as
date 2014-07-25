@@ -4,7 +4,7 @@ class TimeOfDay : GameObject
 		
 	TimeOfDay()
 	{
-		@global::timeOfDay = @this;
+		//@global::timeOfDay = @this;
 	}
 	
 	float getTime()
@@ -56,7 +56,7 @@ class TimeOfDay : GameObject
 	}
 	
 	void draw()
-	{
+	{
 		global::debug.addVariable("Time", formatInt(getHour(), "0", 2) + ":" + formatInt(getMinute(), "0", 2));
 	}
 }

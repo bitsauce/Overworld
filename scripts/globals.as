@@ -13,12 +13,16 @@ namespace global
 	array<Batch@> batches(LAYERS_MAX);
 	
 	// Global objects
-	TimeOfDay @timeOfDay;
-	Terrain @terrain;
+	TimeOfDay timeOfDay;
+	Terrain terrain;
 	
 	Camera camera;
 	ItemManager items;
 	DebugTextDrawer debug;
-	TextureManager textures;
+	TextureManager textures;
 	Spawner spawner;
+	
+	// Menues
+	MainMenu mainMenu;
+	WorldSelectMenu worldSelectMenu;
 }
