@@ -63,10 +63,14 @@ class TileGrid
 				}
 			}
 		}
-	}
+		}
 		
 		// Make it static
 		batch.makeStatic();
+	}
+	
+	void init(const int width, const int height, array<Texture@> textures)
+	{
 	}
 	
 	bool isValid(const int x, const int y)

@@ -23,6 +23,7 @@ namespace global
 	Spawner spawner;
 	
 	// Menues
-	MainMenu mainMenu;
+	MainMenu mainMenu;
 	WorldSelectMenu worldSelectMenu;
+	GameScene gameScene;
 }

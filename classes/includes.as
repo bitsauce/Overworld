@@ -7,9 +7,13 @@
 #include "debug.as"
 #include "textures.as"
 
-// Menues
-#include "menues/mainmenu.as"
-#include "menues/worldselect.as"
+// Scenes
+#include "scenes/mainmenu.as"
+#include "scenes/worldselect.as"
+#include "scenes/game.as"
+
+// Gui
+#include "gui/button.as"
 
 // Environment
 #include "environment/background.as"

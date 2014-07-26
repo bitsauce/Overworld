@@ -27,6 +27,8 @@ class Terrain : GameObject
 	
 	Texture @terrainTexture;
 	
+	IniFile @worldFile;
+	
 	int get_padding() const
 	{
 		return radius*shadowDownsampleLevel*2;
@@ -59,66 +61,138 @@ class Terrain : GameObject
 		// Set shader uniforms
 		shadowShader.setUniform1f("radius", radius);
 		shadowShader.setUniform1f("falloff", falloff);
+	}
+	
+	~Terrain()
+	{
+		//save();
+	}
+	
+	void save()
+	{
+		if(@worldFile == null) return;
+		Console.log("Saving terrain...");
+		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
+		{
+			string tileString;
+			for(int y = 0; y < height; y++)
+			{
+				for(int x = 0; x < width; x++)
+				{
+					tileString += formatInt(getTileAt(x, y, TerrainLayer(i)), "0", 3);
+				}
+			}
+			if(i == TERRAIN_BACKGROUND) worldFile.setValue("terrain", "background", tileString);
+			else if(i == TERRAIN_SCENE) worldFile.setValue("terrain", "scene", tileString);
+			else if(i == TERRAIN_FOREGROUND) worldFile.setValue("terrain", "foreground", tileString);
+		}
+		Console.log("Terrain saved");
+		worldFile.save();
+	}
+	
+	private void init(int width, int height)
+	{
+		// Set size
+		this.width = width;
+		this.height = height;
+		
+		Console.log("Init terrain of size: " + width + ", " + height);
+		
+		// Load tile textures
+		array<Texture@> tileTextures(MAX_TILES);
+		@tileTextures[GRASS_TILE]	=	@Texture(":/sprites/tiles/grass_tile_test.png");
+		@tileTextures[STONE_TILE]	=	@Texture(":/sprites/tiles/stone_tile_test.png");
+		//@tileTextures[LEAF_TILE]	=	@Texture(":/sprites/tiles/leaf_tile.png");
+		//@tileTextures[TREE_TILE]	=	@Texture(":/sprites/tiles/tree_tile.png");
+		
+		// Create terrain layers
+		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
+		{
+			int start = 0;
+			int end = 0;
+			switch(i) {
+			case TERRAIN_SCENE: start = NULL_TILE + 1; end = SCENE_TILES; break;
+			case TERRAIN_BACKGROUND: start = SCENE_TILES + 1; end = BACKGROUND_TILES; break;
+			case TERRAIN_FOREGROUND: start = BACKGROUND_TILES + 1; end = FOREGROUND_TILES; break;
+			}
+			
+			array<Texture@> textures;
+			for(; start < end; start++) {
+				textures.insertLast(@tileTextures[start]);
+			}
+			
+			@layers[i] = @TileGrid(width, height, textures);
+		}
+		
+		// Resize fixture grid
+		fixtures.resize(width, height);
+		
+		// Setup b2Body
+		b2BodyDef def;
+		def.type = b2_staticBody;
+		def.position.set(0.0f, 0.0f);
+		def.allowSleep = true;
+		
+		@body = b2Body(def);
+		body.setObject(@this);
 		
 		// NOTE TO SELF: The vertex count can be redused to 424320
 		// on-screen vertices by using texture atlases. This
 		// equates to 15.28 MB of VRAM. Formulae: num_tiles * quads_per_tile * verts_per_quad * floats_per_vert * float_to_bytes / size_of_megabyte
-		Console.log("Vertex count: " + width*height*13*4 + " (" + (width*height*13*4*8*4.0f/1048576.0f) + " MB)");
-	}
-	
-	void load(string worldFile)
-	{
-		IniFile @file = @IniFile(worldFile);
-		
-		// Set size
-		this.width = parseInt(file.getValue("world", "width"));
-		this.height = parseInt(file.getValue("world", "height"));
-		
-		// Load tile textures
-		array<Texture@> tileTextures(MAX_TILES);
-		@tileTextures[GRASS_TILE]	=	@Texture(":/sprites/tiles/grass_tile_test.png");
-		@tileTextures[STONE_TILE]	=	@Texture(":/sprites/tiles/stone_tile_test.png");
-		//@tileTextures[LEAF_TILE]	=	@Texture(":/sprites/tiles/leaf_tile.png");
-		//@tileTextures[TREE_TILE]	=	@Texture(":/sprites/tiles/tree_tile.png");
-		
-		// Create terrain layers
-		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
-		{
-			int start = 0;
-			int end = 0;
-			switch(i) {
-			case TERRAIN_SCENE: start = NULL_TILE + 1; end = SCENE_TILES; break;
-			case TERRAIN_BACKGROUND: start = SCENE_TILES + 1; end = BACKGROUND_TILES; break;
-			case TERRAIN_FOREGROUND: start = BACKGROUND_TILES + 1; end = FOREGROUND_TILES; break;
-			}
-			
-			array<Texture@> textures;
-			for(; start < end; start++) {
-				textures.insertLast(@tileTextures[start]);
-			}
-			
-			@layers[i] = @TileGrid(width, height, textures);
-		}
-		
-		// Resize fixture grid
-		fixtures.resize(width, height);
-		
-		// Setup b2Body
-		b2BodyDef def;
-		def.type = b2_staticBody;
-		def.position.set(0.0f, 0.0f);
-		def.allowSleep = true;
-		
-		@body = b2Body(def);
-		body.setObject(@this);
-		
-		// Generate a terrain
-		Console.log("Generating world...");
-		gen.generate(@this);
-		
-		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
-			layers[i].setInitialized(true);
-		}
+		Console.log("Terrain vertex count: " + width*height*13*4 + " (" + (width*height*13*4*8*4.0f/1048576.0f) + " MB)");
+	}
+	
+	void load(IniFile @worldFile)
+	{
+		// Set world file
+		@this.worldFile = @worldFile;
+		
+		// Initialize terrain
+		init(parseInt(worldFile.getValue("world", "width")), parseInt(worldFile.getValue("world", "height")));
+		
+		// Load tiles from file
+		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
+		{
+			string tileString;
+			if(i == TERRAIN_BACKGROUND) tileString = worldFile.getValue("terrain", "background");
+			else if(i == TERRAIN_SCENE) tileString = worldFile.getValue("terrain", "scene");
+			else if(i == TERRAIN_FOREGROUND) tileString = worldFile.getValue("terrain", "foreground");
+			for(int y = 0; y < height; y++)
+			{
+				for(int x = 0; x < width; x++)
+				{
+					int j = (x + y*width) * 3;
+					addTile(x, y, Tile(parseInt(tileString.substr(j, 3))));
+				}
+			}
+		}
+		
+		// Set layers as initialized
+		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
+			layers[i].setInitialized(true);
+		}
+	}
+	
+	void generate(int width, int height, IniFile @worldFile)
+	{
+		// Set world file
+		@this.worldFile = @worldFile;
+		
+		worldFile.setValue("world", "width", formatInt(width, ""));
+		worldFile.setValue("world", "height", formatInt(height, ""));
+		
+		// Initialize terrain
+		init(width, height);
+		
+		// Generate a terrain
+		Console.log("Generating world...");
+		gen.generate(@this);
+		save();
+		
+		// Set layers as initialized
+		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
+			layers[i].setInitialized(true);
+		}
 	}
 	
 	// Getters/setters/validators
@@ -183,6 +257,10 @@ class Terrain : GameObject
 	// Terrain modification
 	void addTile(const int x, const int y, Tile tile)
 	{
+		// Check for null tile
+		if(tile == NULL_TILE)
+			return;
+		
 		// Get terrain layer
 		TerrainLayer layer = getLayerByTile(tile);
 		
