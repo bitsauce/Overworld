@@ -1,9 +1,3 @@
-enum MouseState
-{
-	MOUSE_PRESSED = 1,
-	MOUSE_HOVERED = 2
-}
-
 class MainMenu : Scene
 {
 	private Batch @batch = @Batch();
@@ -21,10 +15,10 @@ class MainMenu : Scene
 		Button @multiPlayerButton = @Button("Multiplayer", @exit, null);
 		Button @optionButton = @Button("Options", @exit, null);
 		Button @quitButton = @Button("Quit", @exit, null);
-		
-		singlePlayerButton.setSize(Vector2(0.2f, 0.05f));
-		multiPlayerButton.setSize(Vector2(0.2f, 0.05f));
-		optionButton.setSize(Vector2(0.2f, 0.05f));
+		
+		singlePlayerButton.setSize(Vector2(0.2f, 0.05f));
+		multiPlayerButton.setSize(Vector2(0.2f, 0.05f));
+		optionButton.setSize(Vector2(0.2f, 0.05f));
 		quitButton.setSize(Vector2(0.2f, 0.05f));
 		
 		singlePlayerButton.anchor = CENTER;
@@ -45,8 +39,8 @@ class MainMenu : Scene
 	
 	void hide()
 	{
-		Console.log("MainMenu: Hide");
-		
+		Console.log("MainMenu: Hide");
+		
 		uiObjects.clear();
 	}
 	

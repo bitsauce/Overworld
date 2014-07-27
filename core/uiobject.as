@@ -13,19 +13,27 @@ enum Anchor
 	TOP_LEFT = TOP | LEFT,
 	TOP_RIGHT = TOP | RIGHT,
 	BOTTOM_LEFT = BOTTOM | LEFT,
-	BOTTOM_RIGHT = BOTTOM | RIGHT,
-	
-	TOP_CENTER = TOP | VERTICAL,
-	LEFT_CENTER = LEFT | HORIZONTAL,
-	RIGHT_CENTER = RIGHT | VERTICAL,
+	BOTTOM_RIGHT = BOTTOM | RIGHT,
+	
+	TOP_CENTER = TOP | VERTICAL,
+	LEFT_CENTER = LEFT | HORIZONTAL,
+	RIGHT_CENTER = RIGHT | VERTICAL,
 	BOTTOM_CENTER = BOTTOM | HORIZONTAL
+}
+
+enum UiState
+{
+	UI_PRESSED = 1,
+	UI_HOVERED = 2,
+	UI_ACTIVE = 4
 }
 
 class UiObject
 {
 	// Rect in screen relative coordinates
 	private Rect rect;
-	private UiObject @parent;
+	private UiObject @parent;
+	private uint state;
 	uint anchor;
 		
 	UiObject(UiObject @parent)
@@ -34,11 +42,96 @@ class UiObject
 			@parent = @uiRoot;
 		}
 		@this.parent = @parent;
-		this.anchor = TOP_LEFT;
+		this.anchor = TOP_LEFT;
+		this.state = 0;
+	}
+	
+	void press()
+	{
+		state |= UI_PRESSED;
+	}
+	
+	void release()
+	{
+		state &= ~UI_PRESSED;
+	}
+	
+	bool isPressed()
+	{
+		return state & UI_PRESSED != 0;
+	}
+	
+	void hover()
+	{
+		state |= UI_HOVERED;
+	}
+	
+	void unhover()
+	{
+		state &= ~UI_HOVERED;
+	}
+	
+	bool isHovered()
+	{
+		return state & UI_HOVERED != 0;
+	}
+	
+	void activate()
+	{
+		state |= UI_ACTIVE;
+	}
+	
+	void deactivate()
+	{
+		state &= ~UI_ACTIVE;
+	}
+	
+	bool isActive()
+	{
+		return state & UI_ACTIVE != 0;
+	}
+	
+	void click()
+	{
 	}
 	
-	void update() {}
-	void draw(Batch @batch) {}
+	void update()
+	{
+		Vector2 position = getPosition(true)*Vector2(Window.getSize());
+		Vector2 size = getSize(true)*Vector2(Window.getSize());
+		
+		if(Rect(position, size).contains(Input.position))
+		{
+			hover();
+		}else{
+			unhover();
+		}
+		
+		if(!isPressed())
+		{
+			if(isHovered() && Input.getKeyState(KEY_LMB))
+			{
+				press();
+			}
+		}else
+		{
+			if(!Input.getKeyState(KEY_LMB))
+			{
+				if(isHovered())
+				{
+					click();
+					activate();
+				}else{
+					deactivate();
+				}
+				release();
+			}
+		}
+	}
+		
+	void draw(Batch @batch)
+	{
+	}
 	
 	Rect getRect(const bool recursive)
 	{

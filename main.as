@@ -9,8 +9,8 @@ void main()
 	Input.bind(KEY_ESCAPE, @toggleFullscreen);
 	Input.bind(KEY_P, @toggleProfiler);
 	Input.bind(KEY_I, @zoomIn);
-	Input.bind(KEY_O, @zoomOut);
-	Input.bind(KEY_BACKSPACE, @back);
+	Input.bind(KEY_O, @zoomOut);
+	//Input.bind(KEY_BACKSPACE, @back);
 	
 	// Go fullscreen
 	//toggleFullscreen();
@@ -32,7 +32,7 @@ void draw()
 }
 
 void update()
-{
+{
 	exit();
 }
 

@@ -9,11 +9,13 @@
 
 // Scenes
 #include "scenes/mainmenu.as"
-#include "scenes/worldselect.as"
-#include "scenes/game.as"
-
-// Gui
-#include "gui/button.as"
+#include "scenes/worldselect.as"
+#include "scenes/createworld.as"
+#include "scenes/game.as"
+
+// Gui
+#include "gui/button.as"
+#include "gui/lineedit.as"
 
 // Environment
 #include "environment/background.as"

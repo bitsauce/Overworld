@@ -24,6 +24,7 @@ namespace global
 	
 	// Menues
 	MainMenu mainMenu;
-	WorldSelectMenu worldSelectMenu;
+	WorldSelectMenu worldSelectMenu;
+	CreateWorldMenu createWorldMenu;
 	GameScene gameScene;
 }
