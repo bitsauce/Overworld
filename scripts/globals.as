@@ -6,7 +6,7 @@ namespace global
 	array<Player@> players;
 	
 	// Fonts
-	Font @arial12 = @Font("Arial Bold", 12);
+	Font @arial12 = @Font("Arial Bold", 18);
 	Font @arial8 = @Font("Arial", 8);
 	
 	// Drawing batches
@@ -24,7 +24,7 @@ namespace global
 	
 	// Menues
 	MainMenu mainMenu;
-	WorldSelectMenu worldSelectMenu;
+	WorldSelectMenu worldSelectMenu;
 	CreateWorldMenu createWorldMenu;
 	GameScene gameScene;
 }

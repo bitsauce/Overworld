@@ -35,7 +35,7 @@ class Button : UiObject
 		
 		Batch @batch = @Batch();
 		global::arial12.setColor(Vector4(1.0f));
-		global::arial12.draw(@batch, Vector2(0.0f), text);
+		global::arial12.draw(@batch, Vector2(0.0f, -17.0f), text);
 		batch.renderToTexture(@textTexture);
 	}
 	

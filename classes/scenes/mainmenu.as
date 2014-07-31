@@ -14,7 +14,7 @@ class MainMenu : Scene
 		Button @singlePlayerButton = @Button("Singleplayer", @ButtonCallback(@showSinglePlayer), null);
 		Button @multiPlayerButton = @Button("Multiplayer", @exit, null);
 		Button @optionButton = @Button("Options", @exit, null);
-		Button @quitButton = @Button("Quit", @exit, null);
+		Button @quitButton = @Button("Quit", @exit, null);
 		
 		singlePlayerButton.setSize(Vector2(0.2f, 0.05f));
 		multiPlayerButton.setSize(Vector2(0.2f, 0.05f));
@@ -68,8 +68,8 @@ class MainMenu : Scene
 		// Draw all ui objects
 		for(int i = 0; i < uiObjects.size; i++) {
 			uiObjects[i].draw(@batch);
-		}
-		
+		}
+			
 		batch.draw();
 	}
 }
