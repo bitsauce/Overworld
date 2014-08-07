@@ -6,8 +6,8 @@ namespace global
 	array<Player@> players;
 	
 	// Fonts
-	Font @arial12 = @Font("Arial Bold", 18);
-	Font @arial8 = @Font("Arial", 8);
+	Font @largeFont = @Font("Arial Bold", 42);
+	Font @smallFont = @Font("Arial", 12);
 	
 	// Drawing batches
 	array<Batch@> batches(LAYERS_MAX);

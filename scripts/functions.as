@@ -33,9 +33,22 @@ void zoomOut()
 void exit()
 {
 	Engine.exit();
+}
+
+void back()
+{
+	Engine.popScene();
 }
 
-void back()
+Texture @renderTextToTexture(Font @font, string text, int padding = 2.0f)
 {
-	Engine.popScene();
+	Texture @texture = @Texture(font.getStringWidth(text) + padding, font.getStringHeight(text) + padding);
+	texture.setFiltering(LINEAR);
+	
+	Batch @batch = @Batch();
+	font.setColor(Vector4(1.0f));
+	font.draw(@batch, Vector2(padding/2.0f, padding/2.0f), text);
+	batch.renderToTexture(@texture);
+	
+	return @texture;
 }

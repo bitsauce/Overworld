@@ -2,15 +2,10 @@ class MainMenu : Scene
 {
 	private Batch @batch = @Batch();
 	private array<UiObject@> uiObjects;
+	Texture @textTexture;
 	
 	MainMenu()
 	{
-	}
-	
-	void show()
-	{
-		Console.log("MainMenu: Show");
-		
 		Button @singlePlayerButton = @Button("Singleplayer", @ButtonCallback(@showSinglePlayer), null);
 		Button @multiPlayerButton = @Button("Multiplayer", @exit, null);
 		Button @optionButton = @Button("Options", @exit, null);
@@ -37,11 +32,16 @@ class MainMenu : Scene
 		uiObjects.insertLast(@quitButton);
 	}
 	
+	void show()
+	{
+		Console.log("MainMenu: Show");
+	}
+	
 	void hide()
 	{
 		Console.log("MainMenu: Hide");
 		
-		uiObjects.clear();
+		//uiObjects.clear();
 	}
 	
 	void showSinglePlayer()
@@ -68,8 +68,8 @@ class MainMenu : Scene
 		// Draw all ui objects
 		for(int i = 0; i < uiObjects.size; i++) {
 			uiObjects[i].draw(@batch);
-		}
-			
+		}
+		
 		batch.draw();
 	}
 }

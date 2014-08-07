@@ -394,7 +394,7 @@ class Inventory : GameObject
 		}
 		
 		// Draw slot content
-		global::arial8.setColor(Vector4(1.0f)); // Set white font color
+		global::smallFont.setColor(Vector4(1.0f)); // Set white font color
 		if(slot.data != null)
 		{
 			// Draw item icon
@@ -405,7 +405,7 @@ class Inventory : GameObject
 			// Draw quantity text
 			if(slot.amount > 1) {
 				string str = formatInt(slot.amount, "");
-				global::arial8.draw(global::batches[UITEXT], position + Vector2(28 - global::arial8.getStringWidth(str), 20), str);
+				global::smallFont.draw(global::batches[UITEXT], position + Vector2(28 - global::smallFont.getStringWidth(str), 20), str);
 			}
 		}
 	}
@@ -431,7 +431,7 @@ class Inventory : GameObject
 		}
 		
 		if(@hoveredItemSlot != null && @hoveredItemSlot.data != null) {
-			global::arial12.draw(global::batches[UITEXT], Input.position + Vector2(0.0f, 16.0f), hoveredItemSlot.data.desc);
+			global::largeFont.draw(global::batches[UITEXT], Input.position + Vector2(0.0f, 16.0f), hoveredItemSlot.data.desc);
 		}
 		
 		if(!heldSlot.isEmpty())
@@ -441,7 +441,7 @@ class Inventory : GameObject
 			icon.draw(global::batches[GUI]);
 			if(heldSlot.amount > 1) {
 				string str = formatInt(heldSlot.amount, "");
-				global::arial8.draw(global::batches[UITEXT], Input.position + Vector2(4 - global::arial8.getStringWidth(str), -4), str);
+				global::smallFont.draw(global::batches[UITEXT], Input.position + Vector2(4 - global::smallFont.getStringWidth(str), -4), str);
 			}
 		}
 	}

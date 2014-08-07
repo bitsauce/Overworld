@@ -102,56 +102,27 @@ class LineEdit : UiObject, KeyboardListener
 	void keyReleased(VirtualKey key)
 	{
 	}
-	
-	void update()
-	{
-		cursorTime -= Graphics.dt;
-		if(cursorTime <= 0.0f)
-			cursorTime = 1.0f;
-	}
+	
+	void update()
+	{
+		cursorTime -= Graphics.dt;
+		if(cursorTime <= 0.0f)
+			cursorTime = 1.0f;
+	}
 	
 	void draw(Batch @batch)
 	{
 		Vector2 position = getPosition(true)*Vector2(Window.getSize());
 		Vector2 size = getSize(true)*Vector2(Window.getSize());
 		
-		global::arial12.setColor(Vector4(1.0f));
-		global::arial12.draw(@batch, position, text);
-		
-		if(cursorTime >= 0.5f)
-		{
-			Shape @shape = @Shape(Rect(position.x + global::arial12.getStringWidth(text.substr(0, cursorPos)), position.y, 2, global::arial12.getStringHeight("")));
-			shape.setFillColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-			shape.draw(@batch);
-		}
+		global::largeFont.setColor(Vector4(1.0f));
+		global::largeFont.draw(@batch, position, text);
 		
-		// Get pos and size
-		/*Point2 guiPos = viewPos + pos();
-		Size2 size = size();
-		
-		// Draw box
-		GFX.drawRectOutlined(Rect2(guiPos, size()), 1, Color(90, 90, 90, 90), Color(0, 0, 0, 90));
-		
-		// Draw text
-		int stringWidth = currentFont().stringWidth(text);
-		int stringHeight = currentFont().stringHeight(text);
-		int textx = guiPos.x+(size.width/2)-(stringWidth/2);
-		int texty = guiPos.y+(size.height/2)-(stringHeight/2);
-		GFX.drawText(textx, texty, text);
-		
-		// Draw text cursor
-		if(isActive())
+		if(cursorTime >= 0.5f)
 		{
-			if(cursorTime < 30)
-			{
-				int cursorWidth = currentFont().stringWidth(text.substr(0, cursorPos));
-				GFX.drawLine(textx+cursorWidth, guiPos.y+(size.height/2)-(stringHeight),
-							textx+cursorWidth, guiPos.y+(size.height/2)+(stringHeight),
-							1, Color::black);
-			}else if(cursorTime >= 60) {
-				cursorTime = 0;
-			}
-			cursorTime++;
-		}*/
+			Shape @shape = @Shape(Rect(position.x + global::largeFont.getStringWidth(text.substr(0, cursorPos)), position.y, 2, global::largeFont.getStringHeight("")));
+			shape.setFillColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+			shape.draw(@batch);
+		}
 	}
 }

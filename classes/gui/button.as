@@ -8,6 +8,8 @@ class Button : UiObject
 	private ButtonCallbackThis @callbackThis;
 	any userData;
 	
+	Shader @outlineShader = @Shader(":/shaders/outline.vert", ":/shaders/outline.frag");
+	
 	private Texture @textTexture;
 	
 	Button(string text, ButtonCallback @callback, UiObject @parent)
@@ -16,6 +18,7 @@ class Button : UiObject
 		
 		setText(text);
 		@this.callback = @callback;
+		setupShader();
 	}
 	
 	Button(string text, ButtonCallbackThis @callbackThis, UiObject @parent)
@@ -24,19 +27,22 @@ class Button : UiObject
 		
 		setText(text);
 		@this.callbackThis = @callbackThis;
+		setupShader();
+	}
+	
+	void setupShader()
+	{
+		outlineShader.setUniform1f("radius", 1.5f);
+		outlineShader.setUniform1f("step", 0.1f);
+		outlineShader.setUniform3f("color", 0.0f, 0.0f, 0.0f);
+		outlineShader.setUniform2f("resolution", textTexture.getWidth(), textTexture.getHeight());
+		outlineShader.setSampler2D("texture", @textTexture);
 	}
 	
 	void setText(string text)
 	{
 		this.text = text;
-		
-		@textTexture = @Texture(global::arial12.getStringWidth(text), global::arial12.getStringHeight(text));
-		textTexture.setFiltering(LINEAR);
-		
-		Batch @batch = @Batch();
-		global::arial12.setColor(Vector4(1.0f));
-		global::arial12.draw(@batch, Vector2(0.0f, -17.0f), text);
-		batch.renderToTexture(@textTexture);
+		@textTexture = @renderTextToTexture(@global::largeFont, text, 6.0f);
 	}
 	
 	void draw(Batch @batch)
@@ -44,20 +50,21 @@ class Button : UiObject
 		Vector2 position = getPosition(true)*Vector2(Window.getSize());
 		Vector2 size = getSize(true)*Vector2(Window.getSize());
 		
-		Shape @textShape = @Shape(Rect(position + size/2.0f - Vector2(textTexture.getSize())/2.0f, Vector2(textTexture.getSize())));
-		textShape.setFillTexture(@textTexture);
-		
 		if(isPressed() && isHovered())
-			textShape.setFillColor(Vector4(1.0f, 1.0f, 0.0f, 1.0f));
+			outlineShader.setUniform3f("color", 1.0f, 1.0f, 0.0f);
 		else if(isPressed())
-			textShape.setFillColor(Vector4(0.5f, 0.5f, 0.0f, 1.0f));
+			outlineShader.setUniform3f("color", 0.5f, 0.5f, 0.0f);
 		else if(isHovered())
-			textShape.setFillColor(Vector4(0.9f, 0.9f, 0.2f, 1.0f));
+			outlineShader.setUniform3f("color", 0.9f, 0.9f, 0.2f);
 		else
-			textShape.setFillColor(Vector4(1.0f));
+			outlineShader.setUniform3f("color", 0.0f, 0.0f, 0.0f);
+		
+		Vector2 textSize = Vector2(Math.min(textTexture.getWidth(), size.x), Math.min(textTexture.getHeight(), size.y));
 		
-		textShape.draw(@batch);
-		
+		batch.setShader(@outlineShader);
+		Shape(Rect(position - (textSize-size)*0.5f, textSize)).draw(@batch);
+		batch.setShader(null);
+		
 		Shape @shape = @Shape(Rect(position, size));
 		shape.setFillColor(Vector4(0.7f, 0.7f, 0.7f, 1.0f));
 		shape.draw(@batch);
