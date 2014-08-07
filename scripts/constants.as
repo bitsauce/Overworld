@@ -61,7 +61,9 @@ enum Direction
 	NORTH		= 1,
 	SOUTH		= 2,
 	EAST		= 4,
-	WEST		= 8,
+	WEST		= 8,
+	
+	NESW = NORTH | EAST | SOUTH | WEST,
 	
 	NORTH_WEST 	= 16,
 	NORTH_EAST 	= 32,

@@ -67,10 +67,10 @@ class TileGrid
 		
 		// Make it static
 		batch.makeStatic();
-	}
-	
-	void init(const int width, const int height, array<Texture@> textures)
-	{
+	}
+	
+	void init(const int width, const int height, array<Texture@> textures)
+	{
 	}
 	
 	bool isValid(const int x, const int y)
@@ -81,7 +81,7 @@ class TileGrid
 	int getTileAt(const int x, const int y)
 	{
 		if(!isValid(x, y))
-			return NULL_TILE;
+			return 0;
 		return tiles[x, y];
 	}
 	
@@ -168,7 +168,7 @@ class TileGrid
 		}
 	}
 	
-	private uint getTileState(const int x, const int y)
+	uint getTileState(const int x, const int y)
 	{
 		// Set state
 		uint state = 0;

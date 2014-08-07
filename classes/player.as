@@ -1,31 +1,40 @@
 class Player : GameObject
-{
+{
+	// Player body
+	b2Body @body;
+	
+	// Player foot sensor (for checking on-gound-ness)
+	b2Fixture @footSensor;
+	int numGroundContact = 0;
+	
+	// Player physical size
 	Vector2 size = Vector2(28.0f, 44.0f);
-	b2Body @body;
-	b2Fixture @footSensor;
-	
+	
+	// Player inventory
 	Inventory @inventory;
 	
 	bool pressed = false;
-	
-	Texture @playerTexture = @Texture(":/sprites/characters/full/character_ver3.png");
-	
+	
+	// Player name
+	string name = "Bitsauce";
+	
+	// Player skeletal animations
 	spSkeleton @skeleton = @spSkeleton(":/sprites/characters/anim/skeleton.json", ":/sprites/characters/anim/skeleton.atlas", 1.0f);
 	spAnimationState @animation;
 	spAnimation @currentAnim;
 	
-	// Movement
+	// Movement variables
 	float maxRunSpeed = 256.0f;
 	float moveForce = 5000.0f;
 	float jumpForce = 6800.0f;
 	float accel = 0.1f; // factor
 	float mass = 18.0f;
-	
+	
+	// Player health
 	int maxHealth = 100;
 	int health = 100;
 	
-	int numGroundContact = 0;
-	
+	// Walking sounds
 	array<AudioSource@> walkDirtSounds;
 	
 	Player()
@@ -82,6 +91,69 @@ class Player : GameObject
 		
 		// Add to list of players
 		global::players.insertLast(@this);
+	}
+	
+	void save(IniFile @playerFile)
+	{
+		Console.log("Saving player '" + name + "'...");
+		
+		// Save inventory
+		string itemString;
+		string amountString;
+		for(int y = 0; y < INV_HEIGHT; y++)
+		{
+			for(int x = 0; x < INV_WIDTH; x++)
+			{
+				ItemSlot @slot = @inventory.slots[x, y];
+				if(!slot.isEmpty())
+				{
+					itemString += formatInt(global::items.find(@slot.data), "0", 3);
+					amountString += formatInt(slot.amount, "0", 3);
+				}else{
+					itemString += "000";
+					amountString += "000";
+				}
+			}
+		}
+		playerFile.setValue(name, "items", itemString);
+		playerFile.setValue(name, "itemAmounts", amountString);
+		
+		// Save position
+		playerFile.setValue(name, "positionX", formatInt(body.getPosition().x, ""));
+		playerFile.setValue(name, "positionY", formatInt(body.getPosition().y, ""));
+		
+		// Save file
+		playerFile.save();
+	}
+	
+	void load(IniFile @playerFile)
+	{
+		if(playerFile.isSection(name))
+		{
+			// Load inventory
+			string itemString = playerFile.getValue(name, "items");
+			string amountString = playerFile.getValue(name, "itemAmounts");
+			for(int y = 0; y < INV_HEIGHT; y++)
+			{
+				for(int x = 0; x < INV_WIDTH; x++)
+				{
+					int j = (x + y*INV_WIDTH) * 3;
+					inventory.slots[x, y].set(@global::items[ItemID(parseInt(itemString.substr(j, 3)))], parseInt(amountString.substr(j, 3)));
+				}
+			}
+			
+			// Load position
+			body.setPosition(Vector2(parseInt(playerFile.getValue(name, "positionX")), parseInt(playerFile.getValue(name, "positionY"))));
+		}else{
+			// Spawn in the middle of the world
+			int x = 250/2;
+			int y = global::terrain.gen.getGroundHeight(x);
+			body.setPosition(Vector2(x*TILE_SIZE, y*TILE_SIZE));
+			
+			// Give default loadout
+			inventory.addItem(@global::items[PICKAXE_IRON]);
+			inventory.addItem(@global::items[STONE_BLOCK], 50);
+		}
 	}
 	
 	void remove()

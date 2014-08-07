@@ -11,19 +11,16 @@ class WorldSelectMenu : Scene
 	{
 		Console.log("WorldSelectMenu: Show");
 		
-		array<string> @worldFiles = @FileSystem.listFiles("saves:/Overworld/worlds/", "*");
-		for(int i = 0; i < worldFiles.size; i++)
+		array<string> @worlds = @FileSystem.listFolders("saves:/Overworld/", "*");
+		for(int i = 0; i < worlds.size; i++)
 		{
-			IniFile @file = @IniFile(worldFiles[i]);
-			
-			string worldName = file.getValue("world", "name");
-			Button @button = @Button(worldName, @ButtonCallbackThis(@worldClicked), null);
+			Button @button = @Button(IniFile(worlds[i] + "/world.ini").getValue("world", "name"), @ButtonCallbackThis(@worldClicked), null);
 			button.anchor = CENTER;
 			button.setPosition(Vector2(0.0f, -0.3f + i*0.1f));
 			button.setSize(Vector2(0.2f, 0.05f));
-			button.userData.store(worldFiles[i]);
+			button.userData.store(worlds[i]);
 			uiObjects.insertLast(@button);
-		}
+		}
 		
 		Button @createWorldButton = @Button("Create World", ButtonCallback(@showCreateWorld), null);
 		createWorldButton.anchor = BOTTOM_CENTER;
@@ -40,25 +37,18 @@ class WorldSelectMenu : Scene
 	}
 	
 	void showCreateWorld()
-	{
+	{
 		Engine.pushScene(@global::createWorldMenu);
 	}
 	
 	void worldClicked(Button @button)
-	{
-		string path;
-		button.userData.retrieve(path);
-		Console.log("Loading world: " + path + "...");
-		
-		// Get world file
-		IniFile @worldFile = @IniFile(path);
-		
-		// Load terrain
-		Console.log("Loading terrain...");
-		global::terrain.load(@worldFile);
+	{
+		// Get world directory
+		string worldPath;
+		button.userData.retrieve(worldPath);
 		
 		// Load game
-		loadGame(@worldFile);
+		loadGame(worldPath);
 	}
 	
 	void update()
@@ -84,31 +74,4 @@ class WorldSelectMenu : Scene
 		
 		batch.draw();
 	}
-}
-
-void loadGame(IniFile @worldFile)
-{
-	Engine.pushScene(@global::gameScene);
-	
-	// Update time of day
-	//global::timeOfDay.setTime(file.getValue("world", "time"));
-	
-	// Create background
-	Background();
-	
-	// Create player
-	Console.log("Setting up player...");
-	Player player();
-	
-	// Move the player to his last position
-	//player.body.setPosition(file.getValue("player", "position"));
-	
-	// Spawn in the middle of the world
-	int x = 250/2;
-	int y = global::terrain.gen.getGroundHeight(x);
-	player.body.setPosition(Vector2(x*TILE_SIZE, y*TILE_SIZE));
-	
-	// Give loadout
-	player.inventory.addItem(@global::items[PICKAXE_IRON]);
-	player.inventory.addItem(@global::items[STONE_BLOCK], 50);
 }

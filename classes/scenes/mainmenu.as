@@ -6,35 +6,36 @@ class MainMenu : Scene
 	
 	MainMenu()
 	{
-		Button @singlePlayerButton = @Button("Singleplayer", @ButtonCallback(@showSinglePlayer), null);
-		Button @multiPlayerButton = @Button("Multiplayer", @exit, null);
-		Button @optionButton = @Button("Options", @exit, null);
-		Button @quitButton = @Button("Quit", @exit, null);
-		
-		singlePlayerButton.setSize(Vector2(0.2f, 0.05f));
-		multiPlayerButton.setSize(Vector2(0.2f, 0.05f));
-		optionButton.setSize(Vector2(0.2f, 0.05f));
-		quitButton.setSize(Vector2(0.2f, 0.05f));
-		
-		singlePlayerButton.anchor = CENTER;
-		multiPlayerButton.anchor = CENTER;
-		optionButton.anchor = CENTER;
-		quitButton.anchor = CENTER;
-		
-		singlePlayerButton.setPosition(Vector2(0.0f, -0.3f));
-		multiPlayerButton.setPosition(Vector2(0.0f, -0.2f));
-		optionButton.setPosition(Vector2(0.0f, -0.1f));
-		quitButton.setPosition(Vector2(0.0f, 0.0f));
-		
-		uiObjects.insertLast(@singlePlayerButton);
-		uiObjects.insertLast(@multiPlayerButton);
-		uiObjects.insertLast(@optionButton);
-		uiObjects.insertLast(@quitButton);
 	}
 	
 	void show()
 	{
-		Console.log("MainMenu: Show");
+		Console.log("MainMenu: Show");
+		
+		Button @singlePlayerButton = @Button("Singleplayer", @ButtonCallback(@showSinglePlayer), null);
+		Button @multiPlayerButton = @Button("Multiplayer", @exit, null);
+		Button @optionButton = @Button("Options", @exit, null);
+		Button @quitButton = @Button("Quit", @exit, null);
+		
+		singlePlayerButton.setSize(Vector2(0.2f, 0.05f));
+		multiPlayerButton.setSize(Vector2(0.2f, 0.05f));
+		optionButton.setSize(Vector2(0.2f, 0.05f));
+		quitButton.setSize(Vector2(0.2f, 0.05f));
+		
+		singlePlayerButton.anchor = CENTER;
+		multiPlayerButton.anchor = CENTER;
+		optionButton.anchor = CENTER;
+		quitButton.anchor = CENTER;
+		
+		singlePlayerButton.setPosition(Vector2(0.0f, -0.3f));
+		multiPlayerButton.setPosition(Vector2(0.0f, -0.2f));
+		optionButton.setPosition(Vector2(0.0f, -0.1f));
+		quitButton.setPosition(Vector2(0.0f, 0.0f));
+		
+		uiObjects.insertLast(@singlePlayerButton);
+		uiObjects.insertLast(@multiPlayerButton);
+		uiObjects.insertLast(@optionButton);
+		uiObjects.insertLast(@quitButton);
 	}
 	
 	void hide()

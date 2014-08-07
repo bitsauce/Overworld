@@ -1,5 +1,30 @@
 class GameScene : Scene
-{
+{
+	IniFile @worldFile;
+	IniFile @playerFile;
+	
+	void loadWorld(string worldPath)
+	{
+		// Load config file
+		@worldFile = @IniFile(worldPath + "/world.ini");
+		@playerFile = @IniFile(worldPath + "/players.ini");
+		
+		// Load terrain
+		Console.log("Loading terrain...");
+		global::terrain.load(@worldFile);
+		
+		// Update time of day
+		//global::timeOfDay.setTime(file.getValue("world", "time"));
+		
+		// Create background
+		Background();
+		
+		// Create player
+		Console.log("Setting up player...");
+		Player player();
+		player.load(@playerFile);
+	}
+	
 	void show()
 	{
 		Console.log("Show game");
@@ -9,9 +34,15 @@ class GameScene : Scene
 	{
 		// Do clean up here
 		Console.log("Leaving game");
-		global::terrain.save();
-		global::gameObjects.clear();
+		global::terrain.save(@worldFile);
+		global::gameObjects.clear();
 		global::interactables.clear();
+		
+		for(int i = 0; i < global::players.size; i++)
+		{
+			global::players[i].save(@playerFile);
+		}
+		
 		global::players.clear();
 	}
 	
@@ -79,4 +110,22 @@ class GameScene : Scene
 			global::batches[i].draw();
 		}
 	}
+}
+
+bool loadGame(string worldPath)
+{
+	Console.log("Loading world: " + worldPath + "...");
+	
+	// Make sure required world files exist
+	if(!FileSystem.fileExists(worldPath + "/world.ini") || !FileSystem.fileExists(worldPath + "/players.ini")) {
+		Console.log("Loading failed (missing files)");
+		return false;
+	}
+	
+	// Load world
+	
+	global::gameScene.loadWorld(worldPath);
+	Engine.pushScene(@global::gameScene);
+	
+	return true;
 }
