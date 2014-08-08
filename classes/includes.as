@@ -5,7 +5,7 @@
 #include "recipies.as"
 #include "camera.as"
 #include "debug.as"
-#include "textures.as"
+#include "textures.as"
 #include "saveable.as"
 
 // Scenes
@@ -39,6 +39,6 @@
 #include "terrain/terraingen.as"
 #include "terrain/tilegrid.as"
 
-// Interactables
-#include "interactables/interactable.as"
-#include "interactables/berrybush.as"
+// Furnitures
+#include "furniture/furniture.as"
+#include "furniture/berrybush.as"

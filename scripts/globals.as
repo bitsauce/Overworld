@@ -1,30 +1,36 @@
-namespace global
+// Scenes
+namespace scene
 {
-	// Global arrays
-	array<GameObject@> gameObjects;
-	array<Interactable@> interactables;
-	array<Player@> players;
-	
-	// Fonts
-	Font @largeFont = @Font("Arial Bold", 42);
-	Font @smallFont = @Font("Arial", 12);
-	
-	// Drawing batches
-	array<Batch@> batches(LAYERS_MAX);
-	
-	// Global objects
-	TimeOfDay timeOfDay;
-	Terrain terrain;
-	
-	Camera camera;
-	ItemManager items;
-	DebugTextDrawer debug;
-	TextureManager textures;
-	Spawner spawner;
-	
-	// Menues
-	MainMenu mainMenu;
-	WorldSelectMenu worldSelectMenu;
-	CreateWorldMenu createWorldMenu;
-	GameScene gameScene;
+	MainMenu main;
+	WorldSelectMenu worldSelect;
+	CreateWorldMenu createWorld;
+	GameScene game;
+}
+
+// Fonts
+namespace font
+{
+	Font @large = @Font("Arial Bold", 42);
+	Font @small = @Font("Arial", 12);
+}
+
+namespace game
+{
+	// Global arrays
+	array<GameObject@> objects;
+	array<Furniture@> furnitures;
+	array<Player@> players;
+	
+	// Global objects
+	TimeOfDay timeOfDay;
+	Terrain terrain;
+	
+	Camera camera;
+	ItemManager items;
+	DebugTextDrawer debug;
+	TextureManager textures;
+	Spawner spawner;
+	
+	// Drawing batches
+	array<Batch@> batches(LAYERS_MAX);
 }

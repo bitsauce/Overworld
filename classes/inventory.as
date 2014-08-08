@@ -336,7 +336,7 @@ class Inventory : GameObject
 			{
 				for(int x = 0; x < 3; x++)
 				{
-					ItemID id = global::items.find(craftingSlots[x, y].data);
+					ItemID id = game::items.find(craftingSlots[x, y].data);
 					if(id != recipies[i].recipie[x, y])
 					{
 						match = false;
@@ -348,7 +348,7 @@ class Inventory : GameObject
 			}
 			if(match)
 			{
-				addItem(@global::items[recipies[i].result]);
+				addItem(@game::items[recipies[i].result]);
 				
 				
 				for(int y = 0; y < 3; y++) {
@@ -366,7 +366,7 @@ class Inventory : GameObject
 	{
 		ItemDrop drop(@item, amount);
 		drop.body.setPosition(player.body.getPosition());
-		Vector2 dt = Input.position + global::camera.position - player.body.getPosition();
+		Vector2 dt = Input.position + game::camera.position - player.body.getPosition();
 		if(dt.x >= 0.0f) {
 			drop.body.applyImpulse(Vector2(1.0f, -1.0f)*5000.0f, drop.body.getCenter());
 		}else{
@@ -386,7 +386,7 @@ class Inventory : GameObject
 			@slotSprite = @itemSlot;
 		}
 		slotSprite.setPosition(position);
-		slotSprite.draw(global::batches[GUI]);
+		slotSprite.draw(game::batches[GUI]);
 		
 		// Set as hovered if cursor is contained within the rectangle
 		if(Rect(slotSprite.getPosition(), slotSprite.getSize()).contains(Input.position)) {
@@ -394,18 +394,18 @@ class Inventory : GameObject
 		}
 		
 		// Draw slot content
-		global::smallFont.setColor(Vector4(1.0f)); // Set white font color
+		font::small.setColor(Vector4(1.0f)); // Set white font color
 		if(slot.data != null)
 		{
 			// Draw item icon
 			Sprite @icon = @slot.data.icon;
 			icon.setPosition(position + Vector2(8, 8));
-			icon.draw(global::batches[GUI]);
+			icon.draw(game::batches[GUI]);
 			
 			// Draw quantity text
 			if(slot.amount > 1) {
 				string str = formatInt(slot.amount, "");
-				global::smallFont.draw(global::batches[UITEXT], position + Vector2(28 - global::smallFont.getStringWidth(str), 20), str);
+				font::small.draw(game::batches[UITEXT], position + Vector2(28 - font::small.getStringWidth(str), 20), str);
 			}
 		}
 	}
@@ -431,17 +431,17 @@ class Inventory : GameObject
 		}
 		
 		if(@hoveredItemSlot != null && @hoveredItemSlot.data != null) {
-			global::largeFont.draw(global::batches[UITEXT], Input.position + Vector2(0.0f, 16.0f), hoveredItemSlot.data.desc);
+			font::large.draw(game::batches[UITEXT], Input.position + Vector2(0.0f, 16.0f), hoveredItemSlot.data.desc);
 		}
 		
 		if(!heldSlot.isEmpty())
 		{
 			Sprite @icon = @heldSlot.data.icon;
 			icon.setPosition(Input.position + Vector2(-16, -16));
-			icon.draw(global::batches[GUI]);
+			icon.draw(game::batches[GUI]);
 			if(heldSlot.amount > 1) {
 				string str = formatInt(heldSlot.amount, "");
-				global::smallFont.draw(global::batches[UITEXT], Input.position + Vector2(4 - global::smallFont.getStringWidth(str), -4), str);
+				font::small.draw(game::batches[UITEXT], Input.position + Vector2(4 - font::small.getStringWidth(str), -4), str);
 			}
 		}
 	}

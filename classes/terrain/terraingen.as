@@ -63,7 +63,7 @@ class TerrainGen
 				{
 					Bush bush();
 					int y = getGroundHeight(x+i+1)-1;
-					bush.sprite.setPosition(Vector2((x+i+1)*TILE_SIZE, y*TILE_SIZE - 4));
+					bush.place((x+i+1)*TILE_SIZE, y*TILE_SIZE - 4);
 					bushCount--;
 					i += Math.getRandomInt(4, 8);
 				}else{

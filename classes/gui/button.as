@@ -42,7 +42,7 @@ class Button : UiObject
 	void setText(string text)
 	{
 		this.text = text;
-		@textTexture = @renderTextToTexture(@global::largeFont, text, 6.0f);
+		@textTexture = @renderTextToTexture(@font::large, text, 6.0f);
 	}
 	
 	void draw(Batch @batch)

@@ -1,5 +1,5 @@
 class GameScene : Scene
-{
+{	
 	IniFile @worldFile;
 	
 	void setWorldFile(IniFile @worldFile)
@@ -15,10 +15,10 @@ class GameScene : Scene
 		
 		// Load terrain
 		Console.log("Loading terrain...");
-		global::terrain.load(@worldFile);
+		game::terrain.load(@worldFile);
 		
 		// Set time of day
-		//global::timeOfDay.setTime(file.getValue("world", "time"));
+		//timeOfDay.setTime(file.getValue("world", "time"));
 	}
 	
 	void addPlayer(Player @player)
@@ -29,9 +29,9 @@ class GameScene : Scene
 	
 	void save()
 	{
-		for(int i = 0; i < global::gameObjects.size; i++)
+		for(int i = 0; i < game::objects.size; i++)
 		{
-			Serializable @object = cast<Serializable@>(@global::gameObjects[i]);
+			Serializable @object = cast<Serializable@>(@game::objects[i]);
 			if(@object != null)
 			{
 				object.save(@worldFile);
@@ -56,9 +56,9 @@ class GameScene : Scene
 		// Do clean up here
 		Console.log("Leaving game");
 		save();
-		global::gameObjects.clear();
-		global::interactables.clear();
-		global::players.clear();
+		game::objects.clear();
+		game::furnitures.clear();
+		game::players.clear();
 	}
 	
 	void update()
@@ -67,62 +67,62 @@ class GameScene : Scene
 		Box2D.step(Graphics.dt);
 		
 		// Update all game objects
-		for(int i = 0; i < global::gameObjects.size; i++) {
-			global::gameObjects[i].update();
+		for(int i = 0; i < game::objects.size; i++) {
+			game::objects[i].update();
 		}
 	}
 	
 	void draw()
 	{
 		// Clear batches
-		for(int i = 0; i < global::batches.size; i++) {
-			global::batches[i].clear();
+		for(int i = 0; i < game::batches.size; i++) {
+			game::batches[i].clear();
 		}
 	
 		// Create translation matrix
-		global::batches[SCENE].setProjectionMatrix(global::camera.getProjectionMatrix());
+		game::batches[SCENE].setProjectionMatrix(game::camera.getProjectionMatrix());
 		
 		// Draw game object into batches
-		for(int i = 0; i < global::gameObjects.size; i++) {
-			global::gameObjects[i].draw();
+		for(int i = 0; i < game::objects.size; i++) {
+			game::objects[i].draw();
 		}
 		
 		// Render scene terrain-layer to texture
-		global::terrain.terrainTexture.clear();
-		global::terrain.draw(TERRAIN_BACKGROUND);
+		game::terrain.terrainTexture.clear();
+		game::terrain.draw(TERRAIN_BACKGROUND);
 		
-		Shape @screen = @Shape(Rect(Vector2(-global::terrain.padding/2.0f), Vector2(Window.getSize()) + Vector2(global::terrain.padding)));
-		screen.setFillTexture(@global::terrain.terrainTexture);
-		screen.draw(@global::batches[BACKGROUND]);
+		Shape @screen = @Shape(Rect(Vector2(-game::terrain.padding/2.0f), Vector2(Window.getSize()) + Vector2(game::terrain.padding)));
+		screen.setFillTexture(@game::terrain.terrainTexture);
+		screen.draw(@game::batches[BACKGROUND]);
 		
-		global::batches[BACKGROUND].draw();
+		game::batches[BACKGROUND].draw();
 		
 		// Box2D debug draw
 		if(Input.getKeyState(KEY_B)) {
-			Box2D.draw(@global::batches[SCENE]);
+			Box2D.draw(@game::batches[SCENE]);
 		}
 		
 		// Draw scene content
-		global::batches[SCENE].draw();
+		game::batches[SCENE].draw();
 		
 		// Draw terrain scene and foreground layer to texture
-		global::terrain.terrainTexture.clear();
-		global::terrain.draw(TERRAIN_SCENE);
-		global::terrain.draw(TERRAIN_FOREGROUND);
+		game::terrain.terrainTexture.clear();
+		game::terrain.draw(TERRAIN_SCENE);
+		game::terrain.draw(TERRAIN_FOREGROUND);
 		
-		screen.setFillTexture(@global::terrain.terrainTexture);
-		screen.draw(@global::batches[FOREGROUND]);
+		screen.setFillTexture(@game::terrain.terrainTexture);
+		screen.draw(@game::batches[FOREGROUND]);
 		
-		global::terrain.drawShadows();
+		game::terrain.drawShadows();
 		
-		global::batches[FOREGROUND].draw();
+		game::batches[FOREGROUND].draw();
 		
 		// Draw debug text to screen
-		global::debug.addVariable("FPS", ""+Graphics.FPS);
+		game::debug.addVariable("FPS", ""+Graphics.FPS);
 		
 		// Draw remaining batches
-		for(int i = FOREGROUND + 1; i < global::batches.size; i++) {
-			global::batches[i].draw();
+		for(int i = FOREGROUND + 1; i < game::batches.size; i++) {
+			game::batches[i].draw();
 		}
 	}
 }
@@ -138,8 +138,8 @@ bool loadGame(string worldPath)
 	}
 	
 	// Load world
-	global::gameScene.loadWorldFile(@IniFile(worldPath + "/world.ini"));
-	Engine.pushScene(@global::gameScene);
+	scene::game.loadWorldFile(@IniFile(worldPath + "/world.ini"));
+	Engine.pushScene(@scene::game);
 	
 	return true;
 }

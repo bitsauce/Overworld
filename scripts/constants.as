@@ -4,7 +4,8 @@ const int TILE_SIZE = 16;
 // Tiles
 enum Tile
 {
-	NULL_TILE = 0,
+	NULL_TILE = 0,
+	//RESERVED_TILE,
 	
 	// SCENE_TILES BEGIN
 	GRASS_TILE,

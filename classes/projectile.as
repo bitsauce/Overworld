@@ -18,6 +18,6 @@ class Projectile : GameObject
 	{
 		sprite.setRotation(body.getAngle()*(180/Math.PI));
 		sprite.setPosition(body.getPosition());
-		sprite.draw(global::batches[SCENE]);
+		sprite.draw(@game::batches[SCENE]);
 	}
 }

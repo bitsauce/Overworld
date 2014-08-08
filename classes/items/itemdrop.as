@@ -56,9 +56,9 @@ class ItemDrop : GameObject
 			return;
 		}
 		
-		for(int i = 0; i < global::players.size; i++)
+		for(int i = 0; i < game::players.size; i++)
 		{
-			Vector2 dt = global::players[i].body.getPosition() - body.getCenter();
+			Vector2 dt = game::players[i].body.getPosition() - body.getCenter();
 			if(dt.length() <= ITEM_PICKUP_RADIUS)
 			{
 				Vector2 impulse = dt.normalized() * ITEM_SPEED;
@@ -71,6 +71,6 @@ class ItemDrop : GameObject
 	{
 		Sprite @sprite = @data.icon;
 		sprite.setPosition(body.getPosition() - size/2.0f);
-		sprite.draw(global::batches[SCENE]);
+		sprite.draw(game::batches[SCENE]);
 	}
 }

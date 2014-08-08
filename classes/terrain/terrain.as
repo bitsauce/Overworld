@@ -367,8 +367,8 @@ class Terrain : GameObject, Serializable
 	void draw(TerrainLayer layer)
 	{
 		Matrix4 mat;
-		mat.translate(-global::camera.position.x + padding/(2.0f * global::camera.zoom), -global::camera.position.y + padding/(2.0f * global::camera.zoom), 0.0f);
-		mat.scale(global::camera.zoom);
+		mat.translate(-game::camera.position.x + padding/(2.0f * game::camera.zoom), -game::camera.position.y + padding/(2.0f * game::camera.zoom), 0.0f);
+		mat.scale(game::camera.zoom);
 		layers[layer].draw(@terrainTexture, mat);
 	}
 	
@@ -379,6 +379,6 @@ class Terrain : GameObject, Serializable
 		
 		Shape @screen = @Shape(Rect(Vector2(-padding*0.5f), Vector2(Window.getSize()) + Vector2(padding)));
 		screen.setFillTexture(@shadowTexture);
-		screen.draw(@global::batches[FOREGROUND]);
+		screen.draw(@game::batches[FOREGROUND]);
 	}
 }

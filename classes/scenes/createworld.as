@@ -70,10 +70,10 @@ class CreateWorldMenu : Scene
 		
 		// Generate world
 		Console.log("Creating world...");
-		global::terrain.generate(250, 50, @worldFile);
-		
-		// Show game
-		global::gameScene.setWorldFile(@worldFile);
-		Engine.pushScene(@global::gameScene);
+		game::terrain.generate(250, 50, @worldFile);
+		
+		// Show game
+		scene::game.setWorldFile(@worldFile);
+		Engine.pushScene(@scene::game);
 	}
 }

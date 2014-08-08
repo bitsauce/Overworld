@@ -115,12 +115,12 @@ class LineEdit : UiObject, KeyboardListener
 		Vector2 position = getPosition(true)*Vector2(Window.getSize());
 		Vector2 size = getSize(true)*Vector2(Window.getSize());
 		
-		global::largeFont.setColor(Vector4(1.0f));
-		global::largeFont.draw(@batch, position, text);
+		font::large.setColor(Vector4(1.0f));
+		font::large.draw(@batch, position, text);
 		
 		if(cursorTime >= 0.5f)
 		{
-			Shape @shape = @Shape(Rect(position.x + global::largeFont.getStringWidth(text.substr(0, cursorPos)), position.y, 2, global::largeFont.getStringHeight("")));
+			Shape @shape = @Shape(Rect(position.x + font::large.getStringWidth(text.substr(0, cursorPos)), position.y, 2, font::large.getStringHeight("")));
 			shape.setFillColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 			shape.draw(@batch);
 		}

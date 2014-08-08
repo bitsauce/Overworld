@@ -2,12 +2,12 @@ Player @getClosestPlayer(Vector2 position)
 {
 	Player @closestPlayer = null;
 	float minDist = -1.0f;
-	for(int i = 0; i < global::players.size; i++)
+	for(int i = 0; i < game::players.size; i++)
 	{
-		float dist = (global::players[i].body.getPosition() - position).length();
+		float dist = (game::players[i].body.getPosition() - position).length();
 		if(dist <= minDist || minDist < 0.0f)
 		{
-			@closestPlayer = @global::players[i];
+			@closestPlayer = @game::players[i];
 			minDist = dist;
 		}
 	}
@@ -78,10 +78,10 @@ class Zombie : GameObject
 			body.applyImpulse(Vector2(1000.0f, 0.0f), body.getCenter());
 		
 		Vector2i tile = Vector2i((body.getPosition()+Vector2(-8.0f, size.y))/TILE_SIZE);
-		if(global::terrain.isTileAt(tile.x, tile.y))
+		if(game::terrain.isTileAt(tile.x, tile.y))
 			body.applyImpulse(Vector2(0.0f, -1000.0f), body.getCenter());
 		tile = Vector2i((body.getPosition()+Vector2(size.x+8.0f, size.y))/TILE_SIZE);
-		if(global::terrain.isTileAt(tile.x, tile.y))
+		if(game::terrain.isTileAt(tile.x, tile.y))
 			body.applyImpulse(Vector2(0.0f, -1000.0f), body.getCenter());
 		
 		Vector2 vel = body.getLinearVelocity();
@@ -97,6 +97,6 @@ class Zombie : GameObject
 	{
 		Shape @shape = Shape(Rect(body.getPosition(), size));
 		shape.setFillColor(Vector4(0.0f, 1.0f, 0.0f, 1.0f));
-		shape.draw(global::batches[global::SCENE]);
+		shape.draw(game::batches[SCENE]);
 	}
 }

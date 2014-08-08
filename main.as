@@ -10,21 +10,21 @@ void main()
 	Input.bind(KEY_P, @toggleProfiler);
 	Input.bind(KEY_I, @zoomIn);
 	Input.bind(KEY_O, @zoomOut);
-	//Input.bind(KEY_BACKSPACE, @back);
+	//Input.bind(KEY_BACKSPACE, @back);
+	
+	// Set b2d world scale
+	Box2D.gravity = Vector2(0.0f, 40.0f);
+	Box2D.scale = TILE_SIZE;
+	
+	// Create layer batches
+	for(int i = 0; i < game::batches.size; i++) {
+		@game::batches[i] = Batch();
+	}
 	
 	// Go fullscreen
 	//toggleFullscreen();
 	
-	// Set b2d world scale
-	Box2D.gravity = Vector2(0.0f, 40.0f);
-	Box2D.scale = TILE_SIZE;
-	
-	// Create layer batches
-	for(int i = 0; i < global::batches.size; i++) {
-		@global::batches[i] = Batch();
-	}
-	
-	Engine.pushScene(@global::mainMenu);
+	Engine.pushScene(@scene::main);
 }
 
 void draw()
@@ -41,7 +41,7 @@ void windowResized(int width, int height)
 	Console.log("Window resized: " + width + ", " + height);
 	
 	// Call resize event on all game objects
-	for(int i = 0; i < global::gameObjects.size; i++) {
-		global::gameObjects[i].windowResized();
+	for(int i = 0; i < game::objects.size; i++) {
+		game::objects[i].windowResized();
 	}
 }

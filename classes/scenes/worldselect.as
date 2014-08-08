@@ -38,11 +38,11 @@ class WorldSelectMenu : Scene
 	
 	void showCreateWorld()
 	{
-		Engine.pushScene(@global::createWorldMenu);
+		Engine.pushScene(@scene::createWorld);
 	}
 	
 	void worldClicked(Button @button)
-	{
+	{
 		// Get world directory
 		string worldPath;
 		button.userData.retrieve(worldPath);

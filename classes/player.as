@@ -1,3 +1,11 @@
+void createBush()
+{
+	Bush bush();
+	
+	Vector2 cursor = Input.position + game::camera.position;
+	bush.place(cursor.x/TILE_SIZE, cursor.y/TILE_SIZE);
+}
+
 class Player : GameObject, Serializable
 {
 	// Player body
@@ -39,6 +47,8 @@ class Player : GameObject, Serializable
 	
 	Player()
 	{
+		Input.bind(KEY_V, @createBush);
+		
 		// Create an inventory for the player
 		@inventory = @Inventory(@this);
 		
@@ -90,7 +100,7 @@ class Player : GameObject, Serializable
 		skeleton.texture.setFiltering(LINEAR);
 		
 		// Add to list of players
-		global::players.insertLast(@this);
+		game::players.insertLast(@this);
 	}
 	
 	void save(IniFile @worldFile)
@@ -107,7 +117,7 @@ class Player : GameObject, Serializable
 				ItemSlot @slot = @inventory.slots[x, y];
 				if(!slot.isEmpty())
 				{
-					itemString += formatInt(global::items.find(@slot.data), "0", 3);
+					itemString += formatInt(game::items.find(@slot.data), "0", 3);
 					amountString += formatInt(slot.amount, "0", 3);
 				}else{
 					itemString += "000";
@@ -138,7 +148,7 @@ class Player : GameObject, Serializable
 				for(int x = 0; x < INV_WIDTH; x++)
 				{
 					int j = (x + y*INV_WIDTH) * 3;
-					inventory.slots[x, y].set(@global::items[ItemID(parseInt(itemString.substr(j, 3)))], parseInt(amountString.substr(j, 3)));
+					inventory.slots[x, y].set(@game::items[ItemID(parseInt(itemString.substr(j, 3)))], parseInt(amountString.substr(j, 3)));
 				}
 			}
 			
@@ -147,12 +157,12 @@ class Player : GameObject, Serializable
 		}else{
 			// Spawn in the middle of the world
 			int x = 250/2;
-			int y = global::terrain.gen.getGroundHeight(x);
+			int y = game::terrain.gen.getGroundHeight(x);
 			body.setPosition(Vector2(x*TILE_SIZE, y*TILE_SIZE));
 			
 			// Give default loadout
-			inventory.addItem(@global::items[PICKAXE_IRON]);
-			inventory.addItem(@global::items[STONE_BLOCK], 50);
+			inventory.addItem(@game::items[PICKAXE_IRON]);
+			inventory.addItem(@game::items[STONE_BLOCK], 50);
 		}
 	}
 	
@@ -296,10 +306,10 @@ class Player : GameObject, Serializable
 		
 		if(Input.getKeyState(KEY_RMB))
 		{
-			for(int i = 0; i < global::interactables.size; i++)
+			for(int i = 0; i < game::furnitures.size; i++)
 			{
-				Interactable @interactable = @global::interactables[i];
-				if((interactable.sprite.getPosition() - position).length() <= ITEM_PICKUP_RADIUS && interactable.isHovered()) {
+				Furniture @interactable = @game::furnitures[i];
+				if((interactable.getPosition() - position).length() <= ITEM_PICKUP_RADIUS && interactable.isHovered()) {
 					interactable.interact(@this);
 				}
 			}
@@ -311,9 +321,9 @@ class Player : GameObject, Serializable
 			position.x = 0.0f;
 			body.setLinearVelocity(Vector2(0.0f, velocity.y));
 			body.setPosition(position);
-		}else if(position.x > global::terrain.getWidth()*TILE_SIZE)
+		}else if(position.x > game::terrain.getWidth()*TILE_SIZE)
 		{
-			position.x = global::terrain.getWidth()*TILE_SIZE;
+			position.x = game::terrain.getWidth()*TILE_SIZE;
 			body.setLinearVelocity(Vector2(0.0f, velocity.y));
 			body.setPosition(position);
 		}
@@ -323,9 +333,9 @@ class Player : GameObject, Serializable
 			position.y = 0.0f;
 			body.setLinearVelocity(Vector2(velocity.x, 0.0f));
 			body.setPosition(position);
-		}else if(position.y > global::terrain.getHeight()*TILE_SIZE)
+		}else if(position.y > game::terrain.getHeight()*TILE_SIZE)
 		{
-			position.y = global::terrain.getHeight()*TILE_SIZE;
+			position.y = game::terrain.getHeight()*TILE_SIZE;
 			body.setLinearVelocity(Vector2(velocity.x, 0.0f));
 			body.setPosition(position);
 		}
@@ -334,7 +344,7 @@ class Player : GameObject, Serializable
 		animation.update(Graphics.dt);
 		
 		// Update camera
-		global::camera.lookAt(position);
+		game::camera.lookAt(position);
 		
 		// Update audio listener
 		Audio.position = position;
@@ -343,12 +353,12 @@ class Player : GameObject, Serializable
 	void draw()
 	{
 		// Draw skeleton
-		skeleton.draw(@global::batches[SCENE]);
+		skeleton.draw(@game::batches[SCENE]);
 		
 		// Draw debug health bar
 		float p = (health/float(maxHealth));
 		Shape healthBar(Rect(body.getPosition().x-size.x/2.0f, body.getPosition().y-size.y/2.0f-24, size.x*p, 4));
 		healthBar.setFillColor(Vector4(1.0f*(1-p), 1.0f*p, 0.0f, 1.0f));
-		healthBar.draw(@global::batches[SCENE]);
+		healthBar.draw(@game::batches[SCENE]);
 	}
 }

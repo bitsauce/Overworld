@@ -22,12 +22,12 @@ void toggleProfiler()
 
 void zoomIn()
 {
-	global::camera.zoom += 0.1f;
+	game::camera.zoom += 0.1f;
 }
 
 void zoomOut()
 {
-	global::camera.zoom -= 0.1f;
+	game::camera.zoom -= 0.1f;
 }
 
 void exit()

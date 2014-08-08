@@ -11,9 +11,9 @@ class DebugTextDrawer : GameObject
 	{
 		if(Input.getKeyState(KEY_Z))
 		{
-			global::largeFont.setColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+			font::large.setColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 			//for(int i = 0; i < strings.size; i++) {
-			//	global::largeFont.draw(@global::batches[UITEXT], Vector2(20.0f, 12.0f + i*12), strings[i]);
+			//	font::large.draw(@game::batches[UITEXT], Vector2(20.0f, 12.0f + i*12), strings[i]);
 			//}
 			//strings.clear();
 		}

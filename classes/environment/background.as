@@ -44,12 +44,12 @@ class Background : GameObject
 	void update()
 	{
 		// Get hour and mintue
-		int hour = global::timeOfDay.getHour();
-		int minute = global::timeOfDay.getMinute();
-		float time = global::timeOfDay.getTime();
+		int hour = game::timeOfDay.getHour();
+		int minute = game::timeOfDay.getMinute();
+		float time = game::timeOfDay.getTime();
 		
 		// Change background depending on time
-		if(global::timeOfDay.isDay())
+		if(game::timeOfDay.isDay())
 		{
 			// Apply sunrise from 6:00 to 9:00
 			if(hour >= 6 && hour < 9)
@@ -112,21 +112,21 @@ class Background : GameObject
 		vertices[3].position.set(0, Window.getSize().y);
 		vertices[3].color = bottomColor;
 		
-		global::batches[BACKGROUND].addVertices(vertices, QUAD_INDICES);
+		game::batches[BACKGROUND].addVertices(vertices, QUAD_INDICES);
 		
 		if(!Input.getKeyState(KEY_G))
 		{
-			int hour = global::timeOfDay.getHour();
+			int hour = game::timeOfDay.getHour();
 			if(hour >= 6 && hour < 18)
 			{
-				sun.draw(@global::batches[BACKGROUND]);
+				sun.draw(@game::batches[BACKGROUND]);
 			}else{
-				moon.draw(@global::batches[BACKGROUND]);
+				moon.draw(@game::batches[BACKGROUND]);
 			}
 		}else{
 			// Draw sun/moon
 			Vector2 lightPos;
-			int hour = global::timeOfDay.getHour();
+			int hour = game::timeOfDay.getHour();
 			if(hour >= 6 && hour < 18)
 			{
 				sun.draw(@fbo);
@@ -147,9 +147,9 @@ class Background : GameObject
 			fbo.renderToTexture(@fboTexture);
 			
 			// Draw fullscreen rect with godray shader
-			global::batches[SCENE].setShader(@godRayShader);
-			screen.draw(@global::batches[BACKGROUND]);
-			global::batches[SCENE].setShader(null);
+			game::batches[SCENE].setShader(@godRayShader);
+			screen.draw(@game::batches[BACKGROUND]);
+			game::batches[SCENE].setShader(null);
 			
 			// Set light pos
 			lightPos.x /= 800;
