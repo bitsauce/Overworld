@@ -4,7 +4,7 @@ bool isValidTile(Tile tile)
 			tile != FOREGROUND_TILES && tile != MAX_TILES;
 }
 
-class Terrain : GameObject
+class Terrain : GameObject, Serializable
 {
 	// Box2D body
 	b2Body @body;
@@ -89,9 +89,9 @@ class Terrain : GameObject
 		
 		// Load tile textures
 		array<Texture@> tileTextures(MAX_TILES);
-		@tileTextures[GRASS_TILE]	=	@Texture(":/sprites/tiles/grass_tile_test.png");
-		@tileTextures[STONE_TILE]	=	@Texture(":/sprites/tiles/stone_tile_test.png");
-		//@tileTextures[LEAF_TILE]	=	@Texture(":/sprites/tiles/leaf_tile.png");
+		@tileTextures[GRASS_TILE]	=	@Texture(":/sprites/tiles/grass_tile.png");
+		@tileTextures[STONE_TILE]	=	@Texture(":/sprites/tiles/stone_tile.png");
+		@tileTextures[LEAF_TILE]	=	@Texture(":/sprites/tiles/leaf_tile.png");
 		//@tileTextures[TREE_TILE]	=	@Texture(":/sprites/tiles/tree_tile.png");
 		
 		// Create terrain layers
@@ -183,7 +183,7 @@ class Terrain : GameObject
 	}
 	
 	void generate(int width, int height, IniFile @worldFile)
-	{
+	{
 		// Set world size
 		worldFile.setValue("world", "width", formatInt(width, ""));
 		worldFile.setValue("world", "height", formatInt(height, ""));

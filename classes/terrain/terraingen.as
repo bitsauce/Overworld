@@ -29,13 +29,13 @@ class TerrainGen
 		}
 		
 		// Add trees
-		/*for(int x = 5; x < width; x += Math.getRandomInt(10, 20))
+		for(int x = 5; x < width; x += Math.getRandomInt(10, 20))
 		{
 			int ground = getGroundHeight(x);
 			int treeHeight = Math.getRandomInt(10, 15);
 			for(int y = -1; y < treeHeight; y++)
 			{
-				terrain.addTile(x, ground - y, TREE_TILE);
+				//terrain.addTile(x, ground - y, TREE_TILE);
 			}
 			
 			int treeRadius = treeHeight/2.0f;
@@ -47,7 +47,7 @@ class TerrainGen
 					terrain.addTile(x + i, ground + j - treeHeight + 3, LEAF_TILE);
 				}
 			}
-		}*/
+		}
 		
 		// Add bushes
 		int x = 0;

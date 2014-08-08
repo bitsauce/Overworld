@@ -5,16 +5,17 @@
 #include "recipies.as"
 #include "camera.as"
 #include "debug.as"
-#include "textures.as"
+#include "textures.as"
+#include "saveable.as"
 
 // Scenes
 #include "scenes/mainmenu.as"
-#include "scenes/worldselect.as"
+#include "scenes/worldselect.as"
 #include "scenes/createworld.as"
 #include "scenes/game.as"
 
 // Gui
-#include "gui/button.as"
+#include "gui/button.as"
 #include "gui/lineedit.as"
 
 // Environment

@@ -58,27 +58,22 @@ class CreateWorldMenu : Scene
 	}
 	
 	void createWorld()
-	{
+	{
 		// Get world name
 		string worldName = worldNameEdit.getText();
 		if(worldName.length == 0)
 			return;
-		
+		
 		// Create world file
 		IniFile @worldFile = @IniFile("saves:/Overworld/" + worldName + "/world.ini");
 		worldFile.setValue("world", "name", worldName);
 		
 		// Generate world
 		Console.log("Creating world...");
-		global::terrain.generate(250, 50, @worldFile);
+		global::terrain.generate(250, 50, @worldFile);
 		
-		// Save world file
-		worldFile.save();
-		
-		// Create empty player file
-		IniFile("saves:/Overworld/" + worldName + "/players.ini").save();
-		
-		// Load game
-		loadGame(worldName);
+		// Show game
+		global::gameScene.setWorldFile(@worldFile);
+		Engine.pushScene(@global::gameScene);
 	}
 }

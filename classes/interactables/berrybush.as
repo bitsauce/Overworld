@@ -1,10 +1,18 @@
-class Bush : Interactable
+class Bush : Interactable, Serializable
 {
 	float berryTimer = 0.0f;
 	
 	Bush()
 	{
 		@sprite = @Sprite(TextureRegion(@global::textures[BERRY_BUSH_TEXTURE], 0.0f, 0.5f, 1.0f, 1.0f));
+	}
+	
+	void save(IniFile @worldFile)
+	{
+	}
+	
+	void load(IniFile @worldFile)
+	{
 	}
 	
 	void interact(Player @player)

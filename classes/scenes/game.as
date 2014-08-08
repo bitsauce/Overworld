@@ -1,48 +1,63 @@
 class GameScene : Scene
-{
-	IniFile @worldFile;
-	IniFile @playerFile;
-	
-	void loadWorld(string worldPath)
-	{
-		// Load config file
-		@worldFile = @IniFile(worldPath + "/world.ini");
-		@playerFile = @IniFile(worldPath + "/players.ini");
-		
-		// Load terrain
-		Console.log("Loading terrain...");
-		global::terrain.load(@worldFile);
-		
-		// Update time of day
-		//global::timeOfDay.setTime(file.getValue("world", "time"));
-		
-		// Create background
-		Background();
-		
-		// Create player
-		Console.log("Setting up player...");
-		Player player();
-		player.load(@playerFile);
-	}
-	
+{
+	IniFile @worldFile;
+	
+	void setWorldFile(IniFile @worldFile)
+	{
+		// Load config file
+		@this.worldFile = @worldFile;
+	}
+	
+	void loadWorldFile(IniFile @worldFile)
+	{
+		// Set the world file
+		setWorldFile(@worldFile);
+		
+		// Load terrain
+		Console.log("Loading terrain...");
+		global::terrain.load(@worldFile);
+		
+		// Set time of day
+		//global::timeOfDay.setTime(file.getValue("world", "time"));
+	}
+	
+	void addPlayer(Player @player)
+	{
+		Console.log("Loading player '" + player.name + "'...");
+		player.load(@worldFile);
+	}
+	
+	void save()
+	{
+		for(int i = 0; i < global::gameObjects.size; i++)
+		{
+			Serializable @object = cast<Serializable@>(@global::gameObjects[i]);
+			if(@object != null)
+			{
+				object.save(@worldFile);
+			}
+		}
+	}
+	
 	void show()
 	{
 		Console.log("Show game");
+		
+		// Create background
+		Background();
+		
+		// Create player
+		Player player();
+		addPlayer(player);
 	}
 	
 	void hide()
 	{
 		// Do clean up here
 		Console.log("Leaving game");
-		global::terrain.save(@worldFile);
+		save();
 		global::gameObjects.clear();
-		global::interactables.clear();
-		
-		for(int i = 0; i < global::players.size; i++)
-		{
-			global::players[i].save(@playerFile);
-		}
-		
+		global::interactables.clear();
 		global::players.clear();
 	}
 	
@@ -110,22 +125,21 @@ class GameScene : Scene
 			global::batches[i].draw();
 		}
 	}
-}
-
-bool loadGame(string worldPath)
-{
-	Console.log("Loading world: " + worldPath + "...");
-	
-	// Make sure required world files exist
-	if(!FileSystem.fileExists(worldPath + "/world.ini") || !FileSystem.fileExists(worldPath + "/players.ini")) {
-		Console.log("Loading failed (missing files)");
-		return false;
-	}
-	
-	// Load world
-	
-	global::gameScene.loadWorld(worldPath);
-	Engine.pushScene(@global::gameScene);
-	
-	return true;
+}
+
+bool loadGame(string worldPath)
+{
+	Console.log("Loading world: " + worldPath + "...");
+	
+	// Make sure required world files exist
+	if(!FileSystem.fileExists(worldPath + "/world.ini")/* || !FileSystem.fileExists(worldPath + "/players.ini")*/) {
+		Console.log("Loading failed (missing files)");
+		return false;
+	}
+	
+	// Load world
+	global::gameScene.loadWorldFile(@IniFile(worldPath + "/world.ini"));
+	Engine.pushScene(@global::gameScene);
+	
+	return true;
 }

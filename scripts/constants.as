@@ -20,7 +20,7 @@ enum Tile
 	BACKGROUND_TILES,
 	
 	// FOREGROUND_TILES BEGIN
-	//LEAF_TILE,
+	LEAF_TILE,
 	// FOREGROUND_TILES END
 	
 	FOREGROUND_TILES,
@@ -61,8 +61,8 @@ enum Direction
 	NORTH		= 1,
 	SOUTH		= 2,
 	EAST		= 4,
-	WEST		= 8,
-	
+	WEST		= 8,
+	
 	NESW = NORTH | EAST | SOUTH | WEST,
 	
 	NORTH_WEST 	= 16,

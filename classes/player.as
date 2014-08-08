@@ -1,23 +1,23 @@
-class Player : GameObject
-{
-	// Player body
-	b2Body @body;
-	
-	// Player foot sensor (for checking on-gound-ness)
-	b2Fixture @footSensor;
-	int numGroundContact = 0;
-	
+class Player : GameObject, Serializable
+{
+	// Player body
+	b2Body @body;
+	
+	// Player foot sensor (for checking on-gound-ness)
+	b2Fixture @footSensor;
+	int numGroundContact = 0;
+	
 	// Player physical size
 	Vector2 size = Vector2(28.0f, 44.0f);
-	
+	
 	// Player inventory
 	Inventory @inventory;
 	
 	bool pressed = false;
-	
+	
 	// Player name
 	string name = "Bitsauce";
-	
+	
 	// Player skeletal animations
 	spSkeleton @skeleton = @spSkeleton(":/sprites/characters/anim/skeleton.json", ":/sprites/characters/anim/skeleton.atlas", 1.0f);
 	spAnimationState @animation;
@@ -29,7 +29,7 @@ class Player : GameObject
 	float jumpForce = 6800.0f;
 	float accel = 0.1f; // factor
 	float mass = 18.0f;
-	
+	
 	// Player health
 	int maxHealth = 100;
 	int health = 100;
@@ -93,7 +93,7 @@ class Player : GameObject
 		global::players.insertLast(@this);
 	}
 	
-	void save(IniFile @playerFile)
+	void save(IniFile @worldFile)
 	{
 		Console.log("Saving player '" + name + "'...");
 		
@@ -115,24 +115,24 @@ class Player : GameObject
 				}
 			}
 		}
-		playerFile.setValue(name, "items", itemString);
-		playerFile.setValue(name, "itemAmounts", amountString);
+		worldFile.setValue(name, "items", itemString);
+		worldFile.setValue(name, "itemAmounts", amountString);
 		
 		// Save position
-		playerFile.setValue(name, "positionX", formatInt(body.getPosition().x, ""));
-		playerFile.setValue(name, "positionY", formatInt(body.getPosition().y, ""));
+		worldFile.setValue(name, "positionX", formatInt(body.getPosition().x, ""));
+		worldFile.setValue(name, "positionY", formatInt(body.getPosition().y, ""));
 		
 		// Save file
-		playerFile.save();
+		worldFile.save();
 	}
 	
-	void load(IniFile @playerFile)
+	void load(IniFile @worldFile)
 	{
-		if(playerFile.isSection(name))
+		if(worldFile.isSection(name))
 		{
 			// Load inventory
-			string itemString = playerFile.getValue(name, "items");
-			string amountString = playerFile.getValue(name, "itemAmounts");
+			string itemString = worldFile.getValue(name, "items");
+			string amountString = worldFile.getValue(name, "itemAmounts");
 			for(int y = 0; y < INV_HEIGHT; y++)
 			{
 				for(int x = 0; x < INV_WIDTH; x++)
@@ -143,7 +143,7 @@ class Player : GameObject
 			}
 			
 			// Load position
-			body.setPosition(Vector2(parseInt(playerFile.getValue(name, "positionX")), parseInt(playerFile.getValue(name, "positionY"))));
+			body.setPosition(Vector2(parseInt(worldFile.getValue(name, "positionX")), parseInt(worldFile.getValue(name, "positionY"))));
 		}else{
 			// Spawn in the middle of the world
 			int x = 250/2;
