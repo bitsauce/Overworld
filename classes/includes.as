@@ -5,7 +5,6 @@
 #include "recipies.as"
 #include "camera.as"
 #include "debug.as"
-#include "textures.as"
 #include "saveable.as"
 
 // Scenes
@@ -27,7 +26,6 @@
 #include "mobs/zombie.as"
 
 // Items
-#include "items/items.as"
 #include "items/itemdrop.as"
 #include "items/arrow.as"
 #include "items/block.as"

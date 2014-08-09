@@ -1,17 +1,17 @@
 class ItemSlot
 {
-	Item @data;
+	Item @item;
 	int amount;
 		
-	void set(Item @data, int amount)
+	void set(Item @item, int amount)
 	{
-		@this.data = @data;
+		@this.item = @item;
 		this.amount = amount;
 	}
 	
 	void clear()
 	{
-		@this.data = null;
+		@this.item = null;
 		this.amount = 0;
 	}
 	
@@ -19,11 +19,11 @@ class ItemSlot
 	{
 		int dt = 0;
 		this.amount += amount;
-		if(this.amount > data.maxStack)
+		if(this.amount > item.maxStack)
 		{
 			// Slot was overfilled, return delta
-			dt = this.amount - data.maxStack;
-			this.amount = data.maxStack;
+			dt = this.amount - item.maxStack;
+			this.amount = item.maxStack;
 		}
 		return dt;
 	}
@@ -35,7 +35,7 @@ class ItemSlot
 		if(this.amount <= 0)
 		{
 			dt = amount + this.amount;
-			@this.data = null;
+			@this.item = null;
 			this.amount = 0;
 		}
 		return dt;
@@ -43,12 +43,12 @@ class ItemSlot
 	
 	bool isEmpty()
 	{
-		return @data == null;
+		return @item == null;
 	}
 	
-	bool contains(Item @data)
+	bool contains(Item @item)
 	{
-		return @this.data == @data;
+		return @this.item == @item;
 	}
 }
 
@@ -96,7 +96,7 @@ class Inventory : GameObject
 	
 	Item @getSelectedItem()
 	{
-		return @slots[selectedSlot, 0].data;
+		return @slots[selectedSlot, 0].item;
 	}
 	
 	int addItem(Item @data, int amount = 1)
@@ -160,7 +160,7 @@ class Inventory : GameObject
 		if(!slot.isEmpty()) {
 			slot.amount -= amount;
 			if(slot.amount <= 0) {
-				@slot.data = null;
+				@slot.item = null;
 			}
 			return true;
 		}
@@ -234,7 +234,7 @@ class Inventory : GameObject
 				
 				if(!heldSlot.isEmpty() && !escape)
 				{
-					createItemDrop(heldSlot.data, heldSlot.amount);
+					createItemDrop(heldSlot.item, heldSlot.amount);
 					heldSlot.clear();
 				}
 			}
@@ -299,9 +299,9 @@ class Inventory : GameObject
 		}else{
 			if(slot.isEmpty())
 			{
-				slot.set(heldSlot.data, heldSlot.amount);
+				slot.set(heldSlot.item, heldSlot.amount);
 				heldSlot.clear();
-			}else if(@heldSlot.data == @slot.data){
+			}else if(@heldSlot.item == @slot.item){
 				heldSlot.amount = slot.fill(heldSlot.amount);
 				if(heldSlot.amount == 0)
 					heldSlot.clear();
@@ -316,13 +316,13 @@ class Inventory : GameObject
 	void rightClickSlot(ItemSlot @slot)
 	{
 		if(heldSlot.isEmpty()) {
-			heldSlot.set(slot.data, 1);
+			heldSlot.set(slot.item, 1);
 			slot.remove(1);
-		}else if(@heldSlot.data == @slot.data){
+		}else if(@heldSlot.item == @slot.item){
 			heldSlot.amount += 1;
 			slot.remove(1);
 		}else if(slot.isEmpty()) {
-			slot.set(heldSlot.data, 1);
+			slot.set(heldSlot.item, 1);
 			heldSlot.remove(1);
 		}
 	}
@@ -336,7 +336,7 @@ class Inventory : GameObject
 			{
 				for(int x = 0; x < 3; x++)
 				{
-					ItemID id = game::items.find(craftingSlots[x, y].data);
+					ItemID id = craftingSlots[x, y].item.getID();
 					if(id != recipies[i].recipie[x, y])
 					{
 						match = false;
@@ -395,10 +395,10 @@ class Inventory : GameObject
 		
 		// Draw slot content
 		font::small.setColor(Vector4(1.0f)); // Set white font color
-		if(slot.data != null)
+		if(slot.item != null)
 		{
 			// Draw item icon
-			Sprite @icon = @slot.data.icon;
+			Sprite @icon = @slot.item.icon;
 			icon.setPosition(position + Vector2(8, 8));
 			icon.draw(game::batches[GUI]);
 			
@@ -430,13 +430,13 @@ class Inventory : GameObject
 			}
 		}
 		
-		if(@hoveredItemSlot != null && @hoveredItemSlot.data != null) {
-			font::large.draw(game::batches[UITEXT], Input.position + Vector2(0.0f, 16.0f), hoveredItemSlot.data.desc);
+		if(@hoveredItemSlot != null && @hoveredItemSlot.item != null) {
+			font::large.draw(game::batches[UITEXT], Input.position + Vector2(0.0f, 16.0f), hoveredItemSlot.item.desc);
 		}
 		
 		if(!heldSlot.isEmpty())
 		{
-			Sprite @icon = @heldSlot.data.icon;
+			Sprite @icon = @heldSlot.item.icon;
 			icon.setPosition(Input.position + Vector2(-16, -16));
 			icon.draw(game::batches[GUI]);
 			if(heldSlot.amount > 1) {

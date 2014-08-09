@@ -1,11 +1,11 @@
 class BlockItem : Item
-{
-	private Tile tile;
+{
+	TileID tile;
 	
-	BlockItem(ItemID id, Tile tile)
+	BlockItem(ItemID id)
 	{
-		super(id, 255);
-		this.tile = tile;
+		super(id, 255);
+		tile = game::tiles.getByItem(id);
 	}
 	
 	void use(Player @player)
@@ -15,8 +15,7 @@ class BlockItem : Item
 		{
 			TerrainLayer layer = game::terrain.getLayerByTile(tile);
 			Vector2i pos = Vector2i((Input.position + game::camera.position)/TILE_SIZE);
-			if(!game::terrain.isTileAt(pos.x, pos.y, layer) &&
-				player.inventory.removeItem(@this))
+			if(!game::terrain.isTileAt(pos.x, pos.y, layer) && player.inventory.removeItem(@this))
 			{
 				game::terrain.addTile(pos.x, pos.y, tile);
 			}

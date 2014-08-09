@@ -15,37 +15,17 @@ class Pickaxe : Item
 		if(dt.length() <= ITEM_PICKUP_RADIUS)
 		{
 			Vector2i pos = Vector2i((Input.position + game::camera.position)/TILE_SIZE);
-			Tile tile = game::terrain.getTileAt(pos.x, pos.y);
+			TileID tile = game::terrain.getTileAt(pos.x, pos.y);
 			TerrainLayer layer = TERRAIN_SCENE;
 			if(tile == NULL_TILE) { layer = TERRAIN_FOREGROUND; tile = game::terrain.getTileAt(pos.x, pos.y, layer); }
 			if(tile == NULL_TILE) { layer = TERRAIN_BACKGROUND; tile = game::terrain.getTileAt(pos.x, pos.y, layer); }
 			if(prevPos == pos && tile != NULL_TILE)
 			{
 				time += Graphics.dt;
-				if(time >= power) {
-					game::terrain.removeTile(pos.x, pos.y, layer);
-					switch(tile)
-					{
-					case GRASS_TILE:
-					{
-						ItemDrop item(@game::items[GRASS_BLOCK]);
-						item.body.setPosition(Vector2(pos)*TILE_SIZE + item.size/2.0f);
-					}
-					break;
-					/*case TREE_TILE:
-					{
-						ItemDrop item1(@game::items[STICK]);
-						item1.body.setPosition(Vector2(pos)*TILE_SIZE + item1.size/2.0f);
-						ItemDrop item2(@game::items[WOOD_BLOCK]);
-						item2.body.setPosition(Vector2(pos)*TILE_SIZE + item2.size/2.0f);
-					}
-					break;
-					case LEAF_TILE:
-					{
-						ItemDrop item(@game::items[LEAF_BLOCK]);
-						item.body.setPosition(Vector2(pos)*TILE_SIZE + item.size/2.0f);
-					}*/
-					}
+				if(time >= power)
+				{
+					game::terrain.removeTile(pos.x, pos.y, layer);
+					game::tiles[tile].createItemDrop(pos.x, pos.y);
 				}
 			}else{
 				time = 0.0f;

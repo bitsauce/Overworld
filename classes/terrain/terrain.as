@@ -1,4 +1,4 @@
-bool isValidTile(Tile tile)
+bool isValidTile(TileID tile)
 {
 	return tile != SCENE_TILES && tile != BACKGROUND_TILES &&
 			tile != FOREGROUND_TILES && tile != MAX_TILES;
@@ -170,7 +170,7 @@ class Terrain : GameObject, Serializable
 				for(int x = 0; x < width; x++)
 				{
 					int j = (x + y*width) * 3;
-					addTile(x, y, Tile(parseInt(tileString.substr(j, 3))));
+					addTile(x, y, TileID(parseInt(tileString.substr(j, 3))));
 				}
 			}
 		}
@@ -219,7 +219,7 @@ class Terrain : GameObject, Serializable
 		return x >= 0 && x < width && y >= 0 && y < height;
 	}
 	
-	Tile getTileAt(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
+	TileID getTileAt(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
 	{
 		if(!isValid(x, y))
 			return NULL_TILE;
@@ -232,14 +232,14 @@ class Terrain : GameObject, Serializable
 	}
 	
 	// Layer helper functions
-	TerrainLayer getLayerByTile(Tile tile)
+	TerrainLayer getLayerByTile(TileID tile)
 	{
 		if(tile < SCENE_TILES) return TERRAIN_SCENE;
 		if(tile < BACKGROUND_TILES) return TERRAIN_BACKGROUND;
 		return TERRAIN_FOREGROUND;
 	}
 	
-	int getTileIndex(TerrainLayer layer, Tile tile)
+	int getTileIndex(TerrainLayer layer, TileID tile)
 	{
 		switch(layer)
 		{
@@ -250,14 +250,14 @@ class Terrain : GameObject, Serializable
 		return -1;
 	}
 	
-	Tile getTileValue(TerrainLayer layer, int tile)
+	TileID getTileValue(TerrainLayer layer, int tile)
 	{
 		if(tile == 0) return NULL_TILE;
 		switch(layer)
 		{
-		case TERRAIN_SCENE: return Tile(tile + NULL_TILE); break;
-		case TERRAIN_BACKGROUND: return Tile(tile + SCENE_TILES); break;
-		case TERRAIN_FOREGROUND: return Tile(tile + BACKGROUND_TILES); break;
+		case TERRAIN_SCENE: return TileID(tile + NULL_TILE); break;
+		case TERRAIN_BACKGROUND: return TileID(tile + SCENE_TILES); break;
+		case TERRAIN_FOREGROUND: return TileID(tile + BACKGROUND_TILES); break;
 		}
 		return NULL_TILE;
 	}
@@ -271,8 +271,8 @@ class Terrain : GameObject, Serializable
 	{
 		if(!isValidPosition(x, y))
 			return;
-		b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f, TILE_SIZE*2, TILE_SIZE*2), 0.0f);
-		fixture.setFriction(0.5f);
+		b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f, TILE_SIZE*2, TILE_SIZE*2), 0.0f);
+		game::tiles[getTileAt(x, y)].setupFixture(@fixture);
 		@fixtures[x, y] = @fixture;
 	}
 	
@@ -306,7 +306,7 @@ class Terrain : GameObject, Serializable
 	}
 	
 	// Terrain modification
-	void addTile(const int x, const int y, Tile tile)
+	void addTile(const int x, const int y, TileID tile)
 	{
 		// Check for null tile
 		if(tile == NULL_TILE)

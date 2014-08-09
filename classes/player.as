@@ -117,7 +117,7 @@ class Player : GameObject, Serializable
 				ItemSlot @slot = @inventory.slots[x, y];
 				if(!slot.isEmpty())
 				{
-					itemString += formatInt(game::items.find(@slot.data), "0", 3);
+					itemString += formatInt(slot.item.getID(), "0", 3);
 					amountString += formatInt(slot.amount, "0", 3);
 				}else{
 					itemString += "000";
