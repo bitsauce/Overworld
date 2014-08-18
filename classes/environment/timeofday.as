@@ -1,10 +1,15 @@
 class TimeOfDay
 {
-	private float time = 13.0f*60.0f;
-		
-	TimeOfDay()
-	{
-		//@game::timeOfDay = @this;
+	private float time = 13*60; // one o' clock
+	
+	void serialize(StringStream &ss)
+	{
+		ss.write(time);
+	}
+	
+	void deserialize(StringStream &ss)
+	{
+		ss.read(time);
 	}
 	
 	float getTime()
@@ -34,29 +39,31 @@ class TimeOfDay
 	}
 	
 	void update()
-	{
+	{
+		// Apply time
 		time += Graphics.dt;
-		
-		if(Input.getKeyState(KEY_0))
-		{
+		
+		// Debug: Time speedup (0 forwards, 9 backwards)
+		if(Input.getKeyState(KEY_0)) {
 			time += 10.0f;
-		}else if(Input.getKeyState(KEY_9)){
+		}else if(Input.getKeyState(KEY_9)) {
 			time -= 10.0f;
 		}
-		
-		if(time >= 1440.0f)
-		{
+		
+		// Make sure time loops around to 00:00
+		if(time >= 1440.0f) {
 			time = 0.0f;
 		}
-		
-		if(time < 0.0f)
-		{
+		
+		// Make sure time loops back to 24:59
+		if(time < 0.0f) {
 			time = 1440.0f;
 		}
 	}
 	
 	void draw()
-	{
+	{
+		// Debug: Draw time
 		game::debug.setVariable("Time", formatInt(getHour(), "0", 2) + ":" + formatInt(getMinute(), "0", 2));
 	}
 }

@@ -1,23 +1,36 @@
-class Zombie : GameObject
-{
-	Vector2 size = Vector2(24.0f, 42.0f);
-	float moveSpeed = 7.0f;
-	float maxMovementSpeed = 50.0f;
-	b2Body @body;
-	b2Fixture @fix;
-	int health = 5;
+class Zombie : Humanoid
+{
+	// Ray for collision checking
+	RayCast ray;
 	
 	Zombie()
-	{
-		b2BodyDef def;
-		def.type = b2_dynamicBody;
-		def.fixedRotation = true;
-		def.position.set(200, 0);
-		@body = @b2Body(def);
-		@fix = @body.createFixture(Rect(0, 0, size.x, size.y), 32.0f);
-		
-		body.setObject(@this);
-		body.setPreSolveCallback(b2ContactCallback(@preSolve));
+	{
+		init();
+	}
+	
+	private void init()
+	{
+		@ray.plotTest = @TerrainPlotTest;
+		
+		size = Vector2(28.0f, 44.0f);
+		mass = 18.0f;
+		
+		Humanoid::init();
+		
+		health = 5;
+	}
+	
+	void serialize(StringStream &ss)
+	{
+		Console.log("Saving Zombie");
+		
+	}
+	
+	void deserialize(StringStream &ss)
+	{
+		Console.log("Loading Zombie");
+		
+		init();
 	}
 	
 	void remove()
@@ -30,13 +43,15 @@ class Zombie : GameObject
 	{
 		Player @player;
 		Projectile @proj;
-		if(contact.bodyB.getObject(@player)) {
+		if(contact.bodyB.getObject(@player))
+		{
 			contact.setEnabled(false);
 			player.health--;
 			if(player.health <= 0) {
 				player.remove();
 			}
-		}else if(contact.bodyB.getObject(@proj)) {
+		}else if(contact.bodyB.getObject(@proj))
+		{
 			float speed = contact.bodyB.getLinearVelocity().length();
 			if(speed >= 100.0f)
 			{
@@ -48,39 +63,50 @@ class Zombie : GameObject
 			}else{
 				contact.setEnabled(false);
 			}
-		}
+		}
+		
+		Humanoid::preSolve(@contact);
 	}
 	
 	void update()
 	{
-		Player @target = @scene::game.getClosestPlayer(body.getCenter());
+		// Find target player
+		Player @target = @scene::game.getClosestPlayer(body.getCenter());
+		
+		// Get the direction to the target
 		Vector2 dt = target.body.getPosition() - body.getCenter();
-		
-		if(dt.x < 0.0f)
-			body.applyImpulse(Vector2(-1000.0f, 0.0f), body.getCenter());
-		if(dt.x > 0.0f)
-			body.applyImpulse(Vector2(1000.0f, 0.0f), body.getCenter());
-		
-		Vector2i tile = Vector2i((body.getPosition()+Vector2(-8.0f, size.y))/TILE_SIZE);
-		if(game::terrain.isTileAt(tile.x, tile.y))
-			body.applyImpulse(Vector2(0.0f, -1000.0f), body.getCenter());
-		tile = Vector2i((body.getPosition()+Vector2(size.x+8.0f, size.y))/TILE_SIZE);
-		if(game::terrain.isTileAt(tile.x, tile.y))
-			body.applyImpulse(Vector2(0.0f, -1000.0f), body.getCenter());
+		
+		// Move towards target
+		if(dt.x < 0.0f)
+		{
+			moveLeft();
+		}else if(dt.x > 0.0f)
+		{
+			moveRight();
+		}
+		
+		// Jump if necessary
+		if(ray.test(getFeetPosition()/TILE_SIZE, (getFeetPosition() + Vector2(24.0f, 0.0f))/TILE_SIZE) ||
+			ray.test(getFeetPosition()/TILE_SIZE, (getFeetPosition() - Vector2(24.0f, 0.0f))/TILE_SIZE))
+		{
+			jump();
+		}
 		
 		Vector2 vel = body.getLinearVelocity();
-		if(vel.x >= maxMovementSpeed) {
-			vel.x = maxMovementSpeed;
-		}else if(vel.x <= -maxMovementSpeed) {
-			vel.x = -maxMovementSpeed;
+		if(vel.x >= maxRunSpeed)
+		{
+			vel.x = maxRunSpeed;
+		}else if(vel.x <= -maxRunSpeed)
+		{
+			vel.x = -maxRunSpeed;
 		}
-		body.setLinearVelocity(vel);
+		body.setLinearVelocity(vel);
+		
+		updateAnimations();
 	}
 	
 	void draw()
-	{
-		Shape @shape = Shape(Rect(body.getPosition(), size));
-		shape.setFillColor(Vector4(0.0f, 1.0f, 0.0f, 1.0f));
-		shape.draw(@scene::game.getBatch(SCENE));
+	{
+		Humanoid::draw();
 	}
 }

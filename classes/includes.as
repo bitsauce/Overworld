@@ -5,6 +5,8 @@
 #include "recipies.as"
 #include "camera.as"
 #include "debug.as"
+#include "humanoid.as"
+#include "raycast.as"
 
 // Scenes
 #include "scenes/mainmenu.as"

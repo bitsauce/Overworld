@@ -162,11 +162,12 @@ class GameScene : Scene
 		setWorldDir(worldDir);
 		
 		// Load terrain
-		Scripts.deserialize(@terrain, worldDir + "/terrain.obj");
-		if(@terrain == null) Console.log("wat1");
+		Scripts.deserialize(@terrain, worldDir + "/terrain.obj");
+		
+		// Load time of day
+		Scripts.deserialize(@timeOfDay, worldDir + "/timeOfDay.obj");
 		
 		// Create global objects
-		@timeOfDay = @TimeOfDay();
 		@camera = @Camera();
 		@debug = @DebugTextDrawer();
 		@spawner = @Spawner();
@@ -191,7 +192,10 @@ class GameScene : Scene
 	void save()
 	{
 		// Save terrain
-		Scripts.serialize(@terrain, worldDir + "/terrain.obj");
+		Scripts.serialize(@terrain, worldDir + "/terrain.obj");
+		
+		// Save time of day
+		Scripts.serialize(@timeOfDay, worldDir + "/timeOfDay.obj");
 		
 		// Save game objects
 		FileSystem.remove(worldDir + "/objects");
@@ -226,8 +230,10 @@ class GameScene : Scene
 	{
 		// Step Box2D
 		Box2D.step(Graphics.dt);
-		
-		background.update();
+		
+		timeOfDay.update();
+		background.update();
+		spawner.update();
 		
 		// Update all game objects
 		for(int i = 0; i < objects.size; i++) {
@@ -245,7 +251,13 @@ class GameScene : Scene
 		// Create translation matrix
 		batches[SCENE].setProjectionMatrix(camera.getProjectionMatrix());
 		
-		background.draw();
+		background.draw();
+		timeOfDay.draw();
+		spawner.draw();
+		
+		if(Input.getKeyState(KEY_Z)) {
+			debug.draw();
+		}
 		
 		// Draw game object into batches
 		for(int i = 0; i < objects.size; i++) {

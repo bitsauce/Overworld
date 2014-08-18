@@ -11,5 +11,9 @@ class Spawner
 			timer = 10.0f;
 		}
 		timer -= Graphics.dt;
+	}
+	
+	void draw()
+	{
 	}
 }
