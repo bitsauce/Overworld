@@ -1,4 +1,4 @@
-class TimeOfDay : GameObject
+class TimeOfDay
 {
 	private float time = 13.0f*60.0f;
 		
@@ -57,6 +57,6 @@ class TimeOfDay : GameObject
 	
 	void draw()
 	{
-		game::debug.addVariable("Time", formatInt(getHour(), "0", 2) + ":" + formatInt(getMinute(), "0", 2));
+		game::debug.setVariable("Time", formatInt(getHour(), "0", 2) + ":" + formatInt(getMinute(), "0", 2));
 	}
 }

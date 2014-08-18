@@ -1,19 +1,3 @@
-Player @getClosestPlayer(Vector2 position)
-{
-	Player @closestPlayer = null;
-	float minDist = -1.0f;
-	for(int i = 0; i < game::players.size; i++)
-	{
-		float dist = (game::players[i].body.getPosition() - position).length();
-		if(dist <= minDist || minDist < 0.0f)
-		{
-			@closestPlayer = @game::players[i];
-			minDist = dist;
-		}
-	}
-	return closestPlayer;
-}
-
 class Zombie : GameObject
 {
 	Vector2 size = Vector2(24.0f, 42.0f);
@@ -69,7 +53,7 @@ class Zombie : GameObject
 	
 	void update()
 	{
-		Player @target = @getClosestPlayer(body.getCenter());
+		Player @target = @scene::game.getClosestPlayer(body.getCenter());
 		Vector2 dt = target.body.getPosition() - body.getCenter();
 		
 		if(dt.x < 0.0f)
@@ -97,6 +81,6 @@ class Zombie : GameObject
 	{
 		Shape @shape = Shape(Rect(body.getPosition(), size));
 		shape.setFillColor(Vector4(0.0f, 1.0f, 0.0f, 1.0f));
-		shape.draw(game::batches[SCENE]);
+		shape.draw(@scene::game.getBatch(SCENE));
 	}
 }

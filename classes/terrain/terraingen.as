@@ -6,6 +6,8 @@ class TerrainGen
 	
 	void generate(Terrain @terrain)
 	{
+		Console.log("Generating world...");
+		
 		@this.terrain = @terrain;
 		width = terrain.getWidth();
 		height = terrain.getHeight();
@@ -63,7 +65,7 @@ class TerrainGen
 				{
 					Bush bush();
 					int y = getGroundHeight(x+i+1)-1;
-					bush.place((x+i+1)*TILE_SIZE, y*TILE_SIZE - 4);
+					bush.place(x+i+1, y);
 					bushCount--;
 					i += Math.getRandomInt(4, 8);
 				}else{
@@ -71,6 +73,8 @@ class TerrainGen
 				}
 			}
 		} while(x < width);
+		
+		Console.log("Terrain generated");
 	}
 	
 	int getGroundHeight(int x)

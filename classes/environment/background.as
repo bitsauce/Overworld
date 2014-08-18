@@ -13,7 +13,7 @@ Vector4 blendRgb(Vector4 dst, Vector4 src)
 	return ret;
 }
 
-class Background : GameObject
+class Background
 {
 	Vector4 topColor = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	Vector4 bottomColor = Vector4(0.35f, 0.67f, 1.0f, 1.0f);
@@ -112,16 +112,17 @@ class Background : GameObject
 		vertices[3].position.set(0, Window.getSize().y);
 		vertices[3].color = bottomColor;
 		
-		game::batches[BACKGROUND].addVertices(vertices, QUAD_INDICES);
+		Batch @background = scene::game.getBatch(BACKGROUND);
+		background.addVertices(vertices, QUAD_INDICES);
 		
 		if(!Input.getKeyState(KEY_G))
 		{
 			int hour = game::timeOfDay.getHour();
 			if(hour >= 6 && hour < 18)
 			{
-				sun.draw(@game::batches[BACKGROUND]);
+				sun.draw(@background);
 			}else{
-				moon.draw(@game::batches[BACKGROUND]);
+				moon.draw(@background);
 			}
 		}else{
 			// Draw sun/moon
@@ -147,9 +148,9 @@ class Background : GameObject
 			fbo.renderToTexture(@fboTexture);
 			
 			// Draw fullscreen rect with godray shader
-			game::batches[SCENE].setShader(@godRayShader);
-			screen.draw(@game::batches[BACKGROUND]);
-			game::batches[SCENE].setShader(null);
+			background.setShader(@godRayShader);
+			screen.draw(@background);
+			background.setShader(null);
 			
 			// Set light pos
 			lightPos.x /= 800;

@@ -16,23 +16,15 @@ namespace font
 
 namespace game
 {
-	// Global arrays
-	array<GameObject@> objects;
-	array<Furniture@> furnitures;
-	array<Player@> players;
-	
 	// Global objects
-	TimeOfDay timeOfDay;
-	Terrain terrain;
-	
-	Camera camera;
-	DebugTextDrawer debug;
-	Spawner spawner;
-	
+	TimeOfDay @get_timeOfDay()		{ return @scene::game.getTimeOfDay(); }
+	Terrain @get_terrain()			{ return @scene::game.getTerrain(); }
+	Camera @get_camera()			{ return @scene::game.getCamera(); }
+	DebugTextDrawer @get_debug()	{ return @scene::game.getDebug(); }
+	Spawner @get_spawner()			{ return @scene::game.getSpawner(); }
+	
+	// Global managers
 	ItemManager items;
 	TextureManager textures;
 	TileManager tiles;
-	
-	// Drawing batches
-	array<Batch@> batches(LAYERS_MAX);
 }

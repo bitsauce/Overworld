@@ -4,7 +4,7 @@ bool isValidTile(TileID tile)
 			tile != FOREGROUND_TILES && tile != MAX_TILES;
 }
 
-class Terrain : GameObject, Serializable
+class Terrain
 {
 	// Box2D body
 	b2Body @body;
@@ -13,7 +13,7 @@ class Terrain : GameObject, Serializable
 	private grid<b2Fixture@> fixtures;
 	
 	// Terrain layers (as TileGrids)
-	private array<TileGrid@> layers(TERRAIN_LAYERS_MAX);
+	private array<TileGrid@> layers;
 	
 	// Terrain size
 	private int width;
@@ -21,96 +21,25 @@ class Terrain : GameObject, Serializable
 		
 	// Terrain initialized flag
 	bool initialized;
-		
+	
 	// Terrain generator
-	TerrainGen gen();
-	
-	// Shadow shader
-	Shader @shadowShader = @Shader(":/shaders/terrainshadows.vert", ":/shaders/terrainshadows.frag");
-	
-	// Shadow batch and texture (fbo)
-	Batch @shadowBatch = @Batch();
-	Texture @shadowTexture;
-	
-	// Shadow shader uniforms
-	float radius = 3.0f;
-	float falloff = 3.0f;
-	int shadowDownsampleLevel = 16; // must be power of two
-	
-	// Pre-rendered terrain texture
-	Texture @terrainTexture;
-	
-	Terrain()
-	{
-		// Update texture object
-		windowResized();
-		
-		// Set shader uniforms
-		shadowShader.setUniform1f("radius", radius);
-		shadowShader.setUniform1f("falloff", falloff);
-	}
-	
-	~Terrain()
-	{
-		//save();
-	}
-	
-	int get_padding() const
-	{
-		return radius*shadowDownsampleLevel*2;
-	}
-	
-	void windowResized()
-	{
-		Vector2i size = Window.getSize();
-		@terrainTexture = @Texture(size.x + padding, size.y + padding);
-		terrainTexture.setFiltering(LINEAR);
-		
-		Vector2i resolution = size/shadowDownsampleLevel;
-		@shadowTexture = @Texture(resolution.x, resolution.y);
-		shadowTexture.setFiltering(LINEAR);
-		
-		shadowBatch.clear();
-		shadowBatch.setShader(@shadowShader);
-		Shape @downsampledRect = @Shape(Rect(0.0f, 0.0f, resolution.x, resolution.y));
-		downsampledRect.draw(@shadowBatch);
-		
-		shadowShader.setUniform2f("resolution", resolution.x, resolution.y);
-		shadowShader.setSampler2D("texture", @terrainTexture);
-	}
+	TerrainGen generator;
 	
 	private void init(int width, int height)
 	{
+		// Set initialized flag
+		this.initialized = false;
+		
 		// Set size
 		this.width = width;
 		this.height = height;
 		
-		Console.log("Init terrain of size: " + width + ", " + height);
-		
-		// Load tile textures
-		array<Texture@> tileTextures(MAX_TILES);
-		@tileTextures[GRASS_TILE]	=	@Texture(":/sprites/tiles/grass_tile.png");
-		@tileTextures[STONE_TILE]	=	@Texture(":/sprites/tiles/stone_tile.png");
-		@tileTextures[LEAF_TILE]	=	@Texture(":/sprites/tiles/leaf_tile.png");
-		//@tileTextures[TREE_TILE]	=	@Texture(":/sprites/tiles/tree_tile.png");
+		Console.log("Initializing terrain of size: " + width + ", " + height);
 		
 		// Create terrain layers
-		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
-		{
-			int start = 0;
-			int end = 0;
-			switch(i) {
-			case TERRAIN_SCENE: start = NULL_TILE + 1; end = SCENE_TILES; break;
-			case TERRAIN_BACKGROUND: start = SCENE_TILES + 1; end = BACKGROUND_TILES; break;
-			case TERRAIN_FOREGROUND: start = BACKGROUND_TILES + 1; end = FOREGROUND_TILES; break;
-			}
-			
-			array<Texture@> textures;
-			for(; start < end; start++) {
-				textures.insertLast(@tileTextures[start]);
-			}
-			
-			@layers[i] = @TileGrid(width, height, textures);
+		layers.resize(TERRAIN_LAYERS_MAX);
+		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
+			@layers[i] = @TileGrid(width, height);
 		}
 		
 		// Resize fixture grid
@@ -128,13 +57,34 @@ class Terrain : GameObject, Serializable
 		// NOTE TO SELF: The vertex count can be redused to 424320
 		// on-screen vertices by using texture atlases. This
 		// equates to 15.28 MB of VRAM. Formulae: num_tiles * quads_per_tile * verts_per_quad * floats_per_vert * float_to_bytes / size_of_megabyte
-		Console.log("Terrain vertex count: " + width*height*13*4 + " (" + (width*height*13*4*8*4.0f/1048576.0f) + " MB)");
+		Console.log("Terrain VRAM usage: " + (width*height*13*4*8*4.0f/1048576.0f) + " MB");
 	}
 	
-	void save(IniFile @worldFile)
+	void setInitialized(bool initialized)
 	{
-		if(@worldFile == null) return;
+		// Set layers as initialized
+		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
+			layers[i].setInitialized(true);
+		}
+		
+		// Update all fixtures
+		if(this.initialized == false && initialized == true) {
+			for(int x = 0; x < width; x++) {
+				for(int y = 0; y < height; y++) {
+					updateFixture(x, y);
+				}
+			}
+		}
+		this.initialized = initialized;
+	}
+	
+	void serialize(StringStream &ss)
+	{
 		Console.log("Saving terrain...");
+		
+		ss.write(width);
+		ss.write(height);
+		
 		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
 		{
 			string tileString;
@@ -145,26 +95,25 @@ class Terrain : GameObject, Serializable
 					tileString += formatInt(getTileAt(x, y, TerrainLayer(i)), "0", 3);
 				}
 			}
-			if(i == TERRAIN_BACKGROUND) worldFile.setValue("terrain", "background", tileString);
-			else if(i == TERRAIN_SCENE) worldFile.setValue("terrain", "scene", tileString);
-			else if(i == TERRAIN_FOREGROUND) worldFile.setValue("terrain", "foreground", tileString);
+			ss.write(tileString);
 		}
-		Console.log("Terrain saved");
-		worldFile.save();
 	}
 	
-	void load(IniFile @worldFile)
+	void deserialize(StringStream &ss)
 	{	
+		Console.log("Loading terrain...");
+		
 		// Initialize terrain
-		init(parseInt(worldFile.getValue("world", "width")), parseInt(worldFile.getValue("world", "height")));
+		int width, height;
+		ss.read(width);
+		ss.read(height);
+		init(width, height);
 		
 		// Load tiles from file
 		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
 		{
 			string tileString;
-			if(i == TERRAIN_BACKGROUND) tileString = worldFile.getValue("terrain", "background");
-			else if(i == TERRAIN_SCENE) tileString = worldFile.getValue("terrain", "scene");
-			else if(i == TERRAIN_FOREGROUND) tileString = worldFile.getValue("terrain", "foreground");
+			ss.read(tileString);
 			for(int y = 0; y < height; y++)
 			{
 				for(int x = 0; x < width; x++)
@@ -176,30 +125,18 @@ class Terrain : GameObject, Serializable
 		}
 		
 		// Set layers as initialized
-		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
-			layers[i].setInitialized(true);
-		}
 		setInitialized(true);
 	}
 	
-	void generate(int width, int height, IniFile @worldFile)
+	void generate(int width, int height)
 	{
-		// Set world size
-		worldFile.setValue("world", "width", formatInt(width, ""));
-		worldFile.setValue("world", "height", formatInt(height, ""));
-		
 		// Initialize terrain
 		init(width, height);
 		
-		// Generate a terrain
-		Console.log("Generating world...");
-		gen.generate(@this);
-		save(@worldFile);
+		// Generate stuff
+		generator.generate(@game::terrain);
 		
-		// Set layers as initialized
-		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
-			layers[i].setInitialized(true);
-		}
+		// Set terrain as initialized
 		setInitialized(true);
 	}
 	
@@ -221,9 +158,7 @@ class Terrain : GameObject, Serializable
 	
 	TileID getTileAt(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
 	{
-		if(!isValid(x, y))
-			return NULL_TILE;
-		return getTileValue(layer, layers[layer].getTileAt(x, y));
+		return isValid(x, y) ? layers[layer].getTileAt(x, y) : NULL_TILE;
 	}
 	
 	bool isTileAt(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
@@ -231,7 +166,6 @@ class Terrain : GameObject, Serializable
 		return getTileAt(x, y, layer) != NULL_TILE;
 	}
 	
-	// Layer helper functions
 	TerrainLayer getLayerByTile(TileID tile)
 	{
 		if(tile < SCENE_TILES) return TERRAIN_SCENE;
@@ -239,46 +173,18 @@ class Terrain : GameObject, Serializable
 		return TERRAIN_FOREGROUND;
 	}
 	
-	int getTileIndex(TerrainLayer layer, TileID tile)
-	{
-		switch(layer)
-		{
-		case TERRAIN_SCENE: return tile - NULL_TILE; break;
-		case TERRAIN_BACKGROUND: return tile - SCENE_TILES; break;
-		case TERRAIN_FOREGROUND: return tile - BACKGROUND_TILES; break;
-		}
-		return -1;
-	}
-	
-	TileID getTileValue(TerrainLayer layer, int tile)
-	{
-		if(tile == 0) return NULL_TILE;
-		switch(layer)
-		{
-		case TERRAIN_SCENE: return TileID(tile + NULL_TILE); break;
-		case TERRAIN_BACKGROUND: return TileID(tile + SCENE_TILES); break;
-		case TERRAIN_FOREGROUND: return TileID(tile + BACKGROUND_TILES); break;
-		}
-		return NULL_TILE;
-	}
-	
-	private bool isValidPosition(int x, int y) const
-	{
-		return x >= 0 && x < width && y >= 0 && y < height;
-	}
-	
 	private void createFixture(int x, int y)
 	{
-		if(!isValidPosition(x, y))
+		if(!isValid(x, y))
 			return;
-		b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f, TILE_SIZE*2, TILE_SIZE*2), 0.0f);
+		b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f, TILE_SIZE*2, TILE_SIZE*2), 0.0f);
 		game::tiles[getTileAt(x, y)].setupFixture(@fixture);
 		@fixtures[x, y] = @fixture;
 	}
 	
 	private void removeFixture(int x, int y)
 	{
-		if(!isValidPosition(x, y))
+		if(!isValid(x, y))
 			return;
 		body.removeFixture(@fixtures[x, y]);
 		@fixtures[x, y] = null;
@@ -286,7 +192,7 @@ class Terrain : GameObject, Serializable
 	
 	private bool isFixtureAt(int x, int y)
 	{
-		if(!isValidPosition(x, y))
+		if(!isValid(x, y))
 			return false;
 		return @fixtures[x, y] != null;
 	}
@@ -295,7 +201,7 @@ class Terrain : GameObject, Serializable
 	{
 		// Find out if this tile should contain a fixture
 		TileGrid @scene = @layers[TERRAIN_SCENE];
-		bool shouldContainFixture = scene.isTileAt(x, y) && (scene.getTileState(x, y) & NESW != NESW);
+		bool shouldContainFixture = scene.isTileAt(x, y, true) && (scene.getTileState(x, y, true) & NESW != NESW);
 		
 		// Create or remove fixture
 		if(shouldContainFixture && !isFixtureAt(x, y)) {
@@ -316,7 +222,7 @@ class Terrain : GameObject, Serializable
 		TerrainLayer layer = getLayerByTile(tile);
 		
 		// Add tile to tile grid
-		layers[layer].addTile(x, y, getTileIndex(layer, tile));
+		layers[layer].addTile(x, y, tile);
 		
 		// If we've modified the scene layer
 		if(initialized && layer == TERRAIN_SCENE)
@@ -347,38 +253,12 @@ class Terrain : GameObject, Serializable
 		}
 	}
 	
-	void setInitialized(bool initialized)
-	{
-		if(this.initialized == false && initialized == true)
-		{
-			TileGrid @scene = @layers[TERRAIN_SCENE];
-			for(int x = 0; x < width; x++)
-			{
-				for(int y = 0; y < height; y++)
-				{
-					updateFixture(x, y);
-				}
-			}
-		}
-		this.initialized = initialized;
-	}
-	
 	// Drawing
-	void draw(TerrainLayer layer)
+	void draw(TerrainLayer layer, Texture @texture)
 	{
 		Matrix4 mat;
-		mat.translate(-game::camera.position.x + padding/(2.0f * game::camera.zoom), -game::camera.position.y + padding/(2.0f * game::camera.zoom), 0.0f);
+		mat.translate(-game::camera.position.x + scene::game.padding/(2.0f * game::camera.zoom), -game::camera.position.y + scene::game.padding/(2.0f * game::camera.zoom), 0.0f);
 		mat.scale(game::camera.zoom);
-		layers[layer].draw(@terrainTexture, mat);
-	}
-	
-	void drawShadows()
-	{
-		shadowTexture.clear();
-		shadowBatch.renderToTexture(@shadowTexture);
-		
-		Shape @screen = @Shape(Rect(Vector2(-padding*0.5f), Vector2(Window.getSize()) + Vector2(padding)));
-		screen.setFillTexture(@shadowTexture);
-		screen.draw(@game::batches[FOREGROUND]);
+		layers[layer].draw(@texture, mat);
 	}
 }

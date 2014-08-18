@@ -1,33 +1,26 @@
-void createBush()
-{
-	Bush bush();
-	
-	Vector2 cursor = Input.position + game::camera.position;
-	bush.place(cursor.x/TILE_SIZE, cursor.y/TILE_SIZE);
-}
-
-class Player : GameObject, Serializable
+class Player : GameObject
 {
 	// Player body
 	b2Body @body;
 	
 	// Player foot sensor (for checking on-gound-ness)
 	b2Fixture @footSensor;
-	int numGroundContact = 0;
+	int numGroundContact;
 	
 	// Player physical size
-	Vector2 size = Vector2(28.0f, 44.0f);
+	Vector2 size;
 	
 	// Player inventory
 	Inventory @inventory;
 	
-	bool pressed = false;
+	// For single shot items
+	bool lmbPressed;
 	
 	// Player name
-	string name = "Bitsauce";
+	string name;
 	
 	// Player skeletal animations
-	spSkeleton @skeleton = @spSkeleton(":/sprites/characters/anim/skeleton.json", ":/sprites/characters/anim/skeleton.atlas", 1.0f);
+	spSkeleton @skeleton;
 	spAnimationState @animation;
 	spAnimation @currentAnim;
 	
@@ -46,66 +39,85 @@ class Player : GameObject, Serializable
 	array<AudioSource@> walkDirtSounds;
 	
 	Player()
-	{
-		Input.bind(KEY_V, @createBush);
-		
-		// Create an inventory for the player
-		@inventory = @Inventory(@this);
-		
-		// Create body defintion
-		b2BodyDef def;
-		def.type = b2_bulletBody;
-		def.fixedRotation = true;
-		def.allowSleep = false;
-		def.linearDamping = 1.0f;
-		
-		// Create player body
-		@body = @b2Body(def);
-		body.setObject(@this);
-		body.setBeginContactCallback(b2ContactCallback(@beginContact));
-		body.setEndContactCallback(b2ContactCallback(@endContact));
-		body.setPreSolveCallback(b2ContactCallback(@preSolve));
-		
-		// Create upper and lower circle fixtures
-		b2Fixture @fixture = @body.createFixture(Vector2(0.0f, -size.x/4.0f), size.x/2.0f, mass);
-		fixture.setFriction(0.0f);
-		@fixture = @body.createFixture(Vector2(0.0f,  size.x/4.0f), size.x/2.0f, mass);
-		fixture.setFriction(0.0f);
-		
-		// Create foot sensor
-		@footSensor = @body.createFixture(Rect(-4, size.x/4.0f+12, 8, 8), 0.0f);
-		footSensor.setSensor(true);
-		
-		// Setup spine animations
-		spAnimationStateData @data = @spAnimationStateData(@skeleton);
-		data.setMix("idle", "walk", 0.2f);
-		data.setMix("walk", "idle", 0.5f);
-		data.setMix("jump", "idle", 0.1f);
-		data.setMix("walk", "jump", 0.1f);
-		data.setMix("jump", "idle", 0.1f);
-		data.setMix("idle", "jump", 0.2f);
-		
-		// Create spine animation
-		@animation = @spAnimationState(@data);
-		@animation.eventCallback = @spEventCallback(@animationEvent);
-		animation.looping = true;
-		changeAnimation("idle");
-		
-		walkDirtSounds.resize(4);
-		for(int i = 0; i < 4; i++) {
-			@walkDirtSounds[i] = @AudioSource(":/sounds/player/walk_dirt_"+(i+1)+".wav");
-			walkDirtSounds[i].looping = false;
-		}
-		
-		skeleton.texture.setFiltering(LINEAR);
-		
-		// Add to list of players
-		game::players.insertLast(@this);
+	{
+		init();
+	}
+	
+	private void init()
+	{
+		// Create an inventory for the player
+		@inventory = @Inventory(@this);
+		
+		@skeleton = @spSkeleton(":/sprites/characters/anim/skeleton.json", ":/sprites/characters/anim/skeleton.atlas", 1.0f);
+		
+		size = Vector2(28.0f, 44.0f);
+		name = "Bitsauce";
+		
+		lmbPressed = false;
+			
+		maxRunSpeed = 256.0f;
+		moveForce = 5000.0f;
+		jumpForce = 6800.0f;
+		accel = 0.1f; // factor
+		mass = 18.0f;
+		maxHealth = 100;
+		health = 100;
+		
+		// Create body defintion
+		b2BodyDef def;
+		def.type = b2_bulletBody;
+		def.fixedRotation = true;
+		def.allowSleep = false;
+		def.linearDamping = 1.0f;
+		
+		// Create player body
+		@body = @b2Body(def);
+		body.setObject(@this);
+		body.setBeginContactCallback(b2ContactCallback(@beginContact));
+		body.setEndContactCallback(b2ContactCallback(@endContact));
+		body.setPreSolveCallback(b2ContactCallback(@preSolve));
+		
+		// Create upper and lower circle fixtures
+		b2Fixture @fixture = @body.createFixture(Vector2(0.0f, -size.x/4.0f), size.x/2.0f, mass);
+		fixture.setFriction(0.0f);
+		@fixture = @body.createFixture(Vector2(0.0f,  size.x/4.0f), size.x/2.0f, mass);
+		fixture.setFriction(0.0f);
+		
+		// Create foot sensor
+		@footSensor = @body.createFixture(Rect(-4, size.x/4.0f+12, 8, 8), 0.0f);
+		footSensor.setSensor(true);
+		numGroundContact = 0;
+		
+		// Setup spine animations
+		spAnimationStateData @data = @spAnimationStateData(@skeleton);
+		data.setMix("idle", "walk", 0.2f);
+		data.setMix("walk", "idle", 0.5f);
+		data.setMix("jump", "idle", 0.1f);
+		data.setMix("walk", "jump", 0.1f);
+		data.setMix("jump", "idle", 0.1f);
+		data.setMix("idle", "jump", 0.2f);
+		
+		// Create spine animation
+		@animation = @spAnimationState(@data);
+		@animation.eventCallback = @spEventCallback(@animationEvent);
+		animation.looping = true;
+		changeAnimation("idle");
+		
+		walkDirtSounds.resize(4);
+		for(int i = 0; i < 4; i++) {
+			@walkDirtSounds[i] = @AudioSource(":/sounds/player/walk_dirt_"+(i+1)+".wav");
+			walkDirtSounds[i].looping = false;
+		}
+		
+		skeleton.texture.setFiltering(LINEAR);
 	}
 	
-	void save(IniFile @worldFile)
+	void serialize(StringStream &ss)
 	{
 		Console.log("Saving player '" + name + "'...");
+		
+		ss.write(body.getPosition().x);
+		ss.write(body.getPosition().y);
 		
 		// Save inventory
 		string itemString;
@@ -125,44 +137,32 @@ class Player : GameObject, Serializable
 				}
 			}
 		}
-		worldFile.setValue(name, "items", itemString);
-		worldFile.setValue(name, "itemAmounts", amountString);
-		
-		// Save position
-		worldFile.setValue(name, "positionX", formatInt(body.getPosition().x, ""));
-		worldFile.setValue(name, "positionY", formatInt(body.getPosition().y, ""));
-		
-		// Save file
-		worldFile.save();
+		ss.write(itemString);
+		ss.write(amountString);
 	}
 	
-	void load(IniFile @worldFile)
-	{
-		if(worldFile.isSection(name))
+	void deserialize(StringStream &ss)
+	{
+		init();
+		
+		Console.log("Loading player '" + name + "'...");
+		
+		float x, y;
+		ss.read(x);
+		ss.read(y);
+		body.setPosition(Vector2(x, y));
+
+		// Load inventory
+		string itemString, amountString;
+		ss.read(itemString);
+		ss.read(amountString);
+		for(int y = 0; y < INV_HEIGHT; y++)
 		{
-			// Load inventory
-			string itemString = worldFile.getValue(name, "items");
-			string amountString = worldFile.getValue(name, "itemAmounts");
-			for(int y = 0; y < INV_HEIGHT; y++)
+			for(int x = 0; x < INV_WIDTH; x++)
 			{
-				for(int x = 0; x < INV_WIDTH; x++)
-				{
-					int j = (x + y*INV_WIDTH) * 3;
-					inventory.slots[x, y].set(@game::items[ItemID(parseInt(itemString.substr(j, 3)))], parseInt(amountString.substr(j, 3)));
-				}
+				int j = (x + y*INV_WIDTH) * 3;
+				inventory.slots[x, y].set(@game::items[ItemID(parseInt(itemString.substr(j, 3)))], parseInt(amountString.substr(j, 3)));
 			}
-			
-			// Load position
-			body.setPosition(Vector2(parseInt(worldFile.getValue(name, "positionX")), parseInt(worldFile.getValue(name, "positionY"))));
-		}else{
-			// Spawn in the middle of the world
-			int x = 250/2;
-			int y = game::terrain.gen.getGroundHeight(x);
-			body.setPosition(Vector2(x*TILE_SIZE, y*TILE_SIZE));
-			
-			// Give default loadout
-			inventory.addItem(@game::items[PICKAXE_IRON]);
-			inventory.addItem(@game::items[STONE_BLOCK], 50);
 		}
 	}
 	
@@ -295,23 +295,21 @@ class Player : GameObject, Serializable
 		{
 			// Use selected item
 			Item @item = inventory.getSelectedItem();
-			if(@item != null && (!item.singleShot || !pressed)) {
+			if(@item != null && (!item.singleShot || !lmbPressed)) {
 				item.use(@this);
 			}
 			
-			pressed = true;
+			lmbPressed = true;
 		}else{
-			pressed = false;
+			lmbPressed = false;
 		}
 		
+		// Furniture interaction
 		if(Input.getKeyState(KEY_RMB))
 		{
-			for(int i = 0; i < game::furnitures.size; i++)
-			{
-				Furniture @interactable = @game::furnitures[i];
-				if((interactable.getPosition() - position).length() <= ITEM_PICKUP_RADIUS && interactable.isHovered()) {
-					interactable.interact(@this);
-				}
+			Furniture @furniture = @scene::game.getHoveredFurniture();
+			if((furniture.getPosition() - position).length() <= ITEM_PICKUP_RADIUS) {
+				furniture.interact(@this);
 			}
 		}
 		
@@ -347,18 +345,23 @@ class Player : GameObject, Serializable
 		game::camera.lookAt(position);
 		
 		// Update audio listener
-		Audio.position = position;
+		Audio.position = position;
+		
+		//
+		inventory.update();
 	}
 	
 	void draw()
 	{
 		// Draw skeleton
-		skeleton.draw(@game::batches[SCENE]);
+		skeleton.draw(@scene::game.getBatch(SCENE));
 		
 		// Draw debug health bar
 		float p = (health/float(maxHealth));
 		Shape healthBar(Rect(body.getPosition().x-size.x/2.0f, body.getPosition().y-size.y/2.0f-24, size.x*p, 4));
 		healthBar.setFillColor(Vector4(1.0f*(1-p), 1.0f*p, 0.0f, 1.0f));
-		healthBar.draw(@game::batches[SCENE]);
+		healthBar.draw(@scene::game.getBatch(SCENE));
+		
+		inventory.draw();
 	}
 }

@@ -3,8 +3,7 @@ const float ITEM_SPEED = 1000.0f;
 class ItemDrop : GameObject
 {
 	Vector2 velocity;
-	Vector2 size = Vector2(16.0f, 16.0f);
-	float moveSpeed = 7.0f;
+	Vector2 size;
 	b2Body @body;
 	b2Fixture @fix;
 	
@@ -16,23 +15,51 @@ class ItemDrop : GameObject
 	bool jumping = false;
 	
 	ItemDrop(Item @data, int amount = 1)
-	{
-		@this.data = @data;
-		this.amount = amount;
-		
-		b2BodyDef def;
-		def.type = b2_dynamicBody;
-		def.fixedRotation = true;
-		@body = @b2Body(def);
-		body.setObject(@this);
-		body.setPreSolveCallback(b2ContactCallback(@preSolve));
-		@fix = @body.createFixture(Vector2(0.0f), size.x/2.0f, 32.0f);
+	{
+		init(@data, amount);
+	}
+	
+	private void init(Item @data, int amount)
+	{
+		@this.data = @data;
+		this.amount = amount;
+		
+		size = Vector2(16.0f, 16.0f);
+		
+		b2BodyDef def;
+		def.type = b2_dynamicBody;
+		def.fixedRotation = true;
+		@body = @b2Body(def);
+		body.setObject(@this);
+		body.setPreSolveCallback(b2ContactCallback(@preSolve));
+		@fix = @body.createFixture(Vector2(0.0f), size.x/2.0f, 32.0f);
 	}
 	
 	void remove()
 	{
 		body.destroy();
 		GameObject::remove();
+	}
+	
+	void serialize(StringStream &ss)
+	{
+		ss.write(data.getID());
+		ss.write(amount);
+		ss.write(body.getPosition());
+	}
+	
+	void deserialize(StringStream &ss)
+	{
+		ItemID id;
+		ss.read(id);
+		int amount;
+		ss.read(amount);
+		
+		init(@game::items[id], amount);
+		
+		Vector2 pos;
+		ss.read(pos);
+		body.setPosition(pos);
 	}
 	
 	bool canPickup()
@@ -49,21 +76,20 @@ class ItemDrop : GameObject
 	}
 	
 	void update()
-	{
+	{
+		body.setPosition(body.getPosition());
 		if(cooldown > 0.0f)
 		{
 			cooldown -= Graphics.dt;
 			return;
 		}
 		
-		for(int i = 0; i < game::players.size; i++)
+		float dist;
+		Player @player = @scene::game.getClosestPlayer(body.getCenter(), dist);
+		if(dist <= ITEM_PICKUP_RADIUS)
 		{
-			Vector2 dt = game::players[i].body.getPosition() - body.getCenter();
-			if(dt.length() <= ITEM_PICKUP_RADIUS)
-			{
-				Vector2 impulse = dt.normalized() * ITEM_SPEED;
-				body.applyImpulse(impulse, body.getCenter());
-			}
+			Vector2 impulse = (player.body.getCenter() - body.getCenter()).normalized() * ITEM_SPEED;
+			body.applyImpulse(impulse, body.getCenter());
 		}
 	}
 	
@@ -71,6 +97,6 @@ class ItemDrop : GameObject
 	{
 		Sprite @sprite = @data.icon;
 		sprite.setPosition(body.getPosition() - size/2.0f);
-		sprite.draw(game::batches[SCENE]);
+		sprite.draw(@scene::game.getBatch(SCENE));
 	}
 }

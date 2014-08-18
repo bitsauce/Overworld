@@ -1,18 +1,30 @@
-class Bush : Furniture, Serializable
+class Bush : Furniture
 {
 	float berryTimer = 0.0f;
 	
 	Bush()
 	{
-		super(4, 2, @Sprite(TextureRegion(@game::textures[BERRY_BUSH_TEXTURE], 0.0f, 0.5f, 1.0f, 1.0f)));
+		super(4, 2);
+		init();
 	}
 	
-	void save(IniFile @worldFile)
+	private void init()
 	{
+		@sprite = @Sprite(TextureRegion(@game::textures[BERRY_BUSH_TEXTURE], 0.0f, 0.5f, 1.0f, 1.0f));
 	}
 	
-	void load(IniFile @worldFile)
+	void serialize(StringStream &ss)
 	{
+		ss.write(berryTimer);
+		Furniture::serialize(ss);
+	}
+	
+	void deserialize(StringStream &ss)
+	{
+		init();
+		
+		ss.read(berryTimer);
+		Furniture::deserialize(ss);
 	}
 	
 	void interact(Player @player)
@@ -38,7 +50,7 @@ class Bush : Furniture, Serializable
 	}
 	
 	void draw()
-	{
-		Furniture::draw(@game::batches[SCENE]);
+	{
+		Furniture::draw(@scene::game.getBatch(SCENE));
 	}
 }

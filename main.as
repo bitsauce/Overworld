@@ -16,11 +16,6 @@ void main()
 	Box2D.gravity = Vector2(0.0f, 40.0f);
 	Box2D.scale = TILE_SIZE;
 	
-	// Create layer batches
-	for(int i = 0; i < game::batches.size; i++) {
-		@game::batches[i] = Batch();
-	}
-	
 	game::textures.init();
 	game::tiles.init();
 	game::items.init();
@@ -43,9 +38,5 @@ void update()
 void windowResized(int width, int height)
 {
 	Console.log("Window resized: " + width + ", " + height);
-	
-	// Call resize event on all game objects
-	for(int i = 0; i < game::objects.size; i++) {
-		game::objects[i].windowResized();
-	}
+	scene::game.resized(width, height);
 }

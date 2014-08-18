@@ -55,7 +55,7 @@ class ItemSlot
 const int INV_WIDTH = 9;
 const int INV_HEIGHT = 3;
 
-class Inventory : GameObject
+class Inventory
 {
 	// Owner
 	Player @player;
@@ -386,7 +386,7 @@ class Inventory : GameObject
 			@slotSprite = @itemSlot;
 		}
 		slotSprite.setPosition(position);
-		slotSprite.draw(game::batches[GUI]);
+		slotSprite.draw(scene::game.getBatch(GUI));
 		
 		// Set as hovered if cursor is contained within the rectangle
 		if(Rect(slotSprite.getPosition(), slotSprite.getSize()).contains(Input.position)) {
@@ -400,12 +400,12 @@ class Inventory : GameObject
 			// Draw item icon
 			Sprite @icon = @slot.item.icon;
 			icon.setPosition(position + Vector2(8, 8));
-			icon.draw(game::batches[GUI]);
+			icon.draw(scene::game.getBatch(GUI));
 			
 			// Draw quantity text
 			if(slot.amount > 1) {
 				string str = formatInt(slot.amount, "");
-				font::small.draw(game::batches[UITEXT], position + Vector2(28 - font::small.getStringWidth(str), 20), str);
+				font::small.draw(scene::game.getBatch(UITEXT), position + Vector2(28 - font::small.getStringWidth(str), 20), str);
 			}
 		}
 	}
@@ -431,17 +431,17 @@ class Inventory : GameObject
 		}
 		
 		if(@hoveredItemSlot != null && @hoveredItemSlot.item != null) {
-			font::large.draw(game::batches[UITEXT], Input.position + Vector2(0.0f, 16.0f), hoveredItemSlot.item.desc);
+			font::large.draw(scene::game.getBatch(UITEXT), Input.position + Vector2(0.0f, 16.0f), hoveredItemSlot.item.desc);
 		}
 		
 		if(!heldSlot.isEmpty())
 		{
 			Sprite @icon = @heldSlot.item.icon;
 			icon.setPosition(Input.position + Vector2(-16, -16));
-			icon.draw(game::batches[GUI]);
+			icon.draw(@scene::game.getBatch(GUI));
 			if(heldSlot.amount > 1) {
 				string str = formatInt(heldSlot.amount, "");
-				font::small.draw(game::batches[UITEXT], Input.position + Vector2(4 - font::small.getStringWidth(str), -4), str);
+				font::small.draw(scene::game.getBatch(UITEXT), Input.position + Vector2(4 - font::small.getStringWidth(str), -4), str);
 			}
 		}
 	}

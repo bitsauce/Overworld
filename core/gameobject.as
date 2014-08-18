@@ -1,19 +1,15 @@
 class GameObject
 {
-	GameObject()
+	GameObject()
 	{
-		game::objects.insertLast(@this);
+		scene::game.addGameObject(@this);
 	}
 	
 	void remove()
 	{
-		int idx = game::objects.findByRef(@this);
-		if(idx >= 0) {
-			game::objects.removeAt(idx);
-		}
+		scene::game.removeGameObject(@this);
 	}
 	
 	void draw() {}
 	void update() {}
-	void windowResized() {}
 }
