@@ -154,38 +154,38 @@ class GameScene : Scene
 		player.inventory.addItem(@game::items[STONE_BLOCK], 50);
 		
 		addPlayer(@player);
-	}
-	
-	void loadWorld(string worldDir)
-	{
-		// Set the world directory
-		setWorldDir(worldDir);
-		
-		// Load terrain
-		Scripts.deserialize(@terrain, worldDir + "/terrain.obj");
-		if(@terrain == null) Console.log("wat1");
-		
-		// Create global objects
-		@timeOfDay = @TimeOfDay();
-		@camera = @Camera();
-		@debug = @DebugTextDrawer();
-		@spawner = @Spawner();
-		@background = @Background();
-		
-		// Load all objects
-		array<string> @objectFiles = @FileSystem.listFiles(worldDir + "/objects", "*.obj");
-		for(int i = 0; i < objectFiles.size; i++)
-		{
-			GameObject @object;
-			Scripts.deserialize(@object, objectFiles[i]);
-			objects.insertLast(@object);
-			
-			Furniture @furniture = cast<Furniture>(object);
-			if(@furniture != null) addFurniture(@furniture);
-				
-			Player @player = cast<Player>(object);
-			if(@player != null) addPlayer(@player);
-		}
+	}
+	
+	void loadWorld(string worldDir)
+	{
+		// Set the world directory
+		setWorldDir(worldDir);
+		
+		// Load terrain
+		Scripts.deserialize(@terrain, worldDir + "/terrain.obj");
+		if(@terrain == null) Console.log("wat1");
+		
+		// Create global objects
+		@timeOfDay = @TimeOfDay();
+		@camera = @Camera();
+		@debug = @DebugTextDrawer();
+		@spawner = @Spawner();
+		@background = @Background();
+		
+		// Load all objects
+		array<string> @objectFiles = @FileSystem.listFiles(worldDir + "/objects", "*.obj");
+		for(int i = 0; i < objectFiles.size; i++)
+		{
+			GameObject @object;
+			Scripts.deserialize(@object, objectFiles[i]);
+			objects.insertLast(@object);
+			
+			Furniture @furniture = cast<Furniture>(object);
+			if(@furniture != null) addFurniture(@furniture);
+				
+			Player @player = cast<Player>(object);
+			if(@player != null) addPlayer(@player);
+		}
 	}
 	
 	void save()
@@ -225,8 +225,8 @@ class GameScene : Scene
 	void update()
 	{
 		// Step Box2D
-		Box2D.step(Graphics.dt);
-		
+		Box2D.step(Graphics.dt);
+		
 		background.update();
 		
 		// Update all game objects
@@ -243,8 +243,8 @@ class GameScene : Scene
 		}
 	
 		// Create translation matrix
-		batches[SCENE].setProjectionMatrix(camera.getProjectionMatrix());
-		
+		batches[SCENE].setProjectionMatrix(camera.getProjectionMatrix());
+		
 		background.draw();
 		
 		// Draw game object into batches

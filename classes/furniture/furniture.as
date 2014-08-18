@@ -19,15 +19,15 @@ class Furniture : GameObject
 	}
 	
 	void remove()
-	{
-		// Remove invisible tiles
-		Terrain @terrain = @scene::game.getTerrain();
-		for(int j = 0; j < height; j++) {
-			for(int i = 0; i < width; i++) {
-				terrain.removeTile(x+i, y+j);
-			}
-		}
-		
+	{
+		// Remove invisible tiles
+		Terrain @terrain = @scene::game.getTerrain();
+		for(int j = 0; j < height; j++) {
+			for(int i = 0; i < width; i++) {
+				terrain.removeTile(x+i, y+j);
+			}
+		}
+		
 		// Remove from list
 		scene::game.removeFurniture(@this);
 		GameObject::remove();
@@ -64,7 +64,7 @@ class Furniture : GameObject
 			}
 		}
 		
-		// Place here
+		// Fill terrain with reserved tiles
 		Terrain @terrain = @scene::game.getTerrain();
 		for(int j = 0; j < height; j++) {
 			for(int i = 0; i < width; i++) {

@@ -39,77 +39,77 @@ class Player : GameObject
 	array<AudioSource@> walkDirtSounds;
 	
 	Player()
-	{
+	{
 		init();
-	}
-	
-	private void init()
-	{
-		// Create an inventory for the player
-		@inventory = @Inventory(@this);
-		
-		@skeleton = @spSkeleton(":/sprites/characters/anim/skeleton.json", ":/sprites/characters/anim/skeleton.atlas", 1.0f);
-		
-		size = Vector2(28.0f, 44.0f);
-		name = "Bitsauce";
-		
-		lmbPressed = false;
-			
-		maxRunSpeed = 256.0f;
-		moveForce = 5000.0f;
-		jumpForce = 6800.0f;
-		accel = 0.1f; // factor
-		mass = 18.0f;
-		maxHealth = 100;
-		health = 100;
-		
-		// Create body defintion
-		b2BodyDef def;
-		def.type = b2_bulletBody;
-		def.fixedRotation = true;
-		def.allowSleep = false;
-		def.linearDamping = 1.0f;
-		
-		// Create player body
-		@body = @b2Body(def);
-		body.setObject(@this);
-		body.setBeginContactCallback(b2ContactCallback(@beginContact));
-		body.setEndContactCallback(b2ContactCallback(@endContact));
-		body.setPreSolveCallback(b2ContactCallback(@preSolve));
-		
-		// Create upper and lower circle fixtures
-		b2Fixture @fixture = @body.createFixture(Vector2(0.0f, -size.x/4.0f), size.x/2.0f, mass);
-		fixture.setFriction(0.0f);
-		@fixture = @body.createFixture(Vector2(0.0f,  size.x/4.0f), size.x/2.0f, mass);
-		fixture.setFriction(0.0f);
-		
-		// Create foot sensor
-		@footSensor = @body.createFixture(Rect(-4, size.x/4.0f+12, 8, 8), 0.0f);
-		footSensor.setSensor(true);
-		numGroundContact = 0;
-		
-		// Setup spine animations
-		spAnimationStateData @data = @spAnimationStateData(@skeleton);
-		data.setMix("idle", "walk", 0.2f);
-		data.setMix("walk", "idle", 0.5f);
-		data.setMix("jump", "idle", 0.1f);
-		data.setMix("walk", "jump", 0.1f);
-		data.setMix("jump", "idle", 0.1f);
-		data.setMix("idle", "jump", 0.2f);
-		
-		// Create spine animation
-		@animation = @spAnimationState(@data);
-		@animation.eventCallback = @spEventCallback(@animationEvent);
-		animation.looping = true;
-		changeAnimation("idle");
-		
-		walkDirtSounds.resize(4);
-		for(int i = 0; i < 4; i++) {
-			@walkDirtSounds[i] = @AudioSource(":/sounds/player/walk_dirt_"+(i+1)+".wav");
-			walkDirtSounds[i].looping = false;
-		}
-		
-		skeleton.texture.setFiltering(LINEAR);
+	}
+	
+	private void init()
+	{
+		// Create an inventory for the player
+		@inventory = @Inventory(@this);
+		
+		@skeleton = @spSkeleton(":/sprites/characters/anim/skeleton.json", ":/sprites/characters/anim/skeleton.atlas", 1.0f);
+		
+		size = Vector2(28.0f, 44.0f);
+		name = "Bitsauce";
+		
+		lmbPressed = false;
+			
+		maxRunSpeed = 256.0f;
+		moveForce = 5000.0f;
+		jumpForce = 6800.0f;
+		accel = 0.1f; // factor
+		mass = 18.0f;
+		maxHealth = 100;
+		health = 100;
+		
+		// Create body defintion
+		b2BodyDef def;
+		def.type = b2_bulletBody;
+		def.fixedRotation = true;
+		def.allowSleep = false;
+		def.linearDamping = 1.0f;
+		
+		// Create player body
+		@body = @b2Body(def);
+		body.setObject(@this);
+		body.setBeginContactCallback(b2ContactCallback(@beginContact));
+		body.setEndContactCallback(b2ContactCallback(@endContact));
+		body.setPreSolveCallback(b2ContactCallback(@preSolve));
+		
+		// Create upper and lower circle fixtures
+		b2Fixture @fixture = @body.createFixture(Vector2(0.0f, -size.x/4.0f), size.x/2.0f, mass);
+		fixture.setFriction(0.0f);
+		@fixture = @body.createFixture(Vector2(0.0f,  size.x/4.0f), size.x/2.0f, mass);
+		fixture.setFriction(0.0f);
+		
+		// Create foot sensor
+		@footSensor = @body.createFixture(Rect(-4, size.x/4.0f+12, 8, 8), 0.0f);
+		footSensor.setSensor(true);
+		numGroundContact = 0;
+		
+		// Setup spine animations
+		spAnimationStateData @data = @spAnimationStateData(@skeleton);
+		data.setMix("idle", "walk", 0.2f);
+		data.setMix("walk", "idle", 0.5f);
+		data.setMix("jump", "idle", 0.1f);
+		data.setMix("walk", "jump", 0.1f);
+		data.setMix("jump", "idle", 0.1f);
+		data.setMix("idle", "jump", 0.2f);
+		
+		// Create spine animation
+		@animation = @spAnimationState(@data);
+		@animation.eventCallback = @spEventCallback(@animationEvent);
+		animation.looping = true;
+		changeAnimation("idle");
+		
+		walkDirtSounds.resize(4);
+		for(int i = 0; i < 4; i++) {
+			@walkDirtSounds[i] = @AudioSource(":/sounds/player/walk_dirt_"+(i+1)+".wav");
+			walkDirtSounds[i].looping = false;
+		}
+		
+		skeleton.texture.setFiltering(LINEAR);
 	}
 	
 	void serialize(StringStream &ss)
@@ -142,10 +142,10 @@ class Player : GameObject
 	}
 	
 	void deserialize(StringStream &ss)
-	{
-		init();
-		
-		Console.log("Loading player '" + name + "'...");
+	{
+		init();
+		
+		Console.log("Loading player '" + name + "'...");
 		
 		float x, y;
 		ss.read(x);
@@ -308,7 +308,7 @@ class Player : GameObject
 		if(Input.getKeyState(KEY_RMB))
 		{
 			Furniture @furniture = @scene::game.getHoveredFurniture();
-			if((furniture.getPosition() - position).length() <= ITEM_PICKUP_RADIUS) {
+			if(@furniture != null && (furniture.getPosition() - position).length() <= ITEM_PICKUP_RADIUS) {
 				furniture.interact(@this);
 			}
 		}
@@ -345,9 +345,9 @@ class Player : GameObject
 		game::camera.lookAt(position);
 		
 		// Update audio listener
-		Audio.position = position;
-		
-		//
+		Audio.position = position;
+		
+		//
 		inventory.update();
 	}
 	
@@ -360,8 +360,8 @@ class Player : GameObject
 		float p = (health/float(maxHealth));
 		Shape healthBar(Rect(body.getPosition().x-size.x/2.0f, body.getPosition().y-size.y/2.0f-24, size.x*p, 4));
 		healthBar.setFillColor(Vector4(1.0f*(1-p), 1.0f*p, 0.0f, 1.0f));
-		healthBar.draw(@scene::game.getBatch(SCENE));
-		
+		healthBar.draw(@scene::game.getBatch(SCENE));
+		
 		inventory.draw();
 	}
 }

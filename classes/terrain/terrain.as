@@ -91,8 +91,10 @@ class Terrain
 			for(int y = 0; y < height; y++)
 			{
 				for(int x = 0; x < width; x++)
-				{
-					tileString += formatInt(getTileAt(x, y, TerrainLayer(i)), "0", 3);
+				{
+					TileID tile = getTileAt(x, y, TerrainLayer(i));
+					if(tile <= RESERVED_TILE) tile = NULL_TILE;
+					tileString += formatInt(tile, "0", 3);
 				}
 			}
 			ss.write(tileString);
@@ -156,7 +158,7 @@ class Terrain
 		return x >= 0 && x < width && y >= 0 && y < height;
 	}
 	
-	TileID getTileAt(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
+	TileID getTileAt(const int x, const int y, const TerrainLayer layer = TERRAIN_SCENE)
 	{
 		return isValid(x, y) ? layers[layer].getTileAt(x, y) : NULL_TILE;
 	}
