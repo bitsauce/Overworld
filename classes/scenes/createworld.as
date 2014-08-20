@@ -15,7 +15,8 @@ class CreateWorldMenu : Scene
 		@worldNameEdit = LineEdit(null);
 		worldNameEdit.anchor = CENTER;
 		worldNameEdit.setPosition(Vector2(0.0f, 0.0f));
-		worldNameEdit.setSize(Vector2(0.2f, 0.01f));
+		worldNameEdit.setSize(Vector2(0.2f, 0.01f));
+		@worldNameEdit.acceptFunc = AcceptCallback(@createWorld);
 		
 		Button @createWorldButton = @Button("Create!", ButtonCallback(@createWorld), null);
 		createWorldButton.anchor = BOTTOM_CENTER;
@@ -62,12 +63,12 @@ class CreateWorldMenu : Scene
 		// Get world name
 		string worldName = worldNameEdit.getText();
 		if(worldName.length == 0)
-			return;
-		
-		// Create world
-		scene::game.createWorld(worldName);
-		
-		// Show game
+			return;
+		
+		// Create world
+		scene::game.createWorld(worldName);
+		
+		// Show game
 		Engine.pushScene(@scene::game);
 	}
 }
