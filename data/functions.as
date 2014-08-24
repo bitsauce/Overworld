@@ -57,3 +57,9 @@ bool TerrainPlotTest(int x, int y)
 {
 	return scene::game.getTerrain().getTileAt(x, y) <= RESERVED_TILE;
 }
+
+void DebugCreate()
+{
+	Vector2 position = Input.position + scene::game.getCamera().position;
+	scene::game.getWater().addParticle(position, 10.0f);
+}

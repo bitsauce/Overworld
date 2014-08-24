@@ -1,7 +1,7 @@
 // Include "includes.as"-files
 #include "core/includes.as"
 #include "classes/includes.as"
-#include "data/includes.as"
+#include "data/includes.as"
 
 void main()
 {
@@ -10,6 +10,7 @@ void main()
 	Input.bind(KEY_P, @toggleProfiler);
 	Input.bind(KEY_I, @zoomIn);
 	Input.bind(KEY_O, @zoomOut);
+	Input.bind(KEY_C, @DebugCreate);
 	//Input.bind(KEY_BACKSPACE, @back);
 	
 	// Set b2d world scale

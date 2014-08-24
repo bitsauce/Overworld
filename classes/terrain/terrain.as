@@ -91,8 +91,8 @@ class Terrain
 			for(int y = 0; y < height; y++)
 			{
 				for(int x = 0; x < width; x++)
-				{
-					TileID tile = getTileAt(x, y, TerrainLayer(i));
+				{
+					TileID tile = getTileAt(x, y, TerrainLayer(i));
 					if(tile <= RESERVED_TILE) tile = NULL_TILE;
 					tileString += formatInt(tile, "0", 3);
 				}
@@ -136,7 +136,7 @@ class Terrain
 		init(width, height);
 		
 		// Generate stuff
-		generator.generate(@game::terrain);
+		generator.generate(@this);
 		
 		// Set terrain as initialized
 		setInitialized(true);

@@ -5,7 +5,7 @@
 #include "recipies.as"
 #include "camera.as"
 #include "debug.as"
-#include "humanoid.as"
+#include "humanoid.as"
 #include "raycast.as"
 
 // Scenes
@@ -20,7 +20,8 @@
 
 // Environment
 #include "environment/background.as"
-#include "environment/timeofday.as"
+#include "environment/timeofday.as"
+#include "environment/water.as"
 
 // Mobs
 #include "mobs/spawner.as"

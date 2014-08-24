@@ -110,6 +110,9 @@ class GameScene : Scene
 	private Background @background;
 	Background @getBackground() const { return @background; }
 	
+	private Water @water;
+	Water @getWater() const { return @water; }
+	
 	void setWorldDir(string worldDir)
 	{
 		// Set world directory
@@ -139,6 +142,7 @@ class GameScene : Scene
 		@debug = @DebugTextDrawer();
 		@spawner = @Spawner();
 		@background = @Background();
+		@water = @Water();
 		
 		// Create player
 		Console.log("Creating player...");
@@ -151,7 +155,6 @@ class GameScene : Scene
 		
 		// Give default loadout
 		player.inventory.addItem(@game::items[PICKAXE_IRON]);
-		player.inventory.addItem(@game::items[STONE_BLOCK], 50);
 		
 		addPlayer(@player);
 	}
@@ -162,9 +165,9 @@ class GameScene : Scene
 		setWorldDir(worldDir);
 		
 		// Load terrain
-		Scripts.deserialize(@terrain, worldDir + "/terrain.obj");
-		
-		// Load time of day
+		Scripts.deserialize(@terrain, worldDir + "/terrain.obj");
+		
+		// Load time of day
 		Scripts.deserialize(@timeOfDay, worldDir + "/timeOfDay.obj");
 		
 		// Create global objects
@@ -172,6 +175,7 @@ class GameScene : Scene
 		@debug = @DebugTextDrawer();
 		@spawner = @Spawner();
 		@background = @Background();
+		@water = @Water();
 		
 		// Load all objects
 		array<string> @objectFiles = @FileSystem.listFiles(worldDir + "/objects", "*.obj");
@@ -192,9 +196,9 @@ class GameScene : Scene
 	void save()
 	{
 		// Save terrain
-		Scripts.serialize(@terrain, worldDir + "/terrain.obj");
-		
-		// Save time of day
+		Scripts.serialize(@terrain, worldDir + "/terrain.obj");
+		
+		// Save time of day
 		Scripts.serialize(@timeOfDay, worldDir + "/timeOfDay.obj");
 		
 		// Save game objects
@@ -230,10 +234,11 @@ class GameScene : Scene
 	{
 		// Step Box2D
 		Box2D.step(Graphics.dt);
-		
+		
 		timeOfDay.update();
-		background.update();
-		spawner.update();
+		background.update();
+		spawner.update();
+		water.update();
 		
 		// Update all game objects
 		for(int i = 0; i < objects.size; i++) {
@@ -251,12 +256,13 @@ class GameScene : Scene
 		// Create translation matrix
 		batches[SCENE].setProjectionMatrix(camera.getProjectionMatrix());
 		
-		background.draw();
-		timeOfDay.draw();
-		spawner.draw();
-		
-		if(Input.getKeyState(KEY_Z)) {
-			debug.draw();
+		background.draw();
+		timeOfDay.draw();
+		spawner.draw();
+		water.draw();
+		
+		if(Input.getKeyState(KEY_Z)) {
+			debug.draw();
 		}
 		
 		// Draw game object into batches
@@ -289,11 +295,14 @@ class GameScene : Scene
 		
 		screen.setFillTexture(@terrainFbo);
 		screen.draw(@batches[FOREGROUND]);
-		
-		shadowFbo.clear();
-		shadowBatch.renderToTexture(@shadowFbo);
-		screen.setFillTexture(@shadowFbo);
-		screen.draw(@batches[FOREGROUND]);
+		
+		if(!Input.getKeyState(KEY_8))
+		{
+			shadowFbo.clear();
+			shadowBatch.renderToTexture(@shadowFbo);
+			screen.setFillTexture(@shadowFbo);
+			screen.draw(@batches[FOREGROUND]);
+		}
 		
 		batches[FOREGROUND].draw();
 		
@@ -314,9 +323,9 @@ class GameScene : Scene
 	Texture @shadowFbo; // Move to global scope
 	
 	// Shadow shader uniforms
-	float radius = 3.0f;
+	float radius = 8.0f; // 3.0f
 	float falloff = 3.0f;
-	int shadowDownsampleLevel = 16; // must be power of two
+	int shadowDownsampleLevel = 2; //16 // must be power of two
 	
 	int get_padding() const
 	{

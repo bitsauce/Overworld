@@ -113,37 +113,37 @@ class Humanoid : GameObject
 			@currentAnim = @anim;
 		}
 	}
-	
-	void updateAnimations()
-	{
-		Vector2 position = body.getPosition();
-		Vector2 velocity = body.getLinearVelocity();
-		
-		animation.timeScale = Math.abs(velocity.x/128.0f);
-		if(numGroundContact > 0)
-		{
-			animation.looping = true;
-			if(velocity.x >= 0.01f)
-			{
-				changeAnimation("walk");
-				skeleton.flipX = false;
-			}else if(velocity.x <= -0.01f){
-				changeAnimation("walk");
-				skeleton.flipX = true;
-			}else{
-				changeAnimation("idle");
-				velocity.x = 0.0f;
-				body.setLinearVelocity(velocity);
-				animation.timeScale = 1.0f;
-			}
-		}else{
-			animation.looping = false;
-			animation.timeScale = 1.0f;
-			changeAnimation("jump");
-		}
-		
-		skeleton.position = position + Vector2(0.0f, size.y/2.0f);
-		animation.update(Graphics.dt);
+	
+	void updateAnimations()
+	{
+		Vector2 position = body.getPosition();
+		Vector2 velocity = body.getLinearVelocity();
+		
+		animation.timeScale = Math.abs(velocity.x/128.0f);
+		if(numGroundContact > 0)
+		{
+			animation.looping = true;
+			if(velocity.x >= 0.01f)
+			{
+				changeAnimation("walk");
+				skeleton.flipX = false;
+			}else if(velocity.x <= -0.01f){
+				changeAnimation("walk");
+				skeleton.flipX = true;
+			}else{
+				changeAnimation("idle");
+				velocity.x = 0.0f;
+				body.setLinearVelocity(velocity);
+				animation.timeScale = 1.0f;
+			}
+		}else{
+			animation.looping = false;
+			animation.timeScale = 1.0f;
+			changeAnimation("jump");
+		}
+		
+		skeleton.position = position + Vector2(0.0f, size.y/2.0f);
+		animation.update(Graphics.dt);
 	}
 	
 	void beginContact(b2Contact @contact)
@@ -195,25 +195,25 @@ class Humanoid : GameObject
 			stepSound.play();
 			stepSound.position = body.getPosition();
 		}
-	}
-	
-	void moveLeft()
-	{
-		float impulse = (maxRunSpeed + body.getLinearVelocity().x);
-		if(impulse > maxRunSpeed*accel) impulse = maxRunSpeed*accel;
-		body.applyImpulse(Vector2(-impulse * body.getMass(), 0.0f), getFeetPosition());
-	}
-	
-	void moveRight()
-	{
-		float impulse = (maxRunSpeed - body.getLinearVelocity().x);
-		if(impulse > maxRunSpeed*accel) impulse = maxRunSpeed*accel;
-		body.applyImpulse(Vector2(impulse * body.getMass(), 0.0f), getFeetPosition());
-	}
-	
-	void jump()
-	{
-		body.applyImpulse(Vector2(0.0f, -jumpForce), getFeetPosition());
+	}
+	
+	void moveLeft()
+	{
+		float impulse = (maxRunSpeed + body.getLinearVelocity().x);
+		if(impulse > maxRunSpeed*accel) impulse = maxRunSpeed*accel;
+		body.applyImpulse(Vector2(-impulse * body.getMass(), 0.0f), getFeetPosition());
+	}
+	
+	void moveRight()
+	{
+		float impulse = (maxRunSpeed - body.getLinearVelocity().x);
+		if(impulse > maxRunSpeed*accel) impulse = maxRunSpeed*accel;
+		body.applyImpulse(Vector2(impulse * body.getMass(), 0.0f), getFeetPosition());
+	}
+	
+	void jump()
+	{
+		body.applyImpulse(Vector2(0.0f, -jumpForce), getFeetPosition());
 	}
 	
 	void draw()

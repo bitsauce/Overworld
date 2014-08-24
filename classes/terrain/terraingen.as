@@ -13,19 +13,22 @@ class TerrainGen
 		height = terrain.getHeight();
 		
 		// Add slope
-		int slope = Math.getRandomInt(10, 20);
-		float t = 0;
+		int slope = 0;
+		float t = Math.PI*2;
 		for(int x = 0; x < width; x++)
-		{
+		{
+			// Calculate new slope height
 			if(t >= Math.PI*2)
 			{
 				slope = Math.getRandomInt(5, 10);
 				t = 0.0f;
-			}
+			}
+			
+			// Create slopes
 			float h = (Math.sin(t)) * slope + 25;
-			for(int y = height - 1; y >= 0 && y > h; y--)
+			for(int y = height - 1; y >= 0 && y >= h; y--)
 			{
-				terrain.addTile(x, y, GRASS_TILE);
+				terrain.addTile(x, y, y > (height+h)*0.5f ? STONE_TILE : GRASS_TILE);
 			}
 			t += 0.05f;
 		}

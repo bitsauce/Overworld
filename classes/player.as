@@ -12,18 +12,18 @@ class Player : Humanoid
 	Player()
 	{
 		init();
-	}
+	}
 	
 	private void init()
 	{
 		// Create an inventory for the player
-		@inventory = @Inventory(@this);
-		
-		size = Vector2(28.0f, 44.0f);
-		name = "Bitsauce";
-		mass = 18.0f;
-		lmbPressed = false;
-		
+		@inventory = @Inventory(@this);
+		
+		size = Vector2(28.0f, 44.0f);
+		name = "Bitsauce";
+		mass = 18.0f;
+		lmbPressed = false;
+		
 		Humanoid::init();
 	}
 	
@@ -91,27 +91,27 @@ class Player : Humanoid
 	{
 		ItemDrop @item;
 		Projectile @proj;
-		if(contact.bodyB.getObject(@item))
-		{
+		if(contact.bodyB.getObject(@item))
+		{
 			// Pickup item drops
 			contact.setEnabled(false);
-			if(item.canPickup())
+			if(item.canPickup())
 			{
 				int result = inventory.addItem(@item.data, item.amount);
-				if(result == 0)
+				if(result == 0)
 				{
 					item.remove();
-				}else
+				}else
 				{
 					item.amount = result;
 				}
 			}
-		}else if(contact.bodyB.getObject(@proj))
-		{
+		}else if(contact.bodyB.getObject(@proj))
+		{
 			// Disable collision for projectiles (?)
 			contact.setEnabled(false);
-		}
-		
+		}
+		
 		Humanoid::preSolve(@contact);
 	}
 	
@@ -120,18 +120,18 @@ class Player : Humanoid
 		Vector2 position = body.getPosition();
 		Vector2 velocity = body.getLinearVelocity();
 		
-		if(Input.getKeyState(KEY_A)) {
+		if(Input.getKeyState(KEY_A)) {
 			moveLeft();
 		}
 		
-		if(Input.getKeyState(KEY_D)) {
+		if(Input.getKeyState(KEY_D)) {
 			moveRight();
 		}
 		
-		if(Input.getKeyState(KEY_SPACE) && numGroundContact > 0) {
+		if(Input.getKeyState(KEY_SPACE) && numGroundContact > 0) {
 			jump();
 		}
-		
+		
 		// Use selected item
 		if(Input.getKeyState(KEY_LMB))
 		{
@@ -177,8 +177,8 @@ class Player : Humanoid
 			position.y = game::terrain.getHeight()*TILE_SIZE;
 			body.setLinearVelocity(Vector2(velocity.x, 0.0f));
 			body.setPosition(position);
-		}
-		
+		}
+		
 		updateAnimations();
 		
 		// Update camera
@@ -192,7 +192,7 @@ class Player : Humanoid
 	}
 	
 	void draw()
-	{
+	{
 		Humanoid::draw();
 		inventory.draw();
 	}
