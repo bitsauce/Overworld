@@ -293,10 +293,12 @@ class Inventory
 	
 	void leftClickSlot(ItemSlot @slot)
 	{			
-		if(heldSlot.isEmpty()) {
+		if(heldSlot.isEmpty())
+		{
 			heldSlot = slot;
 			slot.clear();
-		}else{
+		}else
+		{
 			if(slot.isEmpty())
 			{
 				slot.set(heldSlot.item, heldSlot.amount);
@@ -336,7 +338,7 @@ class Inventory
 			{
 				for(int x = 0; x < 3; x++)
 				{
-					ItemID id = craftingSlots[x, y].item.getID();
+					ItemID id = craftingSlots[x, y].isEmpty() ? NULL_ITEM : craftingSlots[x, y].item.getID();
 					if(id != recipies[i].recipie[x, y])
 					{
 						match = false;
@@ -345,12 +347,11 @@ class Inventory
 				}
 				if(!match)
 					break;
-			}
+			}
+			
 			if(match)
 			{
 				addItem(@game::items[recipies[i].result]);
-				
-				
 				for(int y = 0; y < 3; y++) {
 					for(int x = 0; x < 3; x++) {
 						craftingSlots[x, y].clear();

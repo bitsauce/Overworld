@@ -12,8 +12,11 @@ class TileManager
 		
 		// Add tiles
 		add(GRASS_TILE, Tile(@Texture(":/sprites/tiles/grass_tile.png"), GRASS_BLOCK));
-		add(STONE_TILE, Tile(@Texture(":/sprites/tiles/stone_tile.png"), STONE_BLOCK));
-		add(LEAF_TILE, Tile(@Texture(":/sprites/tiles/leaf_tile.png"), GRASS_BLOCK));
+		add(STONE_TILE, Tile(@Texture(":/sprites/tiles/stone_tile.png"), STONE_BLOCK));
+		
+		add(WOOD_TILE, Tile(@Texture(":/sprites/tiles/wood_tile.png"), WOOD_BLOCK));
+		
+		add(LEAF_TILE, Tile(@Texture(":/sprites/tiles/leaf_tile.png"), LEAF_BLOCK));
 		
 		// Store tile textures
 		array<Texture@> textures;

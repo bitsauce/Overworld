@@ -16,14 +16,14 @@ class TerrainGen
 		int slope = 0;
 		float t = Math.PI*2;
 		for(int x = 0; x < width; x++)
-		{
+		{
 			// Calculate new slope height
 			if(t >= Math.PI*2)
 			{
 				slope = Math.getRandomInt(5, 10);
 				t = 0.0f;
-			}
-			
+			}
+			
 			// Create slopes
 			float h = (Math.sin(t)) * slope + 25;
 			for(int y = height - 1; y >= 0 && y >= h; y--)
@@ -40,7 +40,7 @@ class TerrainGen
 			int treeHeight = Math.getRandomInt(10, 15);
 			for(int y = -1; y < treeHeight; y++)
 			{
-				//terrain.addTile(x, ground - y, TREE_TILE);
+				terrain.addTile(x, ground - y, WOOD_TILE);
 			}
 			
 			int treeRadius = treeHeight/2.0f;

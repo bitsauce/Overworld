@@ -3,7 +3,7 @@ enum ItemID
 {
 	NULL_ITEM,
 	
-	GRASS_BLOCK,
+	GRASS_BLOCK,
 	STONE_BLOCK,
 	WOOD_BLOCK,
 	LEAF_BLOCK,
@@ -23,10 +23,10 @@ enum ItemID
 // manual maintinance of the script writer each
 // time a item is added to ItemID.
 grid<string> ITEM_STRINGS = {
-	{ "NULL", "" },
+	{ "NULL", "" },
 	{ "Grass block", "A block of grass" },
 	{ "Stone block", "A block of stone" },
-	{ "Wooden block", "A block of wood" },
+	{ "Wood block", "A block of wood" },
 	{ "Leaf block", "A block of leaves" },
 	{ "Iron Pickaxe", "A iron pickaxe" },
 	{ "Wooden Shortsword", "A crappy sword" },
@@ -36,9 +36,9 @@ grid<string> ITEM_STRINGS = {
 
 array<Sprite@> ITEM_ICONS = {
 	null,
-	@Sprite(TextureRegion(@Texture(":/sprites/tiles/grass_tile.png"), 0.0f, 0.0f, 1.0f, 2.0f/3.0f)),
+	@Sprite(TextureRegion(@Texture(":/sprites/tiles/grass_tile.png"), 0.0f, 0.0f, 1.0f, 2.0f/3.0f)),
 	@Sprite(TextureRegion(@Texture(":/sprites/tiles/stone_tile.png"), 0.0f, 0.0f, 1.0f, 2.0f/3.0f)),
-	@Sprite(TextureRegion(@Texture(":/sprites/tiles/tree_tile.png"), 0.0f, 0.0f, 1.0f, 2.0f/3.0f)),
+	@Sprite(TextureRegion(@Texture(":/sprites/tiles/wood_tile.png"), 0.0f, 0.0f, 1.0f, 2.0f/3.0f)),
 	@Sprite(TextureRegion(@Texture(":/sprites/tiles/leaf_tile.png"), 0.0f, 0.0f, 1.0f, 2.0f/3.0f)),
 	@Sprite(@Texture(":/sprites/pickaxes/pickaxe_iron_icon.png")),
 	@Sprite(@Texture(":/sprites/weapons/shortsword_wooden_item.png")),
