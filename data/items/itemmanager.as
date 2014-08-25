@@ -10,12 +10,13 @@ class ItemManager
 			return;
 		
 		// Add items
-		add(GRASS_BLOCK, @BlockItem(GRASS_BLOCK));
+		add(GRASS_BLOCK, @BlockItem(GRASS_BLOCK));
 		add(STONE_BLOCK, @BlockItem(STONE_BLOCK));
 		add(WOOD_BLOCK, @BlockItem(WOOD_BLOCK));
 		add(LEAF_BLOCK, @BlockItem(LEAF_BLOCK));
 		add(PICKAXE_IRON, @Pickaxe(PICKAXE_IRON));
-		add(SHORTSWORD_WOODEN, @ArrowItem(SHORTSWORD_WOODEN));
+		add(SHORTSWORD_WOODEN, @ArrowItem(SHORTSWORD_WOODEN));
+		add(WOODEN_BOW, @Bow(WOODEN_BOW));
 		add(STICK, @ArrowItem(STICK));
 		add(BERRIES, @HealingPotion(BERRIES));
 		

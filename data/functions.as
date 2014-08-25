@@ -61,5 +61,8 @@ bool TerrainPlotTest(int x, int y)
 void DebugCreate()
 {
 	Vector2 position = Input.position + scene::game.getCamera().position;
-	scene::game.getWater().addParticle(position, 10.0f);
+	//scene::game.getWater().addParticle(position, 10.0f);
+	
+	ItemDrop drop(game::items[WOODEN_BOW]);
+	drop.body.setPosition(position);
 }

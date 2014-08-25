@@ -10,7 +10,9 @@ enum ItemID
 	
 	PICKAXE_IRON,
 	
-	SHORTSWORD_WOODEN,
+	SHORTSWORD_WOODEN,
+	
+	WOODEN_BOW,
 	
 	STICK,
 	BERRIES,
@@ -29,7 +31,8 @@ grid<string> ITEM_STRINGS = {
 	{ "Wood block", "A block of wood" },
 	{ "Leaf block", "A block of leaves" },
 	{ "Iron Pickaxe", "A iron pickaxe" },
-	{ "Wooden Shortsword", "A crappy sword" },
+	{ "Wooden Shortsword", "A crappy sword" },
+	{ "Wooden Bow", "A wooden bow" },
 	{ "Stick", "A stick" },
 	{ "Berries", "Yummy!" }
 };
@@ -41,7 +44,8 @@ array<Sprite@> ITEM_ICONS = {
 	@Sprite(TextureRegion(@Texture(":/sprites/tiles/wood_tile.png"), 0.0f, 0.0f, 1.0f, 2.0f/3.0f)),
 	@Sprite(TextureRegion(@Texture(":/sprites/tiles/leaf_tile.png"), 0.0f, 0.0f, 1.0f, 2.0f/3.0f)),
 	@Sprite(@Texture(":/sprites/pickaxes/pickaxe_iron_icon.png")),
-	@Sprite(@Texture(":/sprites/weapons/shortsword_wooden_item.png")),
+	@Sprite(@Texture(":/sprites/weapons/shortsword_wooden_item.png")),
+	@Sprite(@Texture(":/sprites/weapons/wooden_bow_icon.png")),
 	@Sprite(@Texture(":/sprites/items/stick.png")),
 	@Sprite(@Texture(":/sprites/items/berries.png"))
 };

@@ -20,7 +20,7 @@
 
 // Environment
 #include "environment/background.as"
-#include "environment/timeofday.as"
+#include "environment/timeofday.as"
 #include "environment/water.as"
 
 // Mobs
@@ -32,7 +32,8 @@
 #include "items/arrow.as"
 #include "items/block.as"
 #include "items/pickaxe.as"
-#include "items/healing.as"
+#include "items/healing.as"
+#include "items/bow.as"
 
 // Terrain
 #include "terrain/terrain.as"

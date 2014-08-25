@@ -16,7 +16,7 @@ class Item
 	bool singleShot;
 	
 	Item(ItemID id, int maxStack)
-	{
+	{
 		this.id = id;
 		this.name = ITEM_STRINGS[0, id];
 		this.desc = ITEM_STRINGS[1, id];
