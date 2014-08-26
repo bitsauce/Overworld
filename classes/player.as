@@ -90,7 +90,6 @@ class Player : Humanoid
 	void preSolve(b2Contact @contact)
 	{
 		ItemDrop @item;
-		Projectile @proj;
 		if(contact.bodyB.getObject(@item))
 		{
 			// Pickup item drops
@@ -106,10 +105,6 @@ class Player : Humanoid
 					item.amount = result;
 				}
 			}
-		}else if(contact.bodyB.getObject(@proj))
-		{
-			// Disable collision for projectiles (?)
-			contact.setEnabled(false);
 		}
 		
 		Humanoid::preSolve(@contact);

@@ -295,13 +295,13 @@ class GameScene : Scene
 		
 		screen.setFillTexture(@terrainFbo);
 		screen.draw(@batches[FOREGROUND]);
-		
-		if(!Input.getKeyState(KEY_8))
+		
+		if(!Input.getKeyState(KEY_8))
 		{
 			shadowFbo.clear();
 			shadowBatch.renderToTexture(@shadowFbo);
 			screen.setFillTexture(@shadowFbo);
-			screen.draw(@batches[FOREGROUND]);
+			screen.draw(@batches[FOREGROUND]);
 		}
 		
 		batches[FOREGROUND].draw();
@@ -323,9 +323,9 @@ class GameScene : Scene
 	Texture @shadowFbo; // Move to global scope
 	
 	// Shadow shader uniforms
-	float radius = 8.0f; // 3.0f
+	float radius = 3.0f; // 3.0f
 	float falloff = 3.0f;
-	int shadowDownsampleLevel = 2; //16 // must be power of two
+	int shadowDownsampleLevel = 16; //16 // must be power of two
 	
 	int get_padding() const
 	{

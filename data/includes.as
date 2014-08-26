@@ -1,9 +1,9 @@
 #include "globals.as"
 #include "constants.as"
-#include "functions.as"
-
-// Texture data
-#include "textures/texturedata.as"
+#include "functions.as"
+
+// Texture data
+#include "textures/textureids.as"
 #include "textures/texturemanager.as"
 
 // Tile data

@@ -1,28 +1,29 @@
 class TextureManager
 {
-	private array<Texture@> textures(MAX_TEXTURES);
+	private array<Texture@> textures(MAX_TEXTURES);
 	private bool initialized = false;
 		
 	void init()
-	{
-		// Make sure the manager is not initialized already
-		if(initialized)
-			return;
-		
+	{
+		// Make sure the manager is not initialized already
+		if(initialized)
+			return;
+		
 		// Load textures
 		load(BERRY_BUSH_TEXTURE, @Texture(":/sprites/plants/berry_bush.png"));
-		
-		// Mark as initialized
+		load(STICK_TEXTURE, @Texture(":/sprites/items/stick2.png"));
+		
+		// Mark as initialized
 		initialized = true;
 	}
-	
-	private void load(TextureID id, Texture @texture)
-	{
-		// Make sure the manager is not initialized
-		if(initialized)
-			return;
-		@textures[id] = @texture;
-	}
+	
+	private void load(TextureID id, Texture @texture)
+	{
+		// Make sure the manager is not initialized
+		if(initialized)
+			return;
+		@textures[id] = @texture;
+	}
 	
 	Texture @opIndex(int idx)
 	{

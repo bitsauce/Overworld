@@ -1,53 +1,106 @@
 class Projectile : GameObject
 {
-	Vector2 size = Vector2(20, 6);
-	Sprite @sprite = @Sprite(@Texture(":/sprites/items/stick2.png"));
+	Vector2 size;
+	Sprite @sprite;
 	b2Body @body;
-	bool collided = false;
-	float lifeTile = 10.0f; // 10s
+	b2WeldJoint @joint;
+	bool collided;
+	float lifeTime;
 	
 	Projectile()
-	{	
-		b2BodyDef def;
-		def.type = b2_dynamicBody;
-		def.fixedRotation = false;
-		@body = @b2Body(def);
-		body.setObject(@this);
-		body.createFixture(Rect(0, 0, size.x, size.y), 32.0f);
-		body.setBeginContactCallback(@b2ContactCallback(@beginContact));
-	}
-	
-	void remove()
 	{
-		body.destroy();
-		GameObject::remove();
+		// Setup vars
+		collided = false;
+		lifeTime = 10.0f; // 10s
+		
+		// Init the rest
+		init();
 	}
 	
-	void beginContact(b2Contact @contact)
+	private void init()
+	{
+		// Load spirte
+		size = Vector2(20, 6);
+		@sprite = @Sprite(@game::textures[STICK_TEXTURE]);
+		
+		// Create body def
+		b2BodyDef def;
+		def.type = b2_dynamicBody;
+		def.fixedRotation = false;
+		
+		// Create body
+		@body = @b2Body(def);
+		body.setObject(@this);
+		body.createFixture(Rect(0, 0, size.x, size.y), 32.0f);
+		body.setPreSolveCallback(@b2ContactCallback(@preSolve));
+	}
+	
+	void remove()
+	{
+		body.destroy();
+		GameObject::remove();
+	}
+	
+	void serialize(StringStream &ss)
+	{
+		ss.write(body.getPosition());
+		ss.write(body.getLinearVelocity());
+		
+		ss.write(collided);
+		ss.write(lifeTime);
+	}
+	
+	void deserialize(StringStream &ss)
+	{
+		init();
+		
+		Vector2 pos, vel;
+		ss.read(pos); body.setPosition(pos);
+		ss.read(vel); body.setLinearVelocity(vel);
+		
+		ss.read(collided);
+		ss.read(lifeTime);
+	}
+	
+	b2Contact @contact;
+	
+	void preSolve(b2Contact @contact)
 	{
 		Player @player;
-		Terrain @terrain;
-		if(!contact.bodyB.getObject(@player))
+		Projectile @proj;
+		if(contact.bodyB.getObject(@proj) || contact.bodyB.getObject(@player))
 		{
-			collided = true; // Not a player
-			// TODO: Connect projectile to whatever it hit using a b2WeldJoint
-		}
-	}
-	
-	void update()
-	{
-		if(!collided)
-		{
-			// Set angle of projectile
-			body.setAngle(Math.atan2(body.getLinearVelocity().y, body.getLinearVelocity().x));
+			// Disable collision for projectiles and players
+			contact.setEnabled(false);
 		}else
 		{
-			lifeTile -= Graphics.dt;
-			if(lifeTile <= 0.0f)
-			{
-				remove();
-			}
+			collided = true;
+			@this.contact = @contact;
 		}
+	}
+	
+	void update()
+	{
+		if(!collided)
+		{
+			// Set angle of projectile
+			body.setAngle(Math.atan2(body.getLinearVelocity().y, body.getLinearVelocity().x));
+		}else
+		{
+			if(@joint == null && @contact != null)
+			{
+				b2WeldJointDef def;
+				def.initialize(@contact.bodyB, @contact.bodyA, body.getPosition());
+				@joint = @b2WeldJoint(def);
+				@contact = null;
+			}
+			
+			lifeTime -= Graphics.dt;
+			if(lifeTime <= 0.0f)
+			{
+				remove();
+			}
+		}
 	}
 	
 	void draw()
