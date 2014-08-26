@@ -1,8 +1,11 @@
 class GameScene : Scene
-{
+{
+	private array<GameObject@> objects;
+	private array<Furniture@> furnitures;
+	private array<Player@> players;
+	private array<Batch@> batches(LAYERS_MAX);
+		
 	// Game objects
-	private array<GameObject@> objects;
-	
 	void addGameObject(GameObject @object)
 	{
 		objects.insertLast(@object);
@@ -17,8 +20,6 @@ class GameScene : Scene
 	}
 	
 	// Furnitures
-	private array<Furniture@> furnitures;
-		
 	void addFurniture(Furniture @furniture)
 	{
 		furnitures.insertLast(@furniture);
@@ -43,8 +44,6 @@ class GameScene : Scene
 	}	
 	
 	// Players
-	private array<Player@> players;
-	
 	void addPlayer(Player @player)
 	{
 		players.insertLast(@player);
@@ -78,8 +77,6 @@ class GameScene : Scene
 	}
 	
 	// Batches
-	private array<Batch@> batches(LAYERS_MAX);
-	
 	Batch @getBatch(const Layer layer) const
 	{
 		return @batches[layer];
@@ -253,8 +250,9 @@ class GameScene : Scene
 			batches[i].clear();
 		}
 	
-		// Create translation matrix
-		batches[SCENE].setProjectionMatrix(camera.getProjectionMatrix());
+		// Create translation matrix
+		Matrix4 projmat = camera.getProjectionMatrix();
+		batches[SCENE].setProjectionMatrix(projmat);
 		
 		background.draw();
 		timeOfDay.draw();
@@ -269,91 +267,49 @@ class GameScene : Scene
 		for(int i = 0; i < objects.size; i++) {
 			objects[i].draw();
 		}
-		
-		// Render scene terrain-layer to texture
-		terrainFbo.clear();
-		terrain.draw(TERRAIN_BACKGROUND, @terrainFbo);
-		
-		Shape @screen = @Shape(Rect(Vector2(-padding*0.5f), Vector2(Window.getSize()) + Vector2(padding)));
-		screen.setFillTexture(@terrainFbo);
-		screen.draw(@batches[BACKGROUND]);
-		
-		batches[BACKGROUND].draw();
-		
-		// Box2D debug draw
-		if(Input.getKeyState(KEY_B)) {
-			Box2D.draw(@batches[SCENE]);
-		}
+		
+		// Draw background batch
+		batches[BACKGROUND].draw();
+		
+		// Draw terrain background
+		terrain.draw(TERRAIN_BACKGROUND, projmat);
 		
 		// Draw scene content
-		batches[SCENE].draw();
-		
-		// Draw terrain scene and foreground layer to texture
-		terrainFbo.clear();
-		terrain.draw(TERRAIN_SCENE, @terrainFbo);
-		terrain.draw(TERRAIN_FOREGROUND, @terrainFbo);
-		
-		screen.setFillTexture(@terrainFbo);
-		screen.draw(@batches[FOREGROUND]);
-		
+		batches[SCENE].draw();
+		
+		// Draw terrain scene
+		terrain.draw(TERRAIN_SCENE, projmat);
+		
+		// Box2D debug draw
+		if(Input.getKeyState(KEY_B)) {
+			Box2D.draw(@batches[SCENE]);
+		}
+		
+		// Draw terrain foreground
+		terrain.draw(TERRAIN_FOREGROUND, projmat);
+		
+		// Draw terrain shadows
 		if(!Input.getKeyState(KEY_8))
-		{
-			shadowFbo.clear();
-			shadowBatch.renderToTexture(@shadowFbo);
-			screen.setFillTexture(@shadowFbo);
-			screen.draw(@batches[FOREGROUND]);
+		{
+			Sprite @shadows = @Sprite(TextureRegion(@terrain.getShadowMap(), camera.position.x/(TILE_SIZE*terrain.getWidth()), (camera.position.y+Window.getSize().y)/(TILE_SIZE*terrain.getHeight()),
+													(camera.position.x+Window.getSize().x)/(TILE_SIZE*terrain.getWidth()), camera.position.y/(TILE_SIZE*terrain.getHeight())));
+			shadows.setSize(Vector2(Window.getSize()));
+			shadows.draw(@batches[FOREGROUND]);
 		}
 		
 		batches[FOREGROUND].draw();
 		
-		// Draw debug text to screen
-		debug.setVariable("FPS", ""+Graphics.FPS);
-		
 		// Draw remaining batches
 		for(int i = FOREGROUND + 1; i < batches.size; i++) {
 			batches[i].draw();
-		}
-	}
-	
-	// Shadow shader
-	Shader @shadowShader = @Shader(":/shaders/terrainshadows.vert", ":/shaders/terrainshadows.frag"); // Move to global scope
-	
-	// Shadow batch and texture (fbo)
-	Batch @shadowBatch = @Batch(); // Move to global scope
-	Texture @shadowFbo; // Move to global scope
-	
-	// Shadow shader uniforms
-	float radius = 3.0f; // 3.0f
-	float falloff = 3.0f;
-	int shadowDownsampleLevel = 16; //16 // must be power of two
-	
-	int get_padding() const
-	{
-		return radius*shadowDownsampleLevel*2;
+		}
+		
+		// Draw debug text to screen
+		debug.setVariable("FPS", ""+Graphics.FPS);
 	}
 	
 	void resized(int width, int height)
 	{
-		// Resize terrain FBO
-		@terrainFbo = @Texture(width + padding, height + padding);
-		terrainFbo.setFiltering(LINEAR);
-		
-		// Create downsampled shadow texture
-		Vector2i resolution = Vector2i(width, height)/shadowDownsampleLevel;
-		@shadowFbo = @Texture(resolution.x, resolution.y);
-		shadowFbo.setFiltering(LINEAR);
-		
-		// Clear and update shadow batch
-		shadowBatch.clear();
-		shadowBatch.setShader(@shadowShader);
-		Shape @downsampledRect = @Shape(Rect(0.0f, 0.0f, resolution.x, resolution.y));
-		downsampledRect.draw(@shadowBatch);
-		
-		// Update shadow shader uniforms
-		shadowShader.setUniform1f("radius", radius);
-		shadowShader.setUniform1f("falloff", falloff);
-		shadowShader.setUniform2f("resolution", resolution.x, resolution.y);
-		shadowShader.setSampler2D("texture", @terrainFbo);
 	}
 }
 

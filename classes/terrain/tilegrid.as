@@ -230,9 +230,10 @@ class TileGrid
 		}
 	}
 	
-	void draw(Texture @texture, Matrix4 mat)
+	void draw(const Matrix4 &in projmat)
 	{
-		batch.setProjectionMatrix(mat);
-		batch.renderToTexture(@texture);
+		batch.setProjectionMatrix(projmat);
+		//batch.renderToTexture(@texture);
+		batch.draw();
 	}
 }

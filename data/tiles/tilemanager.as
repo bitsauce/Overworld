@@ -10,21 +10,20 @@ class TileManager
 		if(initialized)
 			return;
 		
-		// Add tiles
-		add(GRASS_TILE, Tile(@Texture(":/sprites/tiles/grass_tile.png"), GRASS_BLOCK));
-		add(STONE_TILE, Tile(@Texture(":/sprites/tiles/stone_tile.png"), STONE_BLOCK));
-		
-		add(WOOD_TILE, Tile(@Texture(":/sprites/tiles/wood_tile.png"), WOOD_BLOCK));
-		
-		add(LEAF_TILE, Tile(@Texture(":/sprites/tiles/leaf_tile.png"), LEAF_BLOCK));
+		// Add tiles
+		for(int i = 0; i < MAX_TILES; i++) {
+			add(TileID(i));
+		}
 		
 		// Store tile textures
 		array<Texture@> textures;
-		for(int i = 0; i < tiles.size; i++) {
+		for(int i = 0; i < MAX_TILES; i++) {
 			Tile @tile = @tiles[i];
-			if(@tile == null) {
+			if(@tile.getTexture() == @null)
+			{
 				textures.insertLast(@Texture(32, 48));
-			}else{
+			}else
+			{
 				textures.insertLast(@tile.getTexture());
 			}
 		}
@@ -34,14 +33,14 @@ class TileManager
 		initialized = true;
 	}
 	
-	void add(TileID id, Tile @tile)
+	void add(TileID id)
 	{
 		// Make sure the manager is not initialized
 		if(initialized)
 			return;
 		
 		// Set tile
-		@tiles[id] = @tile;
+		@tiles[id] = @Tile(id);
 	}
 	
 	Tile @opIndex(int idx)
@@ -62,7 +61,7 @@ class TileManager
 		for(int i = 0; i < tiles.size; i++)
 		{
 			Tile @tile = @tiles[i];
-			if(@tile != null && tile.item == item) {
+			if(tile.getItemID() == item) {
 				return TileID(i);
 			}
 		}

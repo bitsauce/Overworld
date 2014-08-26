@@ -24,3 +24,42 @@ enum TileID
 	
 	MAX_TILES
 }
+
+array<Texture@> TILE_TEXTURES = {
+	null, // NULL_TILE
+	null, // RESERVED_TILE
+	@Texture(":/sprites/tiles/grass_tile.png"),
+	@Texture(":/sprites/tiles/stone_tile.png"),
+	null, // SCENE_TILES
+	@Texture(":/sprites/tiles/wood_tile.png"),
+	null, // BACKGROUND_TILES
+	@Texture(":/sprites/tiles/leaf_tile.png"),
+	null, // FOREGROUND_TILES
+	null  // MAX_TILES
+};
+
+array<ItemID> TILE_ITEMS = {
+	NULL_ITEM, // NULL_TILE
+	NULL_ITEM, // RESERVED_TILE
+	GRASS_BLOCK,
+	STONE_BLOCK,
+	NULL_ITEM, // SCENE_TILES
+	WOOD_BLOCK,
+	NULL_ITEM, // BACKGROUND_TILES
+	LEAF_BLOCK,
+	NULL_ITEM, // FOREGROUND_TILES
+	NULL_ITEM  // MAX_TILES
+};
+
+array<float> TILE_OPACITIES = {
+	0.0f, // NULL_TILE
+	0.0f, // RESERVED_TILE
+	1.0f,
+	1.0f,
+	0.0f, // SCENE_TILES
+	0.0f,
+	0.0f, // BACKGROUND_TILES
+	0.0f,
+	0.0f, // FOREGROUND_TILES
+	0.0f  // MAX_TILES
+};
