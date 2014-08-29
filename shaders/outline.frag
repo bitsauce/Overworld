@@ -1,3 +1,5 @@
+#version 120
+
 varying vec2 texCoord;
 uniform sampler2D texture;
 uniform vec2 resolution;

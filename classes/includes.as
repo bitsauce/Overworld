@@ -6,7 +6,8 @@
 #include "camera.as"
 #include "debug.as"
 #include "humanoid.as"
-#include "raycast.as"
+#include "raycast.as"
+#include "simplex.as"
 
 // Scenes
 #include "scenes/mainmenu.as"
@@ -32,7 +33,7 @@
 #include "items/arrow.as"
 #include "items/block.as"
 #include "items/pickaxe.as"
-#include "items/healing.as"
+#include "items/healing.as"
 #include "items/bow.as"
 
 // Terrain

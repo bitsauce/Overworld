@@ -13,12 +13,48 @@ Vector4 blendRgb(Vector4 dst, Vector4 src)
 	return ret;
 }
 
+class Cloud
+{
+	private Sprite @sprite = @Sprite(null);
+	private Vector2 velocity;
+	
+	void update()
+	{
+		sprite.move(velocity);
+		if(sprite.getX() >= Window.getSize().x)
+		{
+			randomize();
+			sprite.setX(-sprite.getWidth());
+		}
+	}
+	
+	void draw(Batch @batch)
+	{
+		sprite.draw(@batch);
+	}
+	
+	void randomize()
+	{
+		Vector2 uv = Vector2(Math.getRandomInt(0, 1000), Math.getRandomInt(0, 1000));
+		sprite.setRegion(TextureRegion(null, uv.x, uv.y, uv.x + 1, uv.y + 1));
+		sprite.setPosition(Math.getRandomInt(0, Window.getSize().x), Math.getRandomInt(0, Window.getSize().y));
+		sprite.setWidth(Math.getRandomInt(128, 256));
+		sprite.setHeight(sprite.getWidth() * Math.getRandomInt(40, 60) / 100.0f);
+		velocity.set(Math.getRandomInt(100, 200)/800.0f, 0.0f);
+	}
+}
+
 class Background
 {
 	Vector4 topColor = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	Vector4 bottomColor = Vector4(0.35f, 0.67f, 1.0f, 1.0f);
 	Sprite @sun = @Sprite(@Texture(":/sprites/sky/sun.png"));
-	Sprite @moon = @Sprite(@Texture(":/sprites/sky/moon.png"));
+	Sprite @moon = @Sprite(@Texture(":/sprites/sky/moon.png"));
+	array<Cloud> clouds(10);
+	Shader @simplexNoise = @Shader(":/shaders/simplex3d.vert", ":/shaders/simplex3d.frag");
+	Texture @cloudGradient = @Texture(":/sprites/sky/cloud_gradient.png");
+	Texture @cloudMask = @Texture(":/sprites/sky/cloud_mask.png");
+	float cloudTime = 0.0f;
 	
 	float exposure = 0.1f;
 	float decay = 0.97f;
@@ -33,6 +69,17 @@ class Background
 		godRayShader.setUniform1f("exposure", exposure);
 		godRayShader.setUniform1f("decay", decay);
 		godRayShader.setUniform1f("density", density);
+		
+		simplexNoise.setSampler2D("u_gradient", @cloudGradient);
+		simplexNoise.setSampler2D("u_mask", @cloudMask);
+		simplexNoise.setUniform1f("u_frequency", 0.1f);
+		simplexNoise.setUniform1f("u_gain", 0.5f);
+		simplexNoise.setUniform1f("u_lacunarity", 2.0f);
+		simplexNoise.setUniform1i("u_octaves", 8);
+		
+		for(int i = 0; i < clouds.size; i++) {
+			clouds[i].randomize();
+		}
 
 		// Draw texture
 		godRayShader.setSampler2D("texture", @fboTexture);
@@ -58,7 +105,8 @@ class Background
 				float minscale = 1.0f - (540-time)/180.0f; // Aka. (9*60-time)/(6*60-9*60)
 				topColor = blendRgb(rgbvec(0, 0, 0, 255), rgbvec(255, 255, 255, 255*minscale));
 				bottomColor = blendRgb(rgbvec(10, 60, 110, 255), rgbvec(90, 170, 255, 255*minscale));
-			}else{
+			}else
+			{
 				// Set day gradient
 				topColor = rgbvec(255, 255, 255);
 				bottomColor = rgbvec(90, 170, 255);
@@ -71,7 +119,8 @@ class Background
 			sun.setPosition(Vector2(windowSize.x/2.0f - sunSize.x/2.0f + Math.cos(Math.PI*ang) * (windowSize.x/2.0f + sunSize.x/4.0f),
 									windowSize.y/2.0f - Math.sin(Math.PI*ang) * (windowSize.y/2.0f + 64)));
 			sun.setRotation(180*(1.0f-ang));
-		}else{
+		}else
+		{
 			// Apply sunset from 18:00 to 21:00
 			if(hour >= 18 && hour < 21)
 			{
@@ -79,7 +128,8 @@ class Background
 				float minscale = 1.0f - (1260-time)/180.0f; // Aka. (21*60-time)/(18*60-21*60)
 				topColor = blendRgb(rgbvec(255, 255, 255, 255), rgbvec(0, 0, 0, 255*minscale));
 				bottomColor = blendRgb(rgbvec(90, 170, 255, 255), rgbvec(10, 60, 110, 255*minscale));
-			}else{
+			}else
+			{
 				// Set night gradient
 				topColor = rgbvec(0, 0, 0);
 				bottomColor = rgbvec(10, 60, 110);
@@ -93,6 +143,11 @@ class Background
 									 windowSize.y/2.0f - Math.sin(Math.PI*ang) * windowSize.y/2.0f));
 			moon.setRotation(180*(1.0f-ang));
 		}
+		
+		for(int i = 0; i < clouds.size; i++) {
+			clouds[i].update();
+		}
+		cloudTime += Graphics.dt;
 	}
 	
 	void draw()
@@ -121,10 +176,12 @@ class Background
 			if(hour >= 6 && hour < 18)
 			{
 				sun.draw(@background);
-			}else{
+			}else
+			{
 				moon.draw(@background);
 			}
-		}else{
+		}else
+		{
 			// Draw sun/moon
 			Vector2 lightPos;
 			int hour = game::timeOfDay.getHour();
@@ -161,5 +218,13 @@ class Background
 			// Clear fbo buffer
 			fbo.clear();
 		}
+		
+		// Draw clouds
+		background.setShader(@simplexNoise);
+		simplexNoise.setUniform1f("u_time", cloudTime * 0.1f);
+		for(int i = 0; i < clouds.size; i++) {
+			clouds[i].draw(@background);
+		}
+		background.setShader(null);
 	}
 }
