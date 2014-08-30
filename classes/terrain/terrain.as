@@ -13,9 +13,8 @@ class Terrain : Serializable
 	private grid<b2Fixture@> fixtures;
 	
 	// Terrain layers (as TileGrids)
-	private array<TileGrid@> layers;
-		
-	// Shadow map
+	private array<TileGrid@> layers;		
+	// Shadow map
 	private Texture @shadowMap;
 	
 	// Terrain size
@@ -47,9 +46,8 @@ class Terrain : Serializable
 		
 		// Resize fixture grid
 		fixtures.resize(width, height);
-		
-		// Create shadow map
-		@shadowMap = @Texture(width, height);
+		// Create shadow map
+		@shadowMap = @Texture(width, height);
 		shadowMap.setFiltering(LINEAR);
 		
 		// Setup b2Body
@@ -214,29 +212,26 @@ class Terrain : Serializable
 		bool shouldContainFixture = scene.isTileAt(x, y, true) && (scene.getTileState(x, y, true) & NESW != NESW);
 		
 		// Create or remove fixture
-		if(shouldContainFixture && !isFixtureAt(x, y))
+		if(shouldContainFixture && !isFixtureAt(x, y))
 		{
 			createFixture(x, y);
-		}else if(!shouldContainFixture && isFixtureAt(x, y))
+		}else if(!shouldContainFixture && isFixtureAt(x, y))
 		{
 			removeFixture(x, y);
 		}
 	}
-	
-	private void updateOpacity(const int x, const int y)
-	{
-		if(!isValid(x, y))
+	private void updateOpacity(const int x, const int y)
+	{
+		if(!isValid(x, y))
 			return;
-		
-		float opacity = 0.0f;
-		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
-			opacity += game::tiles[getTileAt(x, y, TerrainLayer(i))].getOpacity();
+		float opacity = 0.0f;
+		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
+			opacity += game::tiles[getTileAt(x, y, TerrainLayer(i))].getOpacity();
 		}
-		
-		array<Vector4> pixel = {
-			Vector4(0.0f, 0.0f, 0.0f, opacity)
+		array<Vector4> pixel = {
+			Vector4(0.0f, 0.0f, 0.0f, opacity)
 		};
-		shadowMap.updateSection(x, y, Pixmap(1, 1, pixel));
+		shadowMap.updateSection(x, y, Pixmap(1, 1, pixel));
 	}
 	
 	// Terrain modification
@@ -254,18 +249,17 @@ class Terrain : Serializable
 		
 		// Check if the terrain is initialized
 		if(initialized)
-		{
-			if(layer == TERRAIN_SCENE)
+		{
+			if(layer == TERRAIN_SCENE)
 			{
 				// Update fixtures
 				updateFixture(x, y);
 				updateFixture(x+1, y);
 				updateFixture(x-1, y);
 				updateFixture(x, y+1);
-				updateFixture(x, y-1);
+				updateFixture(x, y-1);
 			}
-		
-			// Update opacity
+			// Update opacity
 			updateOpacity(x, y);
 		}
 	}
@@ -273,22 +267,20 @@ class Terrain : Serializable
 	void removeTile(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
 	{
 		// Remove tile from tile grid
-		layers[layer].removeTile(x, y);
-		
-		// Check if the terrain is initialized
-		if(initialized)
-		{
-			if(layer == TERRAIN_SCENE)
+		layers[layer].removeTile(x, y);
+		// Check if the terrain is initialized
+		if(initialized)
+		{
+			if(layer == TERRAIN_SCENE)
 			{
 				// Update fixtures
 				updateFixture(x, y);
 				updateFixture(x+1, y);
 				updateFixture(x-1, y);
 				updateFixture(x, y+1);
-				updateFixture(x, y-1);
+				updateFixture(x, y-1);
 			}
-			
-			// Update opacity
+			// Update opacity
 			updateOpacity(x, y);
 		}
 	}
@@ -298,9 +290,8 @@ class Terrain : Serializable
 	{
 		layers[layer].draw(projmat);
 	}
-	
-	Texture @getShadowMap() const
-	{
-		return @shadowMap;
+	Texture @getShadowMap() const
+	{
+		return @shadowMap;
 	}
 }

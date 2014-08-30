@@ -13,48 +13,17 @@ Vector4 blendRgb(Vector4 dst, Vector4 src)
 	return ret;
 }
 
-class Cloud
-{
-	private Sprite @sprite = @Sprite(null);
-	private Vector2 velocity;
-	
-	void update()
-	{
-		sprite.move(velocity);
-		if(sprite.getX() >= Window.getSize().x)
-		{
-			randomize();
-			sprite.setX(-sprite.getWidth());
-		}
-	}
-	
-	void draw(Batch @batch)
-	{
-		sprite.draw(@batch);
-	}
-	
-	void randomize()
-	{
-		Vector2 uv = Vector2(Math.getRandomInt(0, 1000), Math.getRandomInt(0, 1000));
-		sprite.setRegion(TextureRegion(null, uv.x, uv.y, uv.x + 1, uv.y + 1));
-		sprite.setPosition(Math.getRandomInt(0, Window.getSize().x), Math.getRandomInt(0, Window.getSize().y));
-		sprite.setWidth(Math.getRandomInt(128, 256));
-		sprite.setHeight(sprite.getWidth() * Math.getRandomInt(40, 60) / 100.0f);
-		velocity.set(Math.getRandomInt(100, 200)/800.0f, 0.0f);
-	}
-}
-
 class Background
 {
 	Vector4 topColor = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	Vector4 bottomColor = Vector4(0.35f, 0.67f, 1.0f, 1.0f);
 	Sprite @sun = @Sprite(@Texture(":/sprites/sky/sun.png"));
 	Sprite @moon = @Sprite(@Texture(":/sprites/sky/moon.png"));
-	array<Cloud> clouds(10);
+	float wind = 0.04f;
+	float cloudTime = 0.0f;
 	Shader @simplexNoise = @Shader(":/shaders/simplex3d.vert", ":/shaders/simplex3d.frag");
 	Texture @cloudGradient = @Texture(":/sprites/sky/cloud_gradient.png");
-	Texture @cloudMask = @Texture(":/sprites/sky/cloud_mask.png");
-	float cloudTime = 0.0f;
+	Sprite @cloudSprite = @Sprite(TextureRegion(null, 0.0f, 0.0f, 7.0f, 10.0f));
 	
 	float exposure = 0.1f;
 	float decay = 0.97f;
@@ -76,10 +45,6 @@ class Background
 		simplexNoise.setUniform1f("u_gain", 0.5f);
 		simplexNoise.setUniform1f("u_lacunarity", 2.0f);
 		simplexNoise.setUniform1i("u_octaves", 8);
-		
-		for(int i = 0; i < clouds.size; i++) {
-			clouds[i].randomize();
-		}
 
 		// Draw texture
 		godRayShader.setSampler2D("texture", @fboTexture);
@@ -103,7 +68,7 @@ class Background
 			{
 				// Percentage of sunrise
 				float minscale = 1.0f - (540-time)/180.0f; // Aka. (9*60-time)/(6*60-9*60)
-				topColor = blendRgb(rgbvec(0, 0, 0, 255), rgbvec(255, 255, 255, 255*minscale));
+				topColor = blendRgb(Vector4(0.0f, 0.0f, 0.0f, 1.0f), rgbvec(255, 255, 255, 255*minscale));
 				bottomColor = blendRgb(rgbvec(10, 60, 110, 255), rgbvec(90, 170, 255, 255*minscale));
 			}else
 			{
@@ -144,10 +109,8 @@ class Background
 			moon.setRotation(180*(1.0f-ang));
 		}
 		
-		for(int i = 0; i < clouds.size; i++) {
-			clouds[i].update();
-		}
-		cloudTime += Graphics.dt;
+		// Apply wind
+		cloudTime += wind * Graphics.dt;
 	}
 	
 	void draw()
@@ -220,18 +183,12 @@ class Background
 		}
 		
 		// Draw clouds
+		simplexNoise.setUniform1f("u_time", cloudTime);
 		background.setShader(@simplexNoise);
-		if(Input.getKeyState(KEY_Y)) cloudTime = Math.getRandomInt(0, 10000);
-		simplexNoise.setUniform1f("u_time", cloudTime * 0.01f);
 		
-		/*for(int i = 0; i < clouds.size; i++) {
-			clouds[i].draw(@background);
-		}*/
-		
-		Sprite @sprite = @Sprite(TextureRegion(null, 0.0, 0.0, 0.7, 1.0));
-		sprite.setPosition(0.0f, 0.0f);
-		sprite.setSize(Window.getSize().x, Window.getSize().y);
-		sprite.draw(@background);
+		cloudSprite.setPosition(0.0f, 0.0f);
+		cloudSprite.setSize(Window.getSize().x, Window.getSize().y);
+		cloudSprite.draw(@background);
 		
 		background.setShader(null);
 	}

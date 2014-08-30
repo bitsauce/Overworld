@@ -6,7 +6,7 @@
 #include "camera.as"
 #include "debug.as"
 #include "humanoid.as"
-#include "raycast.as"
+#include "raycast.as"
 #include "simplex.as"
 
 // Scenes

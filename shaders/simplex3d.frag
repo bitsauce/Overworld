@@ -103,8 +103,6 @@ uniform float u_gain;
 uniform float u_lacunarity;
 uniform int u_octaves;
 uniform sampler2D u_gradient;
-//uniform sampler2D u_mask;
-
 varying vec2 v_texCoord;
 
 float simplex(vec3 p)
@@ -127,7 +125,5 @@ float simplex(vec3 p)
 
 void main(void)
 {
-	vec4 color = texture2D(u_gradient, vec2(0.5 + 0.5 * simplex(vec3(vec2(v_texCoord.x + u_time, v_texCoord.y)*10.0, u_time)), 0.0));
-	//color.a *= texture2D(u_mask, v_texCoord).a;
-	gl_FragColor = color;
+	gl_FragColor = texture2D(u_gradient, vec2(0.5 + 0.5 * simplex(vec3(v_texCoord.x - u_time, v_texCoord.y, u_time)), 0.0));
 }
