@@ -162,10 +162,10 @@ class GameScene : Scene
 		setWorldDir(worldDir);
 		
 		// Load terrain
-		Scripts.deserialize(@terrain, worldDir + "/terrain.obj");
+		@terrain = cast<Terrain@>(@Scripts.deserialize(worldDir + "/terrain.obj"));
 		
 		// Load time of day
-		Scripts.deserialize(@timeOfDay, worldDir + "/timeOfDay.obj");
+		@timeOfDay = cast<TimeOfDay@>(Scripts.deserialize(worldDir + "/timeOfDay.obj"));
 		
 		// Create global objects
 		@camera = @Camera();
@@ -178,8 +178,7 @@ class GameScene : Scene
 		array<string> @objectFiles = @FileSystem.listFiles(worldDir + "/objects", "*.obj");
 		for(int i = 0; i < objectFiles.size; i++)
 		{
-			GameObject @object;
-			Scripts.deserialize(@object, objectFiles[i]);
+			GameObject @object = cast<GameObject>(@Scripts.deserialize(objectFiles[i]));
 			objects.insertLast(@object);
 			
 			Furniture @furniture = cast<Furniture>(object);
@@ -201,7 +200,7 @@ class GameScene : Scene
 		// Save game objects
 		FileSystem.remove(worldDir + "/objects");
 		for(int i = 0; i < objects.size; i++) {
-			Scripts.serialize(@objects[i], worldDir + "/objects/" + i + ".obj");
+			Scripts.serialize(cast<Serializable>(@objects[i]), worldDir + "/objects/" + i + ".obj");
 		}
 	}
 	

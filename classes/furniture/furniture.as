@@ -1,4 +1,4 @@
-class Furniture : GameObject
+class Furniture : GameObject, Serializable
 {
 	private Sprite @sprite;
 	private int x, y; // Tile position

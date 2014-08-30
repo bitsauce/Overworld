@@ -1,4 +1,4 @@
-class TimeOfDay
+class TimeOfDay : Serializable
 {
 	private float time = 13*60; // one o' clock
 	

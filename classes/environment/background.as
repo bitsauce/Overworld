@@ -71,7 +71,7 @@ class Background
 		godRayShader.setUniform1f("density", density);
 		
 		simplexNoise.setSampler2D("u_gradient", @cloudGradient);
-		simplexNoise.setSampler2D("u_mask", @cloudMask);
+		//simplexNoise.setSampler2D("u_mask", @cloudMask);
 		simplexNoise.setUniform1f("u_frequency", 0.1f);
 		simplexNoise.setUniform1f("u_gain", 0.5f);
 		simplexNoise.setUniform1f("u_lacunarity", 2.0f);
@@ -221,10 +221,18 @@ class Background
 		
 		// Draw clouds
 		background.setShader(@simplexNoise);
-		simplexNoise.setUniform1f("u_time", cloudTime * 0.1f);
-		for(int i = 0; i < clouds.size; i++) {
+		if(Input.getKeyState(KEY_Y)) cloudTime = Math.getRandomInt(0, 10000);
+		simplexNoise.setUniform1f("u_time", cloudTime * 0.01f);
+		
+		/*for(int i = 0; i < clouds.size; i++) {
 			clouds[i].draw(@background);
-		}
+		}*/
+		
+		Sprite @sprite = @Sprite(TextureRegion(null, 0.0, 0.0, 0.7, 1.0));
+		sprite.setPosition(0.0f, 0.0f);
+		sprite.setSize(Window.getSize().x, Window.getSize().y);
+		sprite.draw(@background);
+		
 		background.setShader(null);
 	}
 }

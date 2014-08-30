@@ -4,7 +4,7 @@ bool isValidTile(TileID tile)
 			tile != FOREGROUND_TILES && tile != MAX_TILES;
 }
 
-class Terrain
+class Terrain : Serializable
 {
 	// Box2D body
 	b2Body @body;

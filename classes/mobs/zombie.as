@@ -1,4 +1,4 @@
-class Zombie : Humanoid
+class Zombie : Humanoid, Serializable
 {
 	// Ray for collision checking
 	RayCast ray;

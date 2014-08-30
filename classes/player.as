@@ -1,4 +1,4 @@
-class Player : Humanoid
+class Player : Humanoid, Serializable
 {
 	// Player inventory
 	Inventory @inventory;
