@@ -1,10 +1,10 @@
 class GameScene : Scene
-{
-	private array<GameObject@> objects;
-	private array<Furniture@> furnitures;
-	private array<Player@> players;
-	private array<Batch@> batches(LAYERS_MAX);
-		
+{
+	private array<GameObject@> objects;
+	private array<Furniture@> furnitures;
+	private array<Player@> players;
+	private array<Batch@> batches(LAYERS_MAX);
+	
 	// Game objects
 	void addGameObject(GameObject @object)
 	{
@@ -131,7 +131,7 @@ class GameScene : Scene
 		@terrain = @Terrain();
 		
 		// Generate world
-		terrain.generate(250, 50);
+		//terrain.generate(250, 50);
 		
 		// Create global objects
 		@timeOfDay = @TimeOfDay();
@@ -249,7 +249,7 @@ class GameScene : Scene
 			batches[i].clear();
 		}
 	
-		// Create translation matrix
+		// Create translation matrix
 		Matrix4 projmat = camera.getProjectionMatrix();
 		batches[SCENE].setProjectionMatrix(projmat);
 		
@@ -266,44 +266,42 @@ class GameScene : Scene
 		for(int i = 0; i < objects.size; i++) {
 			objects[i].draw();
 		}
-		
+		
 		// Draw background batch
-		batches[BACKGROUND].draw();
-		
-		// Draw terrain background
+		batches[BACKGROUND].draw();
+		
+		// Draw terrain background
 		terrain.draw(TERRAIN_BACKGROUND, projmat);
 		
 		// Draw scene content
 		batches[SCENE].draw();
-		
-		// Draw terrain scene
-		terrain.draw(TERRAIN_SCENE, projmat);
-		
-		// Box2D debug draw
-		if(Input.getKeyState(KEY_B)) {
-			Box2D.draw(@batches[SCENE]);
-		}
-		
-		// Draw terrain foreground
-		terrain.draw(TERRAIN_FOREGROUND, projmat);
-		
-		// Draw terrain shadows
-		if(!Input.getKeyState(KEY_8))
-		{
-			Sprite @shadows = @Sprite(TextureRegion(@terrain.getShadowMap(), camera.position.x/(TILE_SIZE*terrain.getWidth()), (camera.position.y+Window.getSize().y)/(TILE_SIZE*terrain.getHeight()),
-													(camera.position.x+Window.getSize().x)/(TILE_SIZE*terrain.getWidth()), camera.position.y/(TILE_SIZE*terrain.getHeight())));
-			shadows.setSize(Vector2(Window.getSize()));
-			shadows.draw(@batches[FOREGROUND]);
+		// Draw terrain scene
+		//terrain.draw(TERRAIN_SCENE, projmat);
+		
+		// Box2D debug draw
+		if(Input.getKeyState(KEY_B)) {
+			Box2D.draw(@batches[SCENE]);
 		}
 		
+		// Draw terrain foreground
+		//terrain.draw(TERRAIN_FOREGROUND, projmat);
+		
+		// Draw terrain shadows
+		/*if(!Input.getKeyState(KEY_8))
+		{
+			Sprite @shadows = @Sprite(TextureRegion(@terrain.getShadowMap(), camera.position.x/(TILE_SIZE*terrain.getWidth()), (camera.position.y+Window.getSize().y)/(TILE_SIZE*terrain.getHeight()),
+													(camera.position.x+Window.getSize().x)/(TILE_SIZE*terrain.getWidth()), camera.position.y/(TILE_SIZE*terrain.getHeight())));
+			shadows.setSize(Vector2(Window.getSize()));
+			shadows.draw(@batches[FOREGROUND]);
+		}*/
 		batches[FOREGROUND].draw();
 		
 		// Draw remaining batches
 		for(int i = FOREGROUND + 1; i < batches.size; i++) {
 			batches[i].draw();
-		}
-		
-		// Draw debug text to screen
+		}
+		
+		// Draw debug text to screen
 		debug.setVariable("FPS", ""+Graphics.FPS);
 	}
 	

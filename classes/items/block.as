@@ -13,7 +13,7 @@ class BlockItem : Item
 		Vector2 dt = Input.position + game::camera.position - player.body.getPosition();
 		if(dt.length() <= ITEM_PICKUP_RADIUS)
 		{
-			TerrainLayer layer = game::terrain.getLayerByTile(tile);
+			TerrainLayer layer = getLayerByTile(tile);
 			Vector2i pos = Vector2i((Input.position + game::camera.position)/TILE_SIZE);
 			if(!game::terrain.isTileAt(pos.x, pos.y, layer) && player.inventory.removeItem(@this))
 			{

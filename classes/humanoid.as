@@ -96,6 +96,52 @@ class Humanoid : GameObject
 		}
 	}
 	
+	// PHYSICS
+	void beginContact(b2Contact @contact)
+	{
+		// Check for foot sensor collision
+		Terrain @terrain;
+		if(contact.bodyB.getObject(@terrain))
+		{
+			if(@footSensor == @contact.fixtureA)
+			{
+				numGroundContact++;
+			}
+		}
+	}
+	
+	void endContact(b2Contact @contact)
+	{
+		// Check for foot sensor collision
+		Terrain @terrain;
+		if(contact.bodyB.getObject(@terrain))
+		{
+			if(@footSensor == @contact.fixtureA)
+			{
+				numGroundContact--;
+			}
+		}
+	}
+	
+	void preSolve(b2Contact @contact)
+	{
+		// This gives friction to the controller while avoiding the wall-sticking problem
+		Terrain @terrain;
+		if(contact.bodyB.getObject(@terrain) && numGroundContact > 0)
+		{
+			contact.setFriction(0.9f);
+		}else
+		{
+			contact.resetFriction();
+		}
+	}
+	
+	Vector2 getFeetPosition() const
+	{
+		return body.getPosition() + Vector2(0.0f, size.y/2.0f);
+	}
+	
+	// ANIMATIONS
 	void changeAnimation(string name)
 	{
 		// Get animation by name
@@ -127,16 +173,19 @@ class Humanoid : GameObject
 			{
 				changeAnimation("walk");
 				skeleton.flipX = false;
-			}else if(velocity.x <= -0.01f){
+			}else if(velocity.x <= -0.01f)
+			{
 				changeAnimation("walk");
 				skeleton.flipX = true;
-			}else{
+			}else
+			{
 				changeAnimation("idle");
 				velocity.x = 0.0f;
 				body.setLinearVelocity(velocity);
 				animation.timeScale = 1.0f;
 			}
-		}else{
+		}else
+		{
 			animation.looping = false;
 			animation.timeScale = 1.0f;
 			changeAnimation("jump");
@@ -144,46 +193,6 @@ class Humanoid : GameObject
 		
 		skeleton.position = position + Vector2(0.0f, size.y/2.0f);
 		animation.update(Graphics.dt);
-	}
-	
-	void beginContact(b2Contact @contact)
-	{
-		// Check for foot sensor collision
-		Terrain @terrain;
-		if(contact.bodyB.getObject(@terrain)) {
-			if(@footSensor == @contact.fixtureA) {
-				numGroundContact++;
-			}
-		}
-	}
-	
-	void endContact(b2Contact @contact)
-	{
-		// Check for foot sensor collision
-		Terrain @terrain;
-		if(contact.bodyB.getObject(@terrain)) {
-			if(@footSensor == @contact.fixtureA) {
-				numGroundContact--;
-			}
-		}
-	}
-	
-	void preSolve(b2Contact @contact)
-	{
-		// This gives friction to the controller while avoiding the wall-sticking problem
-		Terrain @terrain;
-		if(contact.bodyB.getObject(@terrain) && numGroundContact > 0)
-		{
-			contact.setFriction(0.9f);
-		}else
-		{
-			contact.resetFriction();
-		}
-	}
-	
-	Vector2 getFeetPosition() const
-	{
-		return body.getPosition() + Vector2(0.0f, size.y/2.0f);
 	}
 	
 	void animationEvent(spEvent @event)
@@ -197,6 +206,21 @@ class Humanoid : GameObject
 		}
 	}
 	
+	private void updateSprite(const string name, Texture @texture)
+	{
+		// TODO: Implement
+		// 1) Get skeleton texture atlas
+		// 2) Get the texture region for the spesified part
+		// 3) Erase this part of the atlas using a shader, blend mode or Texture.updateSection
+		// 4) Draw the new texture to this region
+	}
+	
+	void setLeftHand(Texture @texture)
+	{
+		updateSprite("lhand", @texture);
+	}
+	
+	// MOVEMENT
 	void moveLeft()
 	{
 		float impulse = (maxRunSpeed + body.getLinearVelocity().x);
@@ -216,6 +240,7 @@ class Humanoid : GameObject
 		body.applyImpulse(Vector2(0.0f, -jumpForce), getFeetPosition());
 	}
 	
+	// DRAWING
 	void draw()
 	{
 		// Draw skeleton

@@ -1,31 +1,35 @@
-class TileGrid
+const int CHUNK_SIZE = 64;
+
+class TerrainChunk
 {
+	private b2Body @body;
+	private grid<b2Fixture@> fixtures;
 	private grid<TileID> tiles;
 	private SpriteBatch @batch;
-	private int width;
-	private int height;
 	private bool initialized;
-		
-	TileGrid(const int width, const int height)
+	
+	TerrainChunk(b2Body @body)
 	{
-		// Set size
-		this.width = width;
-		this.height = height;
-		this.initialized = false;
+		// Set as uninitialized
+		initialized = false;
+		
+		// Set body
+		@this.body = @body;
 		
 		// Resize tile grid
-		tiles.resize(width, height);
-		for(int y = 0; y < height; y++) {
-			for(int x = 0; x < width; x++) {
+		fixtures.resize(CHUNK_SIZE, CHUNK_SIZE);
+		tiles.resize(CHUNK_SIZE, CHUNK_SIZE);
+		for(int y = 0; y < CHUNK_SIZE; y++) {
+			for(int x = 0; x < CHUNK_SIZE; x++) {
 				tiles[x, y] = NULL_TILE;
 			}
 		}
-			
+		
 		// Initialize terrain buffers
 		@batch = @SpriteBatch();
-		for(int y = 0; y < height; y++)
+		for(int y = 0; y < CHUNK_SIZE; y++)
 		{
-			for(int x = 0; x < width; x++)
+			for(int x = 0; x < CHUNK_SIZE; x++)
 			{
 				for(int j = 0; j < 13; j++)
 				{
@@ -41,26 +45,30 @@ class TileGrid
 		batch.makeStatic();
 	}
 	
-	void setInitialized(bool value)
+	void init()
 	{
-		if(initialized == false && value == true)
+		// Create shadow map
+		//@shadowMap = @Texture(width, height);
+		//shadowMap.setFiltering(LINEAR);
+		
+		// Update all tiles
+		for(int y = 0; y < CHUNK_SIZE; y++)
 		{
-			// Update all tiles
-			for(int y = 0; y < height; y++) {
-				for(int x = 0; x < width; x++) {
-					updateTile(x, y);
-				}
+			for(int x = 0; x < CHUNK_SIZE; x++)
+			{
+				updateTile(x, y);
+				updateFixture(x, y);
 			}
 		}
-		initialized = value;
+		initialized = true;
 	}
 	
-	bool isValid(const int x, const int y)
+	bool isValid(const int x, const int y) const
 	{
-		return x >= 0 && x < width && y >= 0 && y < height;
+		return x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE;
 	}
 	
-	TileID getTileAt(const int x, const int y)
+	TileID getTileAt(const int x, const int y) const
 	{
 		return isValid(x, y) ? tiles[x, y] : NULL_TILE;
 	}
@@ -70,14 +78,14 @@ class TileGrid
 		return reserved ? (getTileAt(x, y) > RESERVED_TILE) : (getTileAt(x, y) != NULL_TILE);
 	}
 	
-	void addTile(const int x, const int y, const TileID tile)
+	bool addTile(const int x, const int y, const TileID tile)
 	{
 		// Make sure we can add a tile here
-		if(!isValid(x, y) || isTileAt(x, y)) // Last check probably optional
-			return;
+		if(!isValid(x, y) || isTileAt(x, y))
+			return false;
 		
 		// Show tile
-		int i = (y*width + x) * 13;
+		int i = (y * CHUNK_SIZE + x) * 13;
 		for(int j = 0; j < 13; j++) {
 			batch.get(i+j).setRegion(game::tiles.getTextureRegion(tile, j));
 		}
@@ -86,31 +94,37 @@ class TileGrid
 		// Set the tile value
 		tiles[x, y] = tile;
 		
-		// Update neighbouring tiles
 		if(initialized)
 		{
+			// Update neighbouring tiles
 			updateTile(x, y);
-			
 			updateTile(x+1, y);
 			updateTile(x-1, y);
 			updateTile(x, y+1);
 			updateTile(x, y-1);
-			
 			updateTile(x+1, y+1);
 			updateTile(x-1, y+1);
 			updateTile(x+1, y-1);
 			updateTile(x-1, y-1);
+			
+			// Update fixtures
+			updateFixture(x, y);
+			updateFixture(x+1, y);
+			updateFixture(x-1, y);
+			updateFixture(x, y+1);
+			updateFixture(x, y-1);
 		}
+		return true;
 	}
 	
-	void removeTile(const int x, const int y)
+	bool removeTile(const int x, const int y)
 	{
 		// Make sure there is a tile to remove
 		if(!isValid(x, y) || !isTileAt(x, y))
-			return;
+			return false;
 		
 		// Hide tile
-		int i = (y*width + x) * 13;
+		int i = (y * CHUNK_SIZE + x) * 13;
 		for(int j = 0; j < 13; j++) {
 			batch.get(i+j).setColor(Vector4(0.0f));
 		}
@@ -118,22 +132,29 @@ class TileGrid
 		// Reset the tile value
 		tiles[x, y] = NULL_TILE;
 		
-		// Update neighbouring tiles
 		if(initialized)
 		{
+			// Update neighbouring tiles
 			updateTile(x+1, y);
 			updateTile(x-1, y);
 			updateTile(x, y+1);
 			updateTile(x, y-1);
-			
 			updateTile(x+1, y+1);
 			updateTile(x-1, y+1);
 			updateTile(x+1, y-1);
 			updateTile(x-1, y-1);
+			
+			// Update fixtures
+			updateFixture(x, y);
+			updateFixture(x+1, y);
+			updateFixture(x-1, y);
+			updateFixture(x, y+1);
+			updateFixture(x, y-1);
 		}
+		return true;
 	}
 	
-	uint getTileState(const int x, const int y, const bool reserved = false)
+	private uint getTileState(const int x, const int y, const bool reserved = false)
 	{
 		// Set state
 		uint state = 0;
@@ -148,12 +169,12 @@ class TileGrid
 		return state;
 	}
 	
-	void updateTile(const int x, const int y)
+	private void updateTile(const int x, const int y)
 	{
 		TileID tile = getTileAt(x, y);
 		if(tile != NULL_TILE)
 		{
-			int i = (y*width + x) * 13;
+			int i = (y * CHUNK_SIZE + x) * 13;
 			uint state = getTileState(x, y, true);
 			
 			// Show/Hide north ledge
@@ -230,10 +251,44 @@ class TileGrid
 		}
 	}
 	
+	// PHYSICS
+	private void createFixture(const int x, const int y)
+	{
+		b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f, TILE_SIZE*2, TILE_SIZE*2), 0.0f);
+		game::tiles[getTileAt(x, y)].setupFixture(@fixture);
+		@fixtures[x, y] = @fixture;
+	}
+	
+	private void removeFixture(const int x, const int y)
+	{
+		body.removeFixture(@fixtures[x, y]);
+		@fixtures[x, y] = null;
+	}
+	
+	private bool isFixtureAt(const int x, const int y)
+	{
+		return isValid(x, y) ? @fixtures[x, y] != null : false;
+	}
+	
+	private void updateFixture(const int x, const int y)
+	{
+		// Find out if this tile should contain a fixture
+		bool shouldContainFixture = isTileAt(x, y, true) && (getTileState(x, y, true) & NESW != NESW);
+		
+		// Create or remove fixture
+		if(shouldContainFixture && !isFixtureAt(x, y))
+		{
+			createFixture(x, y);
+		}else if(!shouldContainFixture && isFixtureAt(x, y))
+		{
+			removeFixture(x, y);
+		}
+	}
+	
+	// DRAWING
 	void draw(const Matrix4 &in projmat)
 	{
 		batch.setProjectionMatrix(projmat);
-		//batch.renderToTexture(@texture);
 		batch.draw();
 	}
 }

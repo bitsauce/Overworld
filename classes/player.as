@@ -150,7 +150,7 @@ class Player : Humanoid, Serializable
 		}
 		
 		// Clamp player position to world bounds
-		if(position.x < 0.0f)
+		/*if(position.x < 0.0f)
 		{
 			position.x = 0.0f;
 			body.setLinearVelocity(Vector2(0.0f, velocity.y));
@@ -172,12 +172,13 @@ class Player : Humanoid, Serializable
 			position.y = game::terrain.getHeight()*TILE_SIZE;
 			body.setLinearVelocity(Vector2(velocity.x, 0.0f));
 			body.setPosition(position);
-		}
+		}*/
 		
 		updateAnimations();
 		
 		// Update camera
 		game::camera.lookAt(position);
+		game::debug.setVariable("Camera", game::camera.position.x + ", "+game::camera.position.y);
 		
 		// Update audio listener
 		Audio.position = position;

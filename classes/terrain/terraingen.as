@@ -1,14 +1,23 @@
 class TerrainGen
 {
-	Terrain @terrain;
-	int width;
-	int height;
-	
-	void generate(Terrain @terrain)
+	void generate(TerrainChunk @chunk, const int chunkx, const int chunky)
 	{
-		Console.log("Generating world...");
+		Console.log("Generating chunk...");
 		
-		@this.terrain = @terrain;
+		int tilex = chunkx*CHUNK_SIZE;
+		int tiley = chunky*CHUNK_SIZE;
+		
+		for(int y = 0; tiley > 0 && y < CHUNK_SIZE; y++)
+		{
+			for(int x = 0; x < CHUNK_SIZE; x++)
+			{
+				chunk.addTile(x, y, GRASS_TILE);
+			}
+		}
+		
+		chunk.init();
+		
+		/*@this.terrain = @terrain;
 		width = terrain.getWidth();
 		height = terrain.getHeight();
 		
@@ -33,8 +42,33 @@ class TerrainGen
 			t += 0.05f;
 		}
 		
+		// Add caves
+		for(int x = Math.getRandomInt(50, 100); x < width; x += Math.getRandomInt(50, 100))
+		{
+			int x1 = x;
+			int y1 = getGroundHeight(x1);
+			int depth = Math.getRandomInt(10, 50);
+			for(int z = 0; z < depth; z++)
+			{
+				int r = 5;
+				for(int j = -r; j <= r; j++)
+				{
+					for(int i = -r; i <= r; i++)
+					{
+						if(Math.sqrt(j*j+i*i) >= r)
+							continue;
+						terrain.removeTile(x1+i, y1+j);
+					}
+				}
+				
+				float ang = Math.getRandomInt(20, 160)*Math.PI/180.0f;
+				x1 += Math.cos(ang) * r;
+				y1 += Math.sin(ang) * r;
+			}
+		}
+		
 		// Add trees
-		for(int x = 5; x < width; x += Math.getRandomInt(10, 20))
+		for(int x = Math.getRandomInt(10, 20); x < width; x += Math.getRandomInt(10, 20))
 		{
 			int ground = getGroundHeight(x);
 			int treeHeight = Math.getRandomInt(10, 15);
@@ -75,31 +109,29 @@ class TerrainGen
 					i++;
 				}
 			}
-		} while(x < width);
-		
-		Console.log("Terrain generated");
+		} while(x < width);*/
 	}
 	
 	int getGroundHeight(int x)
 	{
-		for(int y = 0; y < height; y++)
+		/*for(int y = 0; y < height; y++)
 		{
 			if(terrain.isTileAt(x, y))
 			{
 				return y-1;
 			}
-		}
+		}*/
 		return -1;
 	}
 	
 	bool isFlatStretch(int start, int size)
 	{
-		int height = getGroundHeight(start);
+		/*int height = getGroundHeight(start);
 		for(int x = start+1; x < start+size; x++)
 		{
 			if(getGroundHeight(x) != height)
 				return false;
-		}
+		}*/
 		return true;
 	}
 }

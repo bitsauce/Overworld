@@ -4,91 +4,37 @@ bool isValidTile(TileID tile)
 			tile != FOREGROUND_TILES && tile != MAX_TILES;
 }
 
+TerrainLayer getLayerByTile(TileID tile)
+{
+	if(tile < SCENE_TILES) return TERRAIN_SCENE;
+	if(tile < BACKGROUND_TILES) return TERRAIN_BACKGROUND;
+	return TERRAIN_FOREGROUND;
+}
+	
 class Terrain : Serializable
 {
 	// Box2D body
-	b2Body @body;
+	private b2Body @body;
 	
 	// Box2D tile fixtures
-	private grid<b2Fixture@> fixtures;
+	private dictionary fixtures;
 	
-	// Terrain layers (as TileGrids)
-	private array<TileGrid@> layers;		
-	// Shadow map
-	private Texture @shadowMap;
-	
-	// Terrain size
-	private int width;
-	private int height;
-		
-	// Terrain initialized flag
-	bool initialized;
+	// Terrain chunks
+	private dictionary chunks;
 	
 	// Terrain generator
 	TerrainGen generator;
 	
-	private void init(int width, int height)
+	private void init()
 	{
-		// Set initialized flag
-		this.initialized = false;
-		
-		// Set size
-		this.width = width;
-		this.height = height;
-		
-		Console.log("Initializing terrain of size: " + width + ", " + height);
-		
-		// Create terrain layers
-		layers.resize(TERRAIN_LAYERS_MAX);
-		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
-			@layers[i] = @TileGrid(width, height);
-		}
-		
-		// Resize fixture grid
-		fixtures.resize(width, height);
-		// Create shadow map
-		@shadowMap = @Texture(width, height);
-		shadowMap.setFiltering(LINEAR);
-		
-		// Setup b2Body
-		b2BodyDef def;
-		def.type = b2_staticBody;
-		def.position.set(0.0f, 0.0f);
-		def.allowSleep = true;
-		
-		@body = b2Body(def);
-		body.setObject(@this);
-		
-		// NOTE TO SELF: The vertex count can be redused to 424320
-		// on-screen vertices by using texture atlases. This
-		// equates to 15.28 MB of VRAM. Formulae: num_tiles * quads_per_tile * verts_per_quad * floats_per_vert * float_to_bytes / size_of_megabyte
-		Console.log("Terrain VRAM usage: " + (width*height*13*4*8*4.0f/1048576.0f) + " MB");
-	}
-	
-	void setInitialized(bool initialized)
-	{
-		// Set layers as initialized
-		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
-			layers[i].setInitialized(true);
-		}
-		
-		// Update all fixtures
-		if(this.initialized == false && initialized == true) {
-			for(int x = 0; x < width; x++) {
-				for(int y = 0; y < height; y++) {
-					updateFixture(x, y);
-					updateOpacity(x, y);
-				}
-			}
-		}
-		this.initialized = initialized;
+		Console.log("Initializing terrain");
 	}
 	
 	void serialize(StringStream &ss)
 	{
 		Console.log("Saving terrain...");
 		
-		ss.write(width);
+		/*ss.write(width);
 		ss.write(height);
 		
 		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
@@ -104,12 +50,13 @@ class Terrain : Serializable
 				}
 			}
 			ss.write(tileString);
-		}
+		}*/
 	}
 	
 	void deserialize(StringStream &ss)
-	{	
-		Console.log("Loading terrain...");
+	{
+		init();
+		/*Console.log("Loading terrain...");
 		
 		// Initialize terrain
 		int width, height;
@@ -133,105 +80,29 @@ class Terrain : Serializable
 		}
 		
 		// Set layers as initialized
-		setInitialized(true);
+		setInitialized(true);*/
 	}
 	
-	void generate(int width, int height)
-	{
-		// Initialize terrain
-		init(width, height);
-		
-		// Generate stuff
-		generator.generate(@this);
-		
-		// Set terrain as initialized
-		setInitialized(true);
-	}
-	
-	// Getters/setters/validators
-	int getWidth() const
-	{
-		return width;
-	}
-	
-	int getHeight() const
-	{
-		return height;
-	}
-	
-	bool isValid(const int x, const int y)
-	{
-		return x >= 0 && x < width && y >= 0 && y < height;
-	}
-	
+	// TILES
 	TileID getTileAt(const int x, const int y, const TerrainLayer layer = TERRAIN_SCENE)
 	{
-		return isValid(x, y) ? layers[layer].getTileAt(x, y) : NULL_TILE;
+		return getChunk(x / CHUNK_SIZE, y / CHUNK_SIZE).getTileAt(x % CHUNK_SIZE, y % CHUNK_SIZE);
 	}
 	
 	bool isTileAt(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
 	{
 		return getTileAt(x, y, layer) != NULL_TILE;
-	}
-	
-	TerrainLayer getLayerByTile(TileID tile)
-	{
-		if(tile < SCENE_TILES) return TERRAIN_SCENE;
-		if(tile < BACKGROUND_TILES) return TERRAIN_BACKGROUND;
-		return TERRAIN_FOREGROUND;
-	}
-	
-	private void createFixture(int x, int y)
-	{
-		if(!isValid(x, y))
-			return;
-		b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f, TILE_SIZE*2, TILE_SIZE*2), 0.0f);
-		game::tiles[getTileAt(x, y)].setupFixture(@fixture);
-		@fixtures[x, y] = @fixture;
-	}
-	
-	private void removeFixture(int x, int y)
-	{
-		if(!isValid(x, y))
-			return;
-		body.removeFixture(@fixtures[x, y]);
-		@fixtures[x, y] = null;
-	}
-	
-	private bool isFixtureAt(int x, int y)
-	{
-		if(!isValid(x, y))
-			return false;
-		return @fixtures[x, y] != null;
-	}
-	
-	private void updateFixture(int x, int y)
-	{
-		// Find out if this tile should contain a fixture
-		TileGrid @scene = @layers[TERRAIN_SCENE];
-		bool shouldContainFixture = scene.isTileAt(x, y, true) && (scene.getTileState(x, y, true) & NESW != NESW);
-		
-		// Create or remove fixture
-		if(shouldContainFixture && !isFixtureAt(x, y))
-		{
-			createFixture(x, y);
-		}else if(!shouldContainFixture && isFixtureAt(x, y))
-		{
-			removeFixture(x, y);
-		}
 	}
 	private void updateOpacity(const int x, const int y)
 	{
-		if(!isValid(x, y))
-			return;
-		float opacity = 0.0f;
+		/*float opacity = 0.0f;
 		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
 			opacity += game::tiles[getTileAt(x, y, TerrainLayer(i))].getOpacity();
 		}
 		array<Vector4> pixel = {
 			Vector4(0.0f, 0.0f, 0.0f, opacity)
 		};
-		shadowMap.updateSection(x, y, Pixmap(1, 1, pixel));
+		shadowMap.updateSection(x, y, Pixmap(1, 1, pixel));*/
 	}
 	
 	// Terrain modification
@@ -240,58 +111,55 @@ class Terrain : Serializable
 		// Check for null tile
 		if(tile == NULL_TILE)
 			return;
-		
-		// Get terrain layer
-		TerrainLayer layer = getLayerByTile(tile);
-		
-		// Add tile to tile grid
-		layers[layer].addTile(x, y, tile);
-		
-		// Check if the terrain is initialized
-		if(initialized)
-		{
-			if(layer == TERRAIN_SCENE)
-			{
-				// Update fixtures
-				updateFixture(x, y);
-				updateFixture(x+1, y);
-				updateFixture(x-1, y);
-				updateFixture(x, y+1);
-				updateFixture(x, y-1);
-			}
-			// Update opacity
-			updateOpacity(x, y);
-		}
+		getChunk(x / CHUNK_SIZE, y / CHUNK_SIZE).addTile(x % CHUNK_SIZE, y % CHUNK_SIZE, tile);
 	}
 	
 	void removeTile(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
 	{
-		// Remove tile from tile grid
-		layers[layer].removeTile(x, y);
-		// Check if the terrain is initialized
-		if(initialized)
-		{
-			if(layer == TERRAIN_SCENE)
-			{
-				// Update fixtures
-				updateFixture(x, y);
-				updateFixture(x+1, y);
-				updateFixture(x-1, y);
-				updateFixture(x, y+1);
-				updateFixture(x, y-1);
-			}
-			// Update opacity
-			updateOpacity(x, y);
-		}
+		getChunk(x / CHUNK_SIZE, y / CHUNK_SIZE).removeTile(x % CHUNK_SIZE, y % CHUNK_SIZE);
 	}
 	
-	// Drawing
-	void draw(const TerrainLayer layer, const Matrix4 &in projmat)
+	// CHUNKS
+	private TerrainChunk @getChunk(const int x, const int y)
 	{
-		layers[layer].draw(projmat);
-	}
-	Texture @getShadowMap() const
+		string key = x+";"+y;
+		if(!chunks.exists(key))
+		{
+			Console.log("Generate chunk ["+key+"]");
+		
+			b2BodyDef def;
+			def.type = b2_staticBody;
+			def.position.set(x * CHUNK_SIZE * TILE_SIZE, y * CHUNK_SIZE * TILE_SIZE);
+			def.allowSleep = true;
+			
+			@body = b2Body(def);
+			body.setObject(@this);
+			
+			TerrainChunk @chunk = @TerrainChunk(@body);
+			@chunks[key] = @chunk;
+			generator.generate(@chunk, x, y);
+			return @chunk;
+		}
+		
+		return cast<TerrainChunk@>(chunks[key]);
+	}
+	
+	// DRAWING
+	void draw(const TerrainLayer layer, Matrix4)
 	{
-		return @shadowMap;
+		int x0 = game::camera.position.x/CHUNK_SIZE/TILE_SIZE;
+		int y0 = game::camera.position.y/CHUNK_SIZE/TILE_SIZE;
+		int x1 = (game::camera.position.x+Window.getSize().x)/CHUNK_SIZE/TILE_SIZE;
+		int y1 = (game::camera.position.y+Window.getSize().y)/CHUNK_SIZE/TILE_SIZE;
+		
+		for(int y = y0; y <= y1; y++)
+		{
+			for(int x = x0; x <= x1; x++)
+			{
+				Matrix4 projmat = game::camera.getProjectionMatrix();
+				projmat.translate(x * CHUNK_SIZE * TILE_SIZE, y * CHUNK_SIZE * TILE_SIZE, 0.0f);
+				getChunk(x, y).draw(projmat);
+			}
+		}
 	}
 }

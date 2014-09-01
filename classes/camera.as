@@ -8,8 +8,8 @@ class Camera
 		Vector2 windowSize = Vector2(Window.getSize());
 		point -= windowSize/(2.0f*zoom);
 		position = point;
-		position.x = Math.min(Math.max(0, point.x), game::terrain.getWidth() * TILE_SIZE - windowSize.x);
-		position.y = Math.min(Math.max(0, point.y), game::terrain.getHeight() * TILE_SIZE - windowSize.y);
+		//position.x = Math.min(Math.max(0, point.x), game::terrain.getWidth() * TILE_SIZE - windowSize.x);
+		//position.y = Math.min(Math.max(0, point.y), game::terrain.getHeight() * TILE_SIZE - windowSize.y);
 	}
 	
 	Matrix4 getProjectionMatrix()

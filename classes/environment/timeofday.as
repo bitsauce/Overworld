@@ -1,15 +1,13 @@
 class TimeOfDay : Serializable
 {
 	private float time = 13*60; // one o' clock
-	
-	void serialize(StringStream &ss)
-	{
-		ss.write(time);
+	void serialize(StringStream &ss)
+	{
+		ss.write(time);
 	}
-	
-	void deserialize(StringStream &ss)
-	{
-		ss.read(time);
+	void deserialize(StringStream &ss)
+	{
+		ss.read(time);
 	}
 	
 	float getTime()
@@ -39,17 +37,18 @@ class TimeOfDay : Serializable
 	}
 	
 	void update()
-	{
+	{
 		// Apply time
 		time += Graphics.dt;
-		
+		
 		// Debug: Time speedup (0 forwards, 9 backwards)
-		if(Input.getKeyState(KEY_0)) {
+		if(Input.getKeyState(KEY_0))
+		{
 			time += 10.0f;
-		}else if(Input.getKeyState(KEY_9)) {
+		}else if(Input.getKeyState(KEY_9))
+		{
 			time -= 10.0f;
-		}
-		
+		}
 		// Make sure time loops around to 00:00
 		if(time >= 1440.0f) {
 			time = 0.0f;
