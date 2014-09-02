@@ -2,7 +2,7 @@ class TerrainGen
 {
 	void generate(TerrainChunk @chunk, const int chunkx, const int chunky)
 	{
-		Console.log("Generating chunk...");
+		Console.log("Generating chunk ["+chunkx+";"+chunky+"]...");
 		
 		int tilex = chunkx*CHUNK_SIZE;
 		int tiley = chunky*CHUNK_SIZE;
@@ -14,8 +14,6 @@ class TerrainGen
 				chunk.addTile(x, y, GRASS_TILE);
 			}
 		}
-		
-		chunk.init();
 		
 		/*@this.terrain = @terrain;
 		width = terrain.getWidth();

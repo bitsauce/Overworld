@@ -29,9 +29,9 @@ class Pickaxe : Item
 			//Vector2i pos = Vector2i((Input.position + game::camera.position)/TILE_SIZE);
 			TileID tile = game::terrain.getTileAt(pos.x, pos.y);
 			TerrainLayer layer = TERRAIN_SCENE;
-			if(tile == NULL_TILE) { layer = TERRAIN_FOREGROUND; tile = game::terrain.getTileAt(pos.x, pos.y, layer); }
-			if(tile == NULL_TILE) { layer = TERRAIN_BACKGROUND; tile = game::terrain.getTileAt(pos.x, pos.y, layer); }
-			if(prevPos == pos && tile != NULL_TILE)
+			if(tile == EMPTY_TILE) { layer = TERRAIN_FOREGROUND; tile = game::terrain.getTileAt(pos.x, pos.y, layer); }
+			if(tile == EMPTY_TILE) { layer = TERRAIN_BACKGROUND; tile = game::terrain.getTileAt(pos.x, pos.y, layer); }
+			if(prevPos == pos && tile != EMPTY_TILE)
 			{
 				time += Graphics.dt;
 				if(time >= power)

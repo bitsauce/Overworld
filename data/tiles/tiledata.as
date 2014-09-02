@@ -1,6 +1,7 @@
 enum TileID
 {
 	NULL_TILE = 0,
+	EMPTY_TILE,
 	RESERVED_TILE,
 	
 	// SCENE_TILES BEGIN
@@ -27,6 +28,7 @@ enum TileID
 
 array<Texture@> TILE_TEXTURES = {
 	null, // NULL_TILE
+	null, // EMPTY_TILE
 	null, // RESERVED_TILE
 	@Texture(":/sprites/tiles/grass_tile.png"),
 	@Texture(":/sprites/tiles/stone_tile.png"),
@@ -40,6 +42,7 @@ array<Texture@> TILE_TEXTURES = {
 
 array<ItemID> TILE_ITEMS = {
 	NULL_ITEM, // NULL_TILE
+	NULL_ITEM, // EMPTY_TILE
 	NULL_ITEM, // RESERVED_TILE
 	GRASS_BLOCK,
 	STONE_BLOCK,
@@ -53,6 +56,7 @@ array<ItemID> TILE_ITEMS = {
 
 array<float> TILE_OPACITIES = {
 	0.0f, // NULL_TILE
+	0.0f, // EMPTY_TILE
 	0.0f, // RESERVED_TILE
 	1.0f,
 	1.0f,

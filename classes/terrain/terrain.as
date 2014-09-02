@@ -1,9 +1,3 @@
-bool isValidTile(TileID tile)
-{
-	return tile != SCENE_TILES && tile != BACKGROUND_TILES &&
-			tile != FOREGROUND_TILES && tile != MAX_TILES;
-}
-
 TerrainLayer getLayerByTile(TileID tile)
 {
 	if(tile < SCENE_TILES) return TERRAIN_SCENE;
@@ -13,18 +7,13 @@ TerrainLayer getLayerByTile(TileID tile)
 	
 class Terrain : Serializable
 {
-	// Box2D body
-	private b2Body @body;
-	
-	// Box2D tile fixtures
-	private dictionary fixtures;
-	
 	// Terrain chunks
 	private dictionary chunks;
 	
 	// Terrain generator
 	TerrainGen generator;
 	
+	// SERIALIZATION
 	private void init()
 	{
 		Console.log("Initializing terrain");
@@ -34,56 +23,36 @@ class Terrain : Serializable
 	{
 		Console.log("Saving terrain...");
 		
-		/*ss.write(width);
-		ss.write(height);
-		
-		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
+		array<string> @keys = chunks.getKeys();
+		for(int i = 0; i < keys.size; i++)
 		{
-			string tileString;
-			for(int y = 0; y < height; y++)
-			{
-				for(int x = 0; x < width; x++)
-				{
-					TileID tile = getTileAt(x, y, TerrainLayer(i));
-					if(tile <= RESERVED_TILE) tile = NULL_TILE;
-					tileString += formatInt(tile, "0", 3);
-				}
-			}
-			ss.write(tileString);
-		}*/
+			string key = keys[i];
+			ss.write(key);
+			Scripts.serialize(cast<Serializable@>(chunks[key]), scene::game.getWorldDir() + "/chunks/" + key + ".obj");
+		}
 	}
 	
 	void deserialize(StringStream &ss)
 	{
+		Console.log("Loading terrain...");
+		
 		init();
-		/*Console.log("Loading terrain...");
 		
-		// Initialize terrain
-		int width, height;
-		ss.read(width);
-		ss.read(height);
-		init(width, height);
-		
-		// Load tiles from file
-		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++)
+		array<string> @chunkFiles = @FileSystem.listFiles(scene::game.getWorldDir() + "/chunks", "*.obj");
+		for(int i = 0; i < chunkFiles.size; i++)
 		{
-			string tileString;
-			ss.read(tileString);
-			for(int y = 0; y < height; y++)
-			{
-				for(int x = 0; x < width; x++)
-				{
-					int j = (x + y*width) * 3;
-					addTile(x, y, TileID(parseInt(tileString.substr(j, 3))));
-				}
-			}
+			string key;
+			ss.read(key);
+			
+			TerrainChunk@ chunk = cast<TerrainChunk@>(Scripts.deserialize(chunkFiles[i]));
+			chunk.setTerrain(@this);
+			@chunks[key] = @chunk;
+			
+			updateChunk(chunk.getX(), chunk.getY());
 		}
-		
-		// Set layers as initialized
-		setInitialized(true);*/
 	}
 	
-	// TILES
+	// TILE HELPERS
 	TileID getTileAt(const int x, const int y, const TerrainLayer layer = TERRAIN_SCENE)
 	{
 		return getChunk(x / CHUNK_SIZE, y / CHUNK_SIZE).getTileAt(x % CHUNK_SIZE, y % CHUNK_SIZE);
@@ -91,57 +60,96 @@ class Terrain : Serializable
 	
 	bool isTileAt(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
 	{
-		return getTileAt(x, y, layer) != NULL_TILE;
-	}
-	private void updateOpacity(const int x, const int y)
-	{
-		/*float opacity = 0.0f;
-		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
-			opacity += game::tiles[getTileAt(x, y, TerrainLayer(i))].getOpacity();
-		}
-		array<Vector4> pixel = {
-			Vector4(0.0f, 0.0f, 0.0f, opacity)
-		};
-		shadowMap.updateSection(x, y, Pixmap(1, 1, pixel));*/
+		return getTileAt(x, y, layer) > RESERVED_TILE;
 	}
 	
-	// Terrain modification
-	void addTile(const int x, const int y, TileID tile)
+	uint getTileState(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE) const
 	{
-		// Check for null tile
-		if(tile == NULL_TILE)
-			return;
-		getChunk(x / CHUNK_SIZE, y / CHUNK_SIZE).addTile(x % CHUNK_SIZE, y % CHUNK_SIZE, tile);
+		// Set state
+		uint state = 0;
+		if(getChunk(x     / CHUNK_SIZE, (y-1) / CHUNK_SIZE).isTileAt(x     % CHUNK_SIZE, (y-1) % CHUNK_SIZE)) state |= NORTH;
+		if(getChunk(x     / CHUNK_SIZE, (y+1) / CHUNK_SIZE).isTileAt(x     % CHUNK_SIZE, (y+1) % CHUNK_SIZE)) state |= SOUTH;
+		if(getChunk((x+1) / CHUNK_SIZE, y     / CHUNK_SIZE).isTileAt((x+1) % CHUNK_SIZE, y     % CHUNK_SIZE)) state |= EAST;
+		if(getChunk((x-1) / CHUNK_SIZE, y     / CHUNK_SIZE).isTileAt((x-1) % CHUNK_SIZE, y     % CHUNK_SIZE)) state |= WEST;
+		if(getChunk((x+1) / CHUNK_SIZE, (y-1) / CHUNK_SIZE).isTileAt((x+1) % CHUNK_SIZE, (y-1) % CHUNK_SIZE)) state |= NORTH_EAST;
+		if(getChunk((x-1) / CHUNK_SIZE, (y-1) / CHUNK_SIZE).isTileAt((x-1) % CHUNK_SIZE, (y-1) % CHUNK_SIZE)) state |= NORTH_WEST;
+		if(getChunk((x+1) / CHUNK_SIZE, (y+1) / CHUNK_SIZE).isTileAt((x+1) % CHUNK_SIZE, (y+1) % CHUNK_SIZE)) state |= SOUTH_EAST;
+		if(getChunk((x-1) / CHUNK_SIZE, (y+1) / CHUNK_SIZE).isTileAt((x-1) % CHUNK_SIZE, (y+1) % CHUNK_SIZE)) state |= SOUTH_WEST;
+		return state;
 	}
 	
-	void removeTile(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
+	// TILE MODIFICATION
+	bool addTile(const int x, const int y, TileID tile)
 	{
-		getChunk(x / CHUNK_SIZE, y / CHUNK_SIZE).removeTile(x % CHUNK_SIZE, y % CHUNK_SIZE);
+		if(getChunk(x / CHUNK_SIZE, y / CHUNK_SIZE).addTile(x % CHUNK_SIZE, y % CHUNK_SIZE, tile))
+		{
+			// Update neighbouring tiles
+			getChunk(x     / CHUNK_SIZE, y     / CHUNK_SIZE).updateTile(x     % CHUNK_SIZE, y     % CHUNK_SIZE, getTileState(x, y), true);
+			getChunk((x+1) / CHUNK_SIZE, y     / CHUNK_SIZE).updateTile((x+1) % CHUNK_SIZE, y     % CHUNK_SIZE, getTileState(x+1, y), true);
+			getChunk((x-1) / CHUNK_SIZE, y     / CHUNK_SIZE).updateTile((x-1) % CHUNK_SIZE, y     % CHUNK_SIZE, getTileState(x-1, y), true);
+			getChunk(x     / CHUNK_SIZE, (y+1) / CHUNK_SIZE).updateTile(x     % CHUNK_SIZE, (y+1) % CHUNK_SIZE, getTileState(x, y+1), true);
+			getChunk(x     / CHUNK_SIZE, (y-1) / CHUNK_SIZE).updateTile(x     % CHUNK_SIZE, (y-1) % CHUNK_SIZE, getTileState(x, y-1), true);
+			
+			getChunk((x+1) / CHUNK_SIZE, (y+1) / CHUNK_SIZE).updateTile((x+1) % CHUNK_SIZE, (y+1) % CHUNK_SIZE, getTileState(x+1, y+1));
+			getChunk((x-1) / CHUNK_SIZE, (y+1) / CHUNK_SIZE).updateTile((x-1) % CHUNK_SIZE, (y+1) % CHUNK_SIZE, getTileState(x-1, y+1));
+			getChunk((x-1) / CHUNK_SIZE, (y-1) / CHUNK_SIZE).updateTile((x-1) % CHUNK_SIZE, (y-1) % CHUNK_SIZE, getTileState(x-1, y-1));
+			getChunk((x+1) / CHUNK_SIZE, (y-1) / CHUNK_SIZE).updateTile((x+1) % CHUNK_SIZE, (y-1) % CHUNK_SIZE, getTileState(x+1, y-1));
+			
+			return true;
+		}
+		return false;
+	}
+	
+	bool removeTile(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
+	{
+		if(getChunk(x / CHUNK_SIZE, y / CHUNK_SIZE).removeTile(x % CHUNK_SIZE, y % CHUNK_SIZE))
+		{
+			// Update neighbouring tiles
+			getChunk(x     / CHUNK_SIZE, y     / CHUNK_SIZE).updateTile(x     % CHUNK_SIZE, y     % CHUNK_SIZE, getTileState(x, y), true);
+			getChunk((x+1) / CHUNK_SIZE, y     / CHUNK_SIZE).updateTile((x+1) % CHUNK_SIZE, y     % CHUNK_SIZE, getTileState(x+1, y), true);
+			getChunk((x-1) / CHUNK_SIZE, y     / CHUNK_SIZE).updateTile((x-1) % CHUNK_SIZE, y     % CHUNK_SIZE, getTileState(x-1, y), true);
+			getChunk(x     / CHUNK_SIZE, (y+1) / CHUNK_SIZE).updateTile(x     % CHUNK_SIZE, (y+1) % CHUNK_SIZE, getTileState(x, y+1), true);
+			getChunk(x     / CHUNK_SIZE, (y-1) / CHUNK_SIZE).updateTile(x     % CHUNK_SIZE, (y-1) % CHUNK_SIZE, getTileState(x, y-1), true);
+			
+			getChunk((x+1) / CHUNK_SIZE, (y+1) / CHUNK_SIZE).updateTile((x+1) % CHUNK_SIZE, (y+1) % CHUNK_SIZE, getTileState(x+1, y+1));
+			getChunk((x-1) / CHUNK_SIZE, (y+1) / CHUNK_SIZE).updateTile((x-1) % CHUNK_SIZE, (y+1) % CHUNK_SIZE, getTileState(x-1, y+1));
+			getChunk((x-1) / CHUNK_SIZE, (y-1) / CHUNK_SIZE).updateTile((x-1) % CHUNK_SIZE, (y-1) % CHUNK_SIZE, getTileState(x-1, y-1));
+			getChunk((x+1) / CHUNK_SIZE, (y-1) / CHUNK_SIZE).updateTile((x+1) % CHUNK_SIZE, (y-1) % CHUNK_SIZE, getTileState(x+1, y-1));
+			
+			return true;
+		}
+		return false;
 	}
 	
 	// CHUNKS
-	private TerrainChunk @getChunk(const int x, const int y)
+	private TerrainChunk @getChunk(const int chunkX, const int chunkY, const bool generate = false)
 	{
-		string key = x+";"+y;
+		string key = chunkX+";"+chunkY;
 		if(!chunks.exists(key))
 		{
-			Console.log("Generate chunk ["+key+"]");
-		
-			b2BodyDef def;
-			def.type = b2_staticBody;
-			def.position.set(x * CHUNK_SIZE * TILE_SIZE, y * CHUNK_SIZE * TILE_SIZE);
-			def.allowSleep = true;
-			
-			@body = b2Body(def);
-			body.setObject(@this);
-			
-			TerrainChunk @chunk = @TerrainChunk(@body);
-			@chunks[key] = @chunk;
-			generator.generate(@chunk, x, y);
-			return @chunk;
+			if(generate)
+			{
+				TerrainChunk @chunk = @TerrainChunk(@this, chunkX, chunkY);
+				@chunks[key] = @chunk;
+				generator.generate(@chunk, chunkX, chunkY);
+				updateChunk(chunkX, chunkY);
+				return @chunk;
+			}
+			return @TerrainChunk();
 		}
-		
 		return cast<TerrainChunk@>(chunks[key]);
+	}
+	
+	private void updateChunk(const int chunkX, const int chunkY)
+	{
+		TerrainChunk @chunk = getChunk(chunkX, chunkY);
+		if(@chunk != null) {
+			for(int y = 0; y < CHUNK_SIZE; y++) {
+				for(int x = 0; x < CHUNK_SIZE; x++) {
+					chunk.updateTile(x, y, getTileState(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y), true);
+				}
+			}
+		}
 	}
 	
 	// DRAWING
@@ -158,8 +166,22 @@ class Terrain : Serializable
 			{
 				Matrix4 projmat = game::camera.getProjectionMatrix();
 				projmat.translate(x * CHUNK_SIZE * TILE_SIZE, y * CHUNK_SIZE * TILE_SIZE, 0.0f);
-				getChunk(x, y).draw(projmat);
+				getChunk(x, y, true).draw(projmat);
 			}
 		}
+	}
+
+	private void updateOpacity(const int x, const int y)
+	{
+		/*float opacity = 0.0f;
+		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
+			opacity += game::tiles[getTileAt(x, y, TerrainLayer(i))].getOpacity();
+		}
+
+		array<Vector4> pixel = {
+			Vector4(0.0f, 0.0f, 0.0f, opacity)
+		};
+
+		shadowMap.updateSection(x, y, Pixmap(1, 1, pixel));*/
 	}
 }

@@ -1,15 +1,15 @@
 class Tile
-{
+{
 	private TileID id;
 	private Texture @texture;
-	private ItemID item;
+	private ItemID item;
 	private float opacity;
 	
 	Tile(TileID id)
-	{
+	{
 		this.id = id;
-		@this.texture = @TILE_TEXTURES[id];
-		this.item = TILE_ITEMS[id];
+		@this.texture = @TILE_TEXTURES[id];
+		this.item = TILE_ITEMS[id];
 		this.opacity = TILE_OPACITIES[id];
 	}
 	
@@ -22,25 +22,23 @@ class Tile
 	void setupFixture(b2Fixture @fixture)
 	{
 		fixture.setFriction(0.5f);
-	}
-	
-	TileID getID() const
-	{
-		return id;
+	}
+	
+	TileID getID() const
+	{
+		return id;
 	}
 	
 	Texture @getTexture() const
 	{
 		return @texture;
 	}
-	
-	ItemID getItemID() const
-	{
-		return item;
+	ItemID getItemID() const
+	{
+		return item;
 	}
-	
-	float getOpacity() const
-	{
-		return opacity;
+	float getOpacity() const
+	{
+		return opacity;
 	}
 }

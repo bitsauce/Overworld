@@ -1,27 +1,57 @@
 const int CHUNK_SIZE = 64;
 
-class TerrainChunk
+class TerrainChunk : Serializable
 {
+	// CHUNK
+	private int chunkX, chunkY;
+	private grid<TileID> tiles;
+	
+	// PHYSICS
 	private b2Body @body;
 	private grid<b2Fixture@> fixtures;
-	private grid<TileID> tiles;
-	private SpriteBatch @batch;
-	private bool initialized;
 	
-	TerrainChunk(b2Body @body)
-	{
-		// Set as uninitialized
-		initialized = false;
+	// DRAWING
+	private SpriteBatch @batch;
+	
+	// MISC
+	private bool dummy;
 		
-		// Set body
-		@this.body = @body;
+	TerrainChunk()
+	{
+		// A dummy
+		dummy = true;
+	}
+	
+	TerrainChunk(Terrain @terrain, int chunkX, int chunkY)
+	{
+		init(chunkX, chunkY);
+		setTerrain(@terrain);
+	}
+	
+	// SERIALIZATION
+	void init(int chunkX, int chunkY)
+	{
+		// Not a dummy
+		dummy = false;
+		
+		// Set chunk vars
+		this.chunkX = chunkX;
+		this.chunkY = chunkY;
+		
+		// Create body
+		b2BodyDef def;
+		def.type = b2_staticBody;
+		def.position.set(chunkX * CHUNK_SIZE * TILE_SIZE, chunkY * CHUNK_SIZE * TILE_SIZE);
+		def.allowSleep = true;
+		
+		@body = b2Body(def);
 		
 		// Resize tile grid
 		fixtures.resize(CHUNK_SIZE, CHUNK_SIZE);
 		tiles.resize(CHUNK_SIZE, CHUNK_SIZE);
 		for(int y = 0; y < CHUNK_SIZE; y++) {
 			for(int x = 0; x < CHUNK_SIZE; x++) {
-				tiles[x, y] = NULL_TILE;
+				tiles[x, y] = EMPTY_TILE;
 			}
 		}
 		
@@ -33,9 +63,8 @@ class TerrainChunk
 			{
 				for(int j = 0; j < 13; j++)
 				{
-					Sprite @sprite = @Sprite(game::tiles.getTextureRegion(NULL_TILE, j));
+					Sprite @sprite = @Sprite(game::tiles.getTextureRegion(EMPTY_TILE, j));
 					sprite.setPosition(Vector2(x * TILE_SIZE + TILE_SIZE * 2 * (TILE_TEXTURE_COORDS[0, j] - 0.25f), y * TILE_SIZE + TILE_SIZE * 2 * (0.75 - TILE_TEXTURE_COORDS[3, j] * (3.0f/2.0f))));
-					sprite.setColor(Vector4(0.0f));
 					batch.add(@sprite);
 				}
 			}
@@ -45,27 +74,61 @@ class TerrainChunk
 		batch.makeStatic();
 	}
 	
-	void init()
+	void serialize(StringStream &ss)
 	{
-		// Create shadow map
-		//@shadowMap = @Texture(width, height);
-		//shadowMap.setFiltering(LINEAR);
+		Console.log("Saving chunk ["+chunkX+";"+chunkY+"]...");
 		
-		// Update all tiles
+		// Write chunk pos
+		ss.write(chunkX);
+		ss.write(chunkY);
+		
+		// Write chunk tiles
 		for(int y = 0; y < CHUNK_SIZE; y++)
 		{
 			for(int x = 0; x < CHUNK_SIZE; x++)
 			{
-				updateTile(x, y);
-				updateFixture(x, y);
+				TileID tile = getTileAt(x, y);
+				if(tile <= RESERVED_TILE) tile = EMPTY_TILE;
+				ss.write(int(tile));
 			}
 		}
-		initialized = true;
 	}
+	
+	void deserialize(StringStream &ss)
+	{
+		// Initialize chunk
+		int chunkX, chunkY;
+		ss.read(chunkX);
+		ss.read(chunkY);
+		
+		Console.log("Loading chunk ["+chunkX+";"+chunkY+"]...");
+		
+		init(chunkX, chunkY);
+		
+		// Load tiles from file
+		for(int y = 0; y < CHUNK_SIZE; y++)
+		{
+			for(int x = 0; x < CHUNK_SIZE; x++)
+			{
+				int tile;
+				ss.read(tile);
+				addTile(x, y, TileID(tile));
+			}
+		}
+	}
+	
+	// TODO: Better solution?
+	void setTerrain(Terrain @terrain)
+	{
+		body.setObject(@terrain);
+	}
+	
+	int getX() const { return chunkX; }
+	int getY() const { return chunkY; }
 	
 	bool isValid(const int x, const int y) const
 	{
-		return x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE;
+		return !dummy && x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE;
 	}
 	
 	TileID getTileAt(const int x, const int y) const
@@ -73,47 +136,21 @@ class TerrainChunk
 		return isValid(x, y) ? tiles[x, y] : NULL_TILE;
 	}
 	
-	bool isTileAt(const int x, const int y, const bool reserved = false)
+	bool isTileAt(const int x, const int y, const bool reserved = true) const
 	{
-		return reserved ? (getTileAt(x, y) > RESERVED_TILE) : (getTileAt(x, y) != NULL_TILE);
+		return reserved ? (getTileAt(x, y) > RESERVED_TILE) : (getTileAt(x, y) != EMPTY_TILE);
 	}
 	
 	bool addTile(const int x, const int y, const TileID tile)
 	{
 		// Make sure we can add a tile here
-		if(!isValid(x, y) || isTileAt(x, y))
+		if(!isValid(x, y) || isTileAt(x, y) || tile == EMPTY_TILE)
 			return false;
 		
-		// Show tile
-		int i = (y * CHUNK_SIZE + x) * 13;
-		for(int j = 0; j < 13; j++) {
-			batch.get(i+j).setRegion(game::tiles.getTextureRegion(tile, j));
-		}
-		batch.get(i+12).setColor(Vector4(1.0f));
+		// Set tile
+		setTile(x, y, tile);
 		
-		// Set the tile value
-		tiles[x, y] = tile;
-		
-		if(initialized)
-		{
-			// Update neighbouring tiles
-			updateTile(x, y);
-			updateTile(x+1, y);
-			updateTile(x-1, y);
-			updateTile(x, y+1);
-			updateTile(x, y-1);
-			updateTile(x+1, y+1);
-			updateTile(x-1, y+1);
-			updateTile(x+1, y-1);
-			updateTile(x-1, y-1);
-			
-			// Update fixtures
-			updateFixture(x, y);
-			updateFixture(x+1, y);
-			updateFixture(x-1, y);
-			updateFixture(x, y+1);
-			updateFixture(x, y-1);
-		}
+		// Return true
 		return true;
 	}
 	
@@ -123,60 +160,34 @@ class TerrainChunk
 		if(!isValid(x, y) || !isTileAt(x, y))
 			return false;
 		
-		// Hide tile
-		int i = (y * CHUNK_SIZE + x) * 13;
-		for(int j = 0; j < 13; j++) {
-			batch.get(i+j).setColor(Vector4(0.0f));
-		}
+		// Set tile
+		setTile(x, y, EMPTY_TILE);
 		
-		// Reset the tile value
-		tiles[x, y] = NULL_TILE;
-		
-		if(initialized)
-		{
-			// Update neighbouring tiles
-			updateTile(x+1, y);
-			updateTile(x-1, y);
-			updateTile(x, y+1);
-			updateTile(x, y-1);
-			updateTile(x+1, y+1);
-			updateTile(x-1, y+1);
-			updateTile(x+1, y-1);
-			updateTile(x-1, y-1);
-			
-			// Update fixtures
-			updateFixture(x, y);
-			updateFixture(x+1, y);
-			updateFixture(x-1, y);
-			updateFixture(x, y+1);
-			updateFixture(x, y-1);
-		}
+		// Return true
 		return true;
 	}
 	
-	private uint getTileState(const int x, const int y, const bool reserved = false)
+	private void setTile(const int x, const int y, const TileID tile)
 	{
-		// Set state
-		uint state = 0;
-		if(isTileAt(x, y-1, reserved)) state |= NORTH;
-		if(isTileAt(x, y+1, reserved)) state |= SOUTH;
-		if(isTileAt(x+1, y, reserved)) state |= EAST;
-		if(isTileAt(x-1, y, reserved)) state |= WEST;
-		if(isTileAt(x+1, y-1, reserved)) state |= NORTH_EAST;
-		if(isTileAt(x-1, y-1, reserved)) state |= NORTH_WEST;
-		if(isTileAt(x+1, y+1, reserved)) state |= SOUTH_EAST;
-		if(isTileAt(x-1, y+1, reserved)) state |= SOUTH_WEST;
-		return state;
+		// Setup tile regions
+		int i = (y * CHUNK_SIZE + x) * 13;
+		for(int j = 0; j < 13; j++) {
+			batch.get(i+j).setRegion(game::tiles.getTextureRegion(tile, j));
+		}
+		
+		// Set the tile value
+		tiles[x, y] = tile;
 	}
 	
-	private void updateTile(const int x, const int y)
+	void updateTile(const int x, const int y, const uint state, const bool fixture = false)
 	{
+		if(!isValid(x, y))
+			return;
+		
 		TileID tile = getTileAt(x, y);
-		if(tile != NULL_TILE)
+		int i = (y * CHUNK_SIZE + x) * 13;
+		if(tile > RESERVED_TILE)
 		{
-			int i = (y * CHUNK_SIZE + x) * 13;
-			uint state = getTileState(x, y, true);
-			
 			// Show/Hide north ledge
 			batch.get(i+1).setColor(Vector4(state & NORTH == 0 ? 1.0f : 0.0f));
 			batch.get(i+2).setColor(Vector4(state & NORTH == 0 ? 1.0f : 0.0f));
@@ -249,6 +260,11 @@ class TerrainChunk
 				if(state & WEST == 0) batch.get(i+10).setColor(Vector4(0.0f));
 			}
 		}
+		
+		if(fixture)
+		{
+			updateFixture(x, y, state);
+		}
 	}
 	
 	// PHYSICS
@@ -270,10 +286,10 @@ class TerrainChunk
 		return isValid(x, y) ? @fixtures[x, y] != null : false;
 	}
 	
-	private void updateFixture(const int x, const int y)
+	private void updateFixture(const int x, const int y, const uint state)
 	{
 		// Find out if this tile should contain a fixture
-		bool shouldContainFixture = isTileAt(x, y, true) && (getTileState(x, y, true) & NESW != NESW);
+		bool shouldContainFixture = isTileAt(x, y, true) && (state & NESW != NESW);
 		
 		// Create or remove fixture
 		if(shouldContainFixture && !isFixtureAt(x, y))

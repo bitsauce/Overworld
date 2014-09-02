@@ -116,6 +116,11 @@ class GameScene : Scene
 		this.worldDir = worldDir;
 	}
 	
+	string getWorldDir() const
+	{
+		return worldDir;
+	}
+	
 	void createWorld(string worldName)
 	{
 		// Set the world directory

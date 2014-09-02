@@ -55,7 +55,7 @@ class TileManager
 	{
 		// Make sure the manager is initalized
 		if(!initialized)
-			return NULL_TILE;
+			return EMPTY_TILE;
 		
 		// Find the tile which cooresponds to the given item
 		for(int i = 0; i < tiles.size; i++)
@@ -65,7 +65,7 @@ class TileManager
 				return TileID(i);
 			}
 		}
-		return NULL_TILE;
+		return EMPTY_TILE;
 	}
 	
 	TextureRegion getTextureRegion(TileID tile, int i)

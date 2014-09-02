@@ -39,7 +39,7 @@
 // Terrain
 #include "terrain/terrain.as"
 #include "terrain/terraingen.as"
-#include "terrain/tilegrid.as"
+#include "terrain/chunk.as"
 
 // Furnitures
 #include "furniture/furniture.as"
