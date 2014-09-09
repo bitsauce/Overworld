@@ -1,4 +1,5 @@
-const int CHUNK_SIZE = 64;
+const int CHUNK_SIZE = 32;
+const float CHUNK_SIZEF = float(CHUNK_SIZE);
 
 class TerrainChunk : Serializable
 {
@@ -12,6 +13,7 @@ class TerrainChunk : Serializable
 	
 	// DRAWING
 	private SpriteBatch @batch;
+	private Texture @shadowMap;
 	
 	// MISC
 	private bool dummy;
@@ -69,6 +71,10 @@ class TerrainChunk : Serializable
 				}
 			}
 		}
+		
+		@shadowMap = @Texture(CHUNK_SIZE, CHUNK_SIZE);
+		shadowMap.setFiltering(LINEAR);
+		shadowMap.setWrapping(CLAMP_TO_EDGE);
 		
 		// Make it static
 		batch.makeStatic();
@@ -184,6 +190,8 @@ class TerrainChunk : Serializable
 		if(!isValid(x, y))
 			return;
 		
+		setOpacity(x, y, getOpacity(x, y));
+		
 		TileID tile = getTileAt(x, y);
 		int i = (y * CHUNK_SIZE + x) * 13;
 		if(tile > RESERVED_TILE)
@@ -261,10 +269,32 @@ class TerrainChunk : Serializable
 			}
 		}
 		
-		if(fixture)
-		{
+		if(fixture) {
 			updateFixture(x, y, state);
 		}
+	}
+
+	// SHADOWS
+	float getOpacity(const int x, const int y)
+	{
+		if(!isValid(x, y))
+			return 0.0f;
+		
+		float opacity = 0.0f;
+		opacity += game::tiles[getTileAt(x, y)].getOpacity();
+		return opacity;
+	}
+	
+	void setOpacity(const int x, const int y, const float opacity)
+	{
+		if(dummy)
+			return;
+
+		array<Vector4> pixel = {
+			Vector4(0.0f, 0.0f, 0.0f, opacity)
+		};
+
+		shadowMap.updateSection(x, CHUNK_SIZE - y - 1, Pixmap(1, 1, pixel));
 	}
 	
 	// PHYSICS
@@ -306,5 +336,10 @@ class TerrainChunk : Serializable
 	{
 		batch.setProjectionMatrix(projmat);
 		batch.draw();
+		
+		Sprite @shadows = @Sprite(TextureRegion(@shadowMap, 0.0f, 0.0f, 1.0f, 1.0f));
+		shadows.setPosition(chunkX*CHUNK_SIZE*TILE_SIZE, chunkY*CHUNK_SIZE*TILE_SIZE);
+		shadows.setSize(CHUNK_SIZE*TILE_SIZE, CHUNK_SIZE*TILE_SIZE);
+		shadows.draw(@scene::game.getBatch(SCENE));
 	}
 }

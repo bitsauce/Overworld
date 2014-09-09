@@ -48,8 +48,8 @@ class RayCast
 			}
 			
 			// Check if we have reached the end
-			if(x0 == x1 && y0 == y1 || (range > 0.0f && (Vector2(x0, y0) - Vector2(p0)).length() > range))
-				break;
+			if((x0 == x1 && y0 == y1) || (range > 0.0f && (Vector2(x0, y0) - Vector2(p0)).length() > range))
+				break;
 			
 			
 			// Apply y traversal
@@ -77,7 +77,7 @@ class RayCast
 	
 	bool test(const Vector2 p0, const Vector2 p1, Vector2i &out end = void)
 	{
-		return test(Vector2i(p0), Vector2i(p1), end);
+		return test(Vector2i(Math.floor(p0.x), Math.floor(p0.y)), Vector2i(Math.floor(p1.x), Math.floor(p1.y)), end);
 	}
 	
 	bool plot(const int x, const int y)

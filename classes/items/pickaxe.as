@@ -1,10 +1,10 @@
-bool PickaxePlotTest(int x, int y)
-{
-	return scene::game.getTerrain().getTileAt(x, y, TERRAIN_SCENE) <= RESERVED_TILE &&
-			scene::game.getTerrain().getTileAt(x, y, TERRAIN_BACKGROUND) <= RESERVED_TILE &&
-			scene::game.getTerrain().getTileAt(x, y, TERRAIN_FOREGROUND) <= RESERVED_TILE;
-}
-
+bool PickaxePlotTest(int x, int y)
+{
+	return scene::game.getTerrain().getTileAt(x, y, TERRAIN_SCENE) <= RESERVED_TILE &&
+			scene::game.getTerrain().getTileAt(x, y, TERRAIN_BACKGROUND) <= RESERVED_TILE &&
+			scene::game.getTerrain().getTileAt(x, y, TERRAIN_FOREGROUND) <= RESERVED_TILE;
+}
+
 class Pickaxe : Item
 {
 	private Vector2i prevPos;
@@ -24,9 +24,8 @@ class Pickaxe : Item
 	{
 		Vector2 dt = Input.position + game::camera.position - player.body.getPosition();
 		Vector2i pos;
-		if(ray.test(player.body.getPosition()/TILE_SIZE, (Input.position + game::camera.position)/TILE_SIZE, pos)) //if(dt.length() <= ITEM_PICKUP_RADIUS)
+		if(ray.test(player.body.getPosition()/TILE_SIZE, (Input.position + game::camera.position)/TILE_SIZE, pos))
 		{
-			//Vector2i pos = Vector2i((Input.position + game::camera.position)/TILE_SIZE);
 			TileID tile = game::terrain.getTileAt(pos.x, pos.y);
 			TerrainLayer layer = TERRAIN_SCENE;
 			if(tile == EMPTY_TILE) { layer = TERRAIN_FOREGROUND; tile = game::terrain.getTileAt(pos.x, pos.y, layer); }

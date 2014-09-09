@@ -1,10 +1,10 @@
 class BlockItem : Item
-{
-	TileID tile;
+{
+	TileID tile;
 	
 	BlockItem(ItemID id)
 	{
-		super(id, 255);
+		super(id, 255);
 		tile = game::tiles.getByItem(id);
 	}
 	
@@ -14,7 +14,8 @@ class BlockItem : Item
 		if(dt.length() <= ITEM_PICKUP_RADIUS)
 		{
 			TerrainLayer layer = getLayerByTile(tile);
-			Vector2i pos = Vector2i((Input.position + game::camera.position)/TILE_SIZE);
+			Vector2 pos = (Input.position + game::camera.position)/TILE_SIZE;
+			pos.x = Math.floor(pos.x); pos.y = Math.floor(pos.y);
 			if(!game::terrain.isTileAt(pos.x, pos.y, layer) && player.inventory.removeItem(@this))
 			{
 				game::terrain.addTile(pos.x, pos.y, tile);

@@ -1,17 +1,28 @@
 class TerrainGen
-{
-	void generate(TerrainChunk @chunk, const int chunkx, const int chunky)
+{
+	int seed;
+	Simplex2D noise;
+	
+	void generate(TerrainChunk @chunk, const int chunkX, const int chunkY)
 	{
-		Console.log("Generating chunk ["+chunkx+";"+chunky+"]...");
+		Console.log("Generating chunk ["+chunkX+";"+chunkY+"]...");
 		
-		int tilex = chunkx*CHUNK_SIZE;
-		int tiley = chunky*CHUNK_SIZE;
+		int tileX = chunkX*CHUNK_SIZE;
+		int tileY = chunkY*CHUNK_SIZE;
 		
-		for(int y = 0; tiley > 0 && y < CHUNK_SIZE; y++)
+		noise.octaves = 8;
+		noise.frequency = 0.01f;
+		noise.gain = 0.5f;
+		
+		for(int x = 0; x < CHUNK_SIZE; x++)
 		{
-			for(int x = 0; x < CHUNK_SIZE; x++)
+			float h = noise.valueAt((seed + tileX + x), seed) * 7;
+			for(int y = CHUNK_SIZE - 1; y >= 0 && tileY + y >= h; y--)
 			{
-				chunk.addTile(x, y, GRASS_TILE);
+				if(noise.valueAt(seed + tileX+x, seed + tileY+y) < 0.5f - Math.atan((tileY+y - h - 30) * 0.1f)/Math.PI)
+				{
+					chunk.addTile(x, y, GRASS_TILE);
+				}
 			}
 		}
 		

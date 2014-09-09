@@ -151,9 +151,7 @@ class GameScene : Scene
 		
 		Player player();
 		
-		int x = 250/2;
-		int y = terrain.generator.getGroundHeight(x);
-		player.body.setPosition(Vector2(x*TILE_SIZE, y*TILE_SIZE));
+		player.body.setPosition(Vector2(0, -8.0f*TILE_SIZE));
 		
 		// Give default loadout
 		player.inventory.addItem(@game::items[PICKAXE_IRON]);
@@ -279,7 +277,7 @@ class GameScene : Scene
 		terrain.draw(TERRAIN_BACKGROUND, projmat);
 		
 		// Draw scene content
-		batches[SCENE].draw();
+		batches[SCENE].draw();
 		// Draw terrain scene
 		//terrain.draw(TERRAIN_SCENE, projmat);
 		

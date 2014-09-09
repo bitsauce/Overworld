@@ -4,14 +4,26 @@ TerrainLayer getLayerByTile(TileID tile)
 	if(tile < BACKGROUND_TILES) return TERRAIN_BACKGROUND;
 	return TERRAIN_FOREGROUND;
 }
-	
+
+int mod(int a, int b)
+{
+   int r = a % b;
+   return r < 0 ? r + b : r;
+}
+
 class Terrain : Serializable
 {
 	// Terrain chunks
 	private dictionary chunks;
 	
 	// Terrain generator
-	TerrainGen generator;
+	TerrainGen generator;
+	
+	Terrain()
+	{
+		init();
+		generator.seed = Math.getRandomInt();
+	}
 	
 	// SERIALIZATION
 	private void init()
@@ -21,7 +33,9 @@ class Terrain : Serializable
 	
 	void serialize(StringStream &ss)
 	{
-		Console.log("Saving terrain...");
+		Console.log("Saving terrain...");
+		
+		ss.write(generator.seed);
 		
 		array<string> @keys = chunks.getKeys();
 		for(int i = 0; i < keys.size; i++)
@@ -36,7 +50,9 @@ class Terrain : Serializable
 	{
 		Console.log("Loading terrain...");
 		
-		init();
+		init();
+		
+		ss.read(generator.seed);
 		
 		array<string> @chunkFiles = @FileSystem.listFiles(scene::game.getWorldDir() + "/chunks", "*.obj");
 		for(int i = 0; i < chunkFiles.size; i++)
@@ -55,7 +71,7 @@ class Terrain : Serializable
 	// TILE HELPERS
 	TileID getTileAt(const int x, const int y, const TerrainLayer layer = TERRAIN_SCENE)
 	{
-		return getChunk(x / CHUNK_SIZE, y / CHUNK_SIZE).getTileAt(x % CHUNK_SIZE, y % CHUNK_SIZE);
+		return getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).getTileAt(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE));
 	}
 	
 	bool isTileAt(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
@@ -67,33 +83,33 @@ class Terrain : Serializable
 	{
 		// Set state
 		uint state = 0;
-		if(getChunk(x     / CHUNK_SIZE, (y-1) / CHUNK_SIZE).isTileAt(x     % CHUNK_SIZE, (y-1) % CHUNK_SIZE)) state |= NORTH;
-		if(getChunk(x     / CHUNK_SIZE, (y+1) / CHUNK_SIZE).isTileAt(x     % CHUNK_SIZE, (y+1) % CHUNK_SIZE)) state |= SOUTH;
-		if(getChunk((x+1) / CHUNK_SIZE, y     / CHUNK_SIZE).isTileAt((x+1) % CHUNK_SIZE, y     % CHUNK_SIZE)) state |= EAST;
-		if(getChunk((x-1) / CHUNK_SIZE, y     / CHUNK_SIZE).isTileAt((x-1) % CHUNK_SIZE, y     % CHUNK_SIZE)) state |= WEST;
-		if(getChunk((x+1) / CHUNK_SIZE, (y-1) / CHUNK_SIZE).isTileAt((x+1) % CHUNK_SIZE, (y-1) % CHUNK_SIZE)) state |= NORTH_EAST;
-		if(getChunk((x-1) / CHUNK_SIZE, (y-1) / CHUNK_SIZE).isTileAt((x-1) % CHUNK_SIZE, (y-1) % CHUNK_SIZE)) state |= NORTH_WEST;
-		if(getChunk((x+1) / CHUNK_SIZE, (y+1) / CHUNK_SIZE).isTileAt((x+1) % CHUNK_SIZE, (y+1) % CHUNK_SIZE)) state |= SOUTH_EAST;
-		if(getChunk((x-1) / CHUNK_SIZE, (y+1) / CHUNK_SIZE).isTileAt((x-1) % CHUNK_SIZE, (y+1) % CHUNK_SIZE)) state |= SOUTH_WEST;
+		if(getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor((y-1) / CHUNK_SIZEF)).isTileAt(mod(x,   CHUNK_SIZE), mod(y-1, CHUNK_SIZE))) state |= NORTH;
+		if(getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor((y+1) / CHUNK_SIZEF)).isTileAt(mod(x,   CHUNK_SIZE), mod(y+1, CHUNK_SIZE))) state |= SOUTH;
+		if(getChunk(Math.floor((x+1) / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).isTileAt(mod(x+1, CHUNK_SIZE), mod(y,   CHUNK_SIZE))) state |= EAST;
+		if(getChunk(Math.floor((x-1) / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).isTileAt(mod(x-1, CHUNK_SIZE), mod(y,   CHUNK_SIZE))) state |= WEST;
+		if(getChunk(Math.floor((x+1) / CHUNK_SIZEF), Math.floor((y-1) / CHUNK_SIZEF)).isTileAt(mod(x+1, CHUNK_SIZE), mod(y-1, CHUNK_SIZE))) state |= NORTH_EAST;
+		if(getChunk(Math.floor((x-1) / CHUNK_SIZEF), Math.floor((y-1) / CHUNK_SIZEF)).isTileAt(mod(x-1, CHUNK_SIZE), mod(y-1, CHUNK_SIZE))) state |= NORTH_WEST;
+		if(getChunk(Math.floor((x+1) / CHUNK_SIZEF), Math.floor((y+1) / CHUNK_SIZEF)).isTileAt(mod(x+1, CHUNK_SIZE), mod(y+1, CHUNK_SIZE))) state |= SOUTH_EAST;
+		if(getChunk(Math.floor((x-1) / CHUNK_SIZEF), Math.floor((y+1) / CHUNK_SIZEF)).isTileAt(mod(x-1, CHUNK_SIZE), mod(y+1, CHUNK_SIZE))) state |= SOUTH_WEST;
 		return state;
 	}
 	
 	// TILE MODIFICATION
 	bool addTile(const int x, const int y, TileID tile)
 	{
-		if(getChunk(x / CHUNK_SIZE, y / CHUNK_SIZE).addTile(x % CHUNK_SIZE, y % CHUNK_SIZE, tile))
+		if(getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).addTile(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), tile))
 		{
 			// Update neighbouring tiles
-			getChunk(x     / CHUNK_SIZE, y     / CHUNK_SIZE).updateTile(x     % CHUNK_SIZE, y     % CHUNK_SIZE, getTileState(x, y), true);
-			getChunk((x+1) / CHUNK_SIZE, y     / CHUNK_SIZE).updateTile((x+1) % CHUNK_SIZE, y     % CHUNK_SIZE, getTileState(x+1, y), true);
-			getChunk((x-1) / CHUNK_SIZE, y     / CHUNK_SIZE).updateTile((x-1) % CHUNK_SIZE, y     % CHUNK_SIZE, getTileState(x-1, y), true);
-			getChunk(x     / CHUNK_SIZE, (y+1) / CHUNK_SIZE).updateTile(x     % CHUNK_SIZE, (y+1) % CHUNK_SIZE, getTileState(x, y+1), true);
-			getChunk(x     / CHUNK_SIZE, (y-1) / CHUNK_SIZE).updateTile(x     % CHUNK_SIZE, (y-1) % CHUNK_SIZE, getTileState(x, y-1), true);
+			getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(mod(x,   CHUNK_SIZE), mod(y,   CHUNK_SIZE), getTileState(x,   y), true);
+			getChunk(Math.floor((x+1) / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(mod(x+1, CHUNK_SIZE), mod(y,   CHUNK_SIZE), getTileState(x+1, y), true);
+			getChunk(Math.floor((x-1) / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(mod(x-1, CHUNK_SIZE), mod(y,   CHUNK_SIZE), getTileState(x-1, y), true);
+			getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor((y+1) / CHUNK_SIZEF)).updateTile(mod(x,   CHUNK_SIZE), mod(y+1, CHUNK_SIZE), getTileState(x, y+1), true);
+			getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor((y-1) / CHUNK_SIZEF)).updateTile(mod(x,   CHUNK_SIZE), mod(y-1, CHUNK_SIZE), getTileState(x, y-1), true);
 			
-			getChunk((x+1) / CHUNK_SIZE, (y+1) / CHUNK_SIZE).updateTile((x+1) % CHUNK_SIZE, (y+1) % CHUNK_SIZE, getTileState(x+1, y+1));
-			getChunk((x-1) / CHUNK_SIZE, (y+1) / CHUNK_SIZE).updateTile((x-1) % CHUNK_SIZE, (y+1) % CHUNK_SIZE, getTileState(x-1, y+1));
-			getChunk((x-1) / CHUNK_SIZE, (y-1) / CHUNK_SIZE).updateTile((x-1) % CHUNK_SIZE, (y-1) % CHUNK_SIZE, getTileState(x-1, y-1));
-			getChunk((x+1) / CHUNK_SIZE, (y-1) / CHUNK_SIZE).updateTile((x+1) % CHUNK_SIZE, (y-1) % CHUNK_SIZE, getTileState(x+1, y-1));
+			getChunk(Math.floor((x+1) / CHUNK_SIZEF), Math.floor((y+1) / CHUNK_SIZEF)).updateTile(mod(x+1, CHUNK_SIZE), mod(y+1, CHUNK_SIZE), getTileState(x+1, y+1));
+			getChunk(Math.floor((x-1) / CHUNK_SIZEF), Math.floor((y+1) / CHUNK_SIZEF)).updateTile(mod(x-1, CHUNK_SIZE), mod(y+1, CHUNK_SIZE), getTileState(x-1, y+1));
+			getChunk(Math.floor((x-1) / CHUNK_SIZEF), Math.floor((y-1) / CHUNK_SIZEF)).updateTile(mod(x-1, CHUNK_SIZE), mod(y-1, CHUNK_SIZE), getTileState(x-1, y-1));
+			getChunk(Math.floor((x+1) / CHUNK_SIZEF), Math.floor((y-1) / CHUNK_SIZEF)).updateTile(mod(x+1, CHUNK_SIZE), mod(y-1, CHUNK_SIZE), getTileState(x+1, y-1));
 			
 			return true;
 		}
@@ -102,19 +118,19 @@ class Terrain : Serializable
 	
 	bool removeTile(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
 	{
-		if(getChunk(x / CHUNK_SIZE, y / CHUNK_SIZE).removeTile(x % CHUNK_SIZE, y % CHUNK_SIZE))
+		if(getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).removeTile(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE)))
 		{
 			// Update neighbouring tiles
-			getChunk(x     / CHUNK_SIZE, y     / CHUNK_SIZE).updateTile(x     % CHUNK_SIZE, y     % CHUNK_SIZE, getTileState(x, y), true);
-			getChunk((x+1) / CHUNK_SIZE, y     / CHUNK_SIZE).updateTile((x+1) % CHUNK_SIZE, y     % CHUNK_SIZE, getTileState(x+1, y), true);
-			getChunk((x-1) / CHUNK_SIZE, y     / CHUNK_SIZE).updateTile((x-1) % CHUNK_SIZE, y     % CHUNK_SIZE, getTileState(x-1, y), true);
-			getChunk(x     / CHUNK_SIZE, (y+1) / CHUNK_SIZE).updateTile(x     % CHUNK_SIZE, (y+1) % CHUNK_SIZE, getTileState(x, y+1), true);
-			getChunk(x     / CHUNK_SIZE, (y-1) / CHUNK_SIZE).updateTile(x     % CHUNK_SIZE, (y-1) % CHUNK_SIZE, getTileState(x, y-1), true);
+			getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(mod(x,   CHUNK_SIZE), mod(y,   CHUNK_SIZE), getTileState(x,   y), true);
+			getChunk(Math.floor((x+1) / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(mod(x+1, CHUNK_SIZE), mod(y,   CHUNK_SIZE), getTileState(x+1, y), true);
+			getChunk(Math.floor((x-1) / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(mod(x-1, CHUNK_SIZE), mod(y,   CHUNK_SIZE), getTileState(x-1, y), true);
+			getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor((y+1) / CHUNK_SIZEF)).updateTile(mod(x,   CHUNK_SIZE), mod(y+1, CHUNK_SIZE), getTileState(x, y+1), true);
+			getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor((y-1) / CHUNK_SIZEF)).updateTile(mod(x,   CHUNK_SIZE), mod(y-1, CHUNK_SIZE), getTileState(x, y-1), true);
 			
-			getChunk((x+1) / CHUNK_SIZE, (y+1) / CHUNK_SIZE).updateTile((x+1) % CHUNK_SIZE, (y+1) % CHUNK_SIZE, getTileState(x+1, y+1));
-			getChunk((x-1) / CHUNK_SIZE, (y+1) / CHUNK_SIZE).updateTile((x-1) % CHUNK_SIZE, (y+1) % CHUNK_SIZE, getTileState(x-1, y+1));
-			getChunk((x-1) / CHUNK_SIZE, (y-1) / CHUNK_SIZE).updateTile((x-1) % CHUNK_SIZE, (y-1) % CHUNK_SIZE, getTileState(x-1, y-1));
-			getChunk((x+1) / CHUNK_SIZE, (y-1) / CHUNK_SIZE).updateTile((x+1) % CHUNK_SIZE, (y-1) % CHUNK_SIZE, getTileState(x+1, y-1));
+			getChunk(Math.floor((x+1) / CHUNK_SIZEF), Math.floor((y+1) / CHUNK_SIZEF)).updateTile(mod(x+1, CHUNK_SIZE), mod(y+1, CHUNK_SIZE), getTileState(x+1, y+1));
+			getChunk(Math.floor((x-1) / CHUNK_SIZEF), Math.floor((y+1) / CHUNK_SIZEF)).updateTile(mod(x-1, CHUNK_SIZE), mod(y+1, CHUNK_SIZE), getTileState(x-1, y+1));
+			getChunk(Math.floor((x-1) / CHUNK_SIZEF), Math.floor((y-1) / CHUNK_SIZEF)).updateTile(mod(x-1, CHUNK_SIZE), mod(y-1, CHUNK_SIZE), getTileState(x-1, y-1));
+			getChunk(Math.floor((x+1) / CHUNK_SIZEF), Math.floor((y-1) / CHUNK_SIZEF)).updateTile(mod(x+1, CHUNK_SIZE), mod(y-1, CHUNK_SIZE), getTileState(x+1, y-1));
 			
 			return true;
 		}
@@ -147,6 +163,7 @@ class Terrain : Serializable
 			for(int y = 0; y < CHUNK_SIZE; y++) {
 				for(int x = 0; x < CHUNK_SIZE; x++) {
 					chunk.updateTile(x, y, getTileState(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y), true);
+					//updateOpacity(chunkX, chunkY, x, y);
 				}
 			}
 		}
@@ -155,10 +172,10 @@ class Terrain : Serializable
 	// DRAWING
 	void draw(const TerrainLayer layer, Matrix4)
 	{
-		int x0 = game::camera.position.x/CHUNK_SIZE/TILE_SIZE;
-		int y0 = game::camera.position.y/CHUNK_SIZE/TILE_SIZE;
-		int x1 = (game::camera.position.x+Window.getSize().x)/CHUNK_SIZE/TILE_SIZE;
-		int y1 = (game::camera.position.y+Window.getSize().y)/CHUNK_SIZE/TILE_SIZE;
+		int x0 = Math.floor(game::camera.position.x/CHUNK_SIZE/TILE_SIZE);
+		int y0 = Math.floor(game::camera.position.y/CHUNK_SIZE/TILE_SIZE);
+		int x1 = Math.floor((game::camera.position.x+Window.getSize().x)/CHUNK_SIZE/TILE_SIZE);
+		int y1 = Math.floor((game::camera.position.y+Window.getSize().y)/CHUNK_SIZE/TILE_SIZE);
 		
 		for(int y = y0; y <= y1; y++)
 		{
@@ -169,19 +186,5 @@ class Terrain : Serializable
 				getChunk(x, y, true).draw(projmat);
 			}
 		}
-	}
-
-	private void updateOpacity(const int x, const int y)
-	{
-		/*float opacity = 0.0f;
-		for(int i = 0; i < TERRAIN_LAYERS_MAX; i++) {
-			opacity += game::tiles[getTileAt(x, y, TerrainLayer(i))].getOpacity();
-		}
-
-		array<Vector4> pixel = {
-			Vector4(0.0f, 0.0f, 0.0f, opacity)
-		};
-
-		shadowMap.updateSection(x, y, Pixmap(1, 1, pixel));*/
 	}
 }
