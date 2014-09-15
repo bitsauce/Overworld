@@ -1,5 +1,5 @@
 class TerrainGen
-{
+{
 	int seed;
 	Simplex2D noise;
 	
@@ -24,7 +24,9 @@ class TerrainGen
 					chunk.addTile(x, y, GRASS_TILE);
 				}
 			}
-		}
+		}
+		
+		Console.log("Chunk generated");
 		
 		/*@this.terrain = @terrain;
 		width = terrain.getWidth();

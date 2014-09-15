@@ -11,18 +11,23 @@ int mod(int a, int b)
    return r < 0 ? r + b : r;
 }
 
+const int MAX_PRELOADED_CHUNKS = 128;
+
 class Terrain : Serializable
 {
 	// Terrain chunks
 	private dictionary chunks;
 	
 	// Terrain generator
-	TerrainGen generator;
-	
-	Terrain()
-	{
-		init();
-		generator.seed = Math.getRandomInt();
+	TerrainGen generator;
+	
+	// For selecting a direction to generate in
+	Vector2 prevCameraPos;
+	
+	Terrain()
+	{
+		init();
+		generator.seed = Math.getRandomInt();
 	}
 	
 	// SERIALIZATION
@@ -33,8 +38,8 @@ class Terrain : Serializable
 	
 	void serialize(StringStream &ss)
 	{
-		Console.log("Saving terrain...");
-		
+		Console.log("Saving terrain...");
+		
 		ss.write(generator.seed);
 		
 		array<string> @keys = chunks.getKeys();
@@ -50,8 +55,8 @@ class Terrain : Serializable
 	{
 		Console.log("Loading terrain...");
 		
-		init();
-		
+		init();
+		
 		ss.read(generator.seed);
 		
 		array<string> @chunkFiles = @FileSystem.listFiles(scene::game.getWorldDir() + "/chunks", "*.obj");
@@ -145,28 +150,80 @@ class Terrain : Serializable
 		{
 			if(generate)
 			{
-				TerrainChunk @chunk = @TerrainChunk(@this, chunkX, chunkY);
-				@chunks[key] = @chunk;
-				generator.generate(@chunk, chunkX, chunkY);
-				updateChunk(chunkX, chunkY);
-				return @chunk;
+				return @generateChunk(chunkX, chunkY);
 			}
 			return @TerrainChunk();
 		}
 		return cast<TerrainChunk@>(chunks[key]);
 	}
 	
+	private TerrainChunk @generateChunk(const int chunkX, const int chunkY)
+	{
+		TerrainChunk @chunk = @TerrainChunk(@this, chunkX, chunkY);
+		@chunks[chunkX+";"+chunkY] = @chunk;
+		generator.generate(@chunk, chunkX, chunkY);
+		updateChunk(chunkX, chunkY);
+		return @chunk;
+	}
+	
 	private void updateChunk(const int chunkX, const int chunkY)
 	{
 		TerrainChunk @chunk = getChunk(chunkX, chunkY);
-		if(@chunk != null) {
-			for(int y = 0; y < CHUNK_SIZE; y++) {
-				for(int x = 0; x < CHUNK_SIZE; x++) {
+		if(@chunk != null)
+		{
+			for(int y = 0; y < CHUNK_SIZE; y++)
+			{
+				for(int x = 0; x < CHUNK_SIZE; x++)
+				{
 					chunk.updateTile(x, y, getTileState(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y), true);
-					//updateOpacity(chunkX, chunkY, x, y);
 				}
 			}
 		}
+	}
+	
+	bool test = true;
+	
+	// UPDATING
+	void update()
+	{
+		if(test)
+		{
+			thread th(funccall(@this, "findAndGenerateChunk"));
+			th.detach();
+			test = false;
+		}
+	}
+	
+	void findAndGenerateChunk()
+	{
+		if(chunks.getSize() >= MAX_PRELOADED_CHUNKS)
+			return;
+		Vector2 center = game::camera.position + Vector2(Window.getSize())*0.5f;
+		int chunkX = center.x/CHUNK_SIZE/TILE_SIZE;
+		int chunkY = center.x/CHUNK_SIZE/TILE_SIZE;
+		
+		int step = 1;
+		int dir = 1;
+		bool found = false;
+		while(!found)
+		{
+			dir = step % 2 == 0 ? -1 : 1;
+			for(int j = 0; !found && j < 2; j++)
+			{
+				int dx = (1-j)*dir;
+				int dy = j*dir;
+				for(int i = 0; !found && i < step; i++)
+				{
+					chunkX += dx;
+					chunkY += dy;
+					found = !chunks.exists(chunkX+";"+chunkY);
+				}
+			}
+			step++;
+		}
+		
+		generateChunk(chunkX, chunkY);
+		test = true;
 	}
 	
 	// DRAWING

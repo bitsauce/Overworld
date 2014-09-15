@@ -1,5 +1,6 @@
 const int CHUNK_SIZE = 32;
-const float CHUNK_SIZEF = float(CHUNK_SIZE);
+const float CHUNK_SIZEF = float(CHUNK_SIZE);
+mutex physicsmtx;
 
 class TerrainChunk : Serializable
 {
@@ -17,6 +18,7 @@ class TerrainChunk : Serializable
 	
 	// MISC
 	private bool dummy;
+	private bool generating;
 		
 	TerrainChunk()
 	{
@@ -35,6 +37,7 @@ class TerrainChunk : Serializable
 	{
 		// Not a dummy
 		dummy = false;
+		generating = true;
 		
 		// Set chunk vars
 		this.chunkX = chunkX;
@@ -45,8 +48,10 @@ class TerrainChunk : Serializable
 		def.type = b2_staticBody;
 		def.position.set(chunkX * CHUNK_SIZE * TILE_SIZE, chunkY * CHUNK_SIZE * TILE_SIZE);
 		def.allowSleep = true;
-		
-		@body = b2Body(def);
+		
+		physicsmtx.lock();
+		@body = b2Body(def);
+		physicsmtx.unlock();
 		
 		// Resize tile grid
 		fixtures.resize(CHUNK_SIZE, CHUNK_SIZE);
@@ -131,6 +136,11 @@ class TerrainChunk : Serializable
 	
 	int getX() const { return chunkX; }
 	int getY() const { return chunkY; }
+	
+	bool isGenerating() const
+	{
+		return generating;
+	}
 	
 	bool isValid(const int x, const int y) const
 	{
@@ -299,8 +309,11 @@ class TerrainChunk : Serializable
 	
 	// PHYSICS
 	private void createFixture(const int x, const int y)
-	{
+	{
+		physicsmtx.lock();
 		b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f, TILE_SIZE*2, TILE_SIZE*2), 0.0f);
+		physicsmtx.unlock();
+		
 		game::tiles[getTileAt(x, y)].setupFixture(@fixture);
 		@fixtures[x, y] = @fixture;
 	}
@@ -334,6 +347,9 @@ class TerrainChunk : Serializable
 	// DRAWING
 	void draw(const Matrix4 &in projmat)
 	{
+		if(dummy)
+			return;
+			
 		batch.setProjectionMatrix(projmat);
 		batch.draw();
 		

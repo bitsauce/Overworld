@@ -149,36 +149,12 @@ class Player : Humanoid, Serializable
 			}
 		}
 		
-		// Clamp player position to world bounds
-		/*if(position.x < 0.0f)
-		{
-			position.x = 0.0f;
-			body.setLinearVelocity(Vector2(0.0f, velocity.y));
-			body.setPosition(position);
-		}else if(position.x > game::terrain.getWidth()*TILE_SIZE)
-		{
-			position.x = game::terrain.getWidth()*TILE_SIZE;
-			body.setLinearVelocity(Vector2(0.0f, velocity.y));
-			body.setPosition(position);
-		}
-		
-		if(position.y < 0.0f)
-		{
-			position.y = 0.0f;
-			body.setLinearVelocity(Vector2(velocity.x, 0.0f));
-			body.setPosition(position);
-		}else if(position.y > game::terrain.getHeight()*TILE_SIZE)
-		{
-			position.y = game::terrain.getHeight()*TILE_SIZE;
-			body.setLinearVelocity(Vector2(velocity.x, 0.0f));
-			body.setPosition(position);
-		}*/
-		
 		updateAnimations();
 		
 		// Update camera
 		game::camera.lookAt(position);
-		game::debug.setVariable("Camera", game::camera.position.x + ", "+game::camera.position.y);
+		game::debug.setVariable("Camera", game::camera.position.x + ", "+game::camera.position.y);
+		game::debug.setVariable("Chunk", body.getPosition().x/CHUNK_SIZE/TILE_SIZE+", "+body.getPosition().y/CHUNK_SIZE/TILE_SIZE);
 		
 		// Update audio listener
 		Audio.position = position;
