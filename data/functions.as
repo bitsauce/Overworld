@@ -17,7 +17,7 @@ void toggleFullscreen()
 
 void toggleProfiler()
 {
-	Engine.toggleProfiler();
+	//Engine.toggleProfiler();
 }
 
 void zoomIn()

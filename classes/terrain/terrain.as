@@ -36,6 +36,8 @@ class Terrain : Serializable
 		Console.log("Initializing terrain");
 	}
 	
+	bool exitThread = false;
+	
 	void serialize(StringStream &ss)
 	{
 		Console.log("Saving terrain...");
@@ -152,16 +154,23 @@ class Terrain : Serializable
 			{
 				return @generateChunk(chunkX, chunkY);
 			}
-			return @TerrainChunk();
-		}
-		return cast<TerrainChunk@>(chunks[key]);
+			return @TerrainChunk(); // Create dummy
+		}
+		
+		TerrainChunk @chunk = cast<TerrainChunk@>(chunks[key]);
+		if(!chunk.generateMutex.tryLock())
+			return @TerrainChunk(); // Create dummy
+		chunk.generateMutex.unlock();
+		return chunk;
 	}
 	
 	private TerrainChunk @generateChunk(const int chunkX, const int chunkY)
 	{
-		TerrainChunk @chunk = @TerrainChunk(@this, chunkX, chunkY);
+		TerrainChunk @chunk = @TerrainChunk(@this, chunkX, chunkY);
+		chunk.generateMutex.lock();
 		@chunks[chunkX+";"+chunkY] = @chunk;
-		generator.generate(@chunk, chunkX, chunkY);
+		generator.generate(@chunk, chunkX, chunkY);
+		chunk.generateMutex.unlock();
 		updateChunk(chunkX, chunkY);
 		return @chunk;
 	}
@@ -181,50 +190,59 @@ class Terrain : Serializable
 		}
 	}
 	
-	bool test = true;
-	
 	// UPDATING
 	void update()
 	{
-		if(test)
-		{
-			thread th(funccall(@this, "findAndGenerateChunk"));
-			th.detach();
-			test = false;
-		}
+		game::debug.setVariable("Chunks", ""+chunks.getSize());
 	}
 	
+	// This works almost perfect, except from the fact that
+	// it eventualy stops generating chunks for some reason
 	void findAndGenerateChunk()
 	{
-		if(chunks.getSize() >= MAX_PRELOADED_CHUNKS)
-			return;
-		Vector2 center = game::camera.position + Vector2(Window.getSize())*0.5f;
-		int chunkX = center.x/CHUNK_SIZE/TILE_SIZE;
-		int chunkY = center.x/CHUNK_SIZE/TILE_SIZE;
-		
-		int step = 1;
-		int dir = 1;
-		bool found = false;
-		while(!found)
-		{
-			dir = step % 2 == 0 ? -1 : 1;
-			for(int j = 0; !found && j < 2; j++)
+		int i = 1;
+		while(true)
+		{
+			Console.log("Loop begin");
+			if(chunks.getSize() >= MAX_PRELOADED_CHUNKS)
+				continue;
+			
+			Console.log("Setup search");
+			Vector2 center = game::camera.position + Vector2(Window.getSize())*0.5f;
+			int chunkX = center.x/CHUNK_SIZE/TILE_SIZE;
+			int chunkY = center.x/CHUNK_SIZE/TILE_SIZE;
+			
+			int step = 1;
+			int dir = 1;
+			bool found = false;
+			Console.log("Search");
+			while(!found)
 			{
-				int dx = (1-j)*dir;
-				int dy = j*dir;
-				for(int i = 0; !found && i < step; i++)
+				dir = step % 2 == 0 ? -1 : 1;
+				for(int j = 0; !found && j < 2; j++)
 				{
-					chunkX += dx;
-					chunkY += dy;
-					found = !chunks.exists(chunkX+";"+chunkY);
+					int dx = (1-j)*dir;
+					int dy = j*dir;
+					for(int i = 0; !found && i < step; i++)
+					{
+						chunkX += dx;
+						chunkY += dy;
+						found = !chunks.exists(chunkX+";"+chunkY);
+					}
 				}
-			}
-			step++;
+				step++;
+			}
+			Console.log("Chunk found");
+			
+			generateChunk(chunkX, chunkY);
+			/*funccall call(@this, "generateChunk");
+			call.setArg(0, chunkX);
+			call.setArg(1, chunkY);
+			thread th(call);*/
+			Console.log("Thread loop: "+i++);
 		}
-		
-		generateChunk(chunkX, chunkY);
-		test = true;
 	}
+	bool test = true;
 	
 	// DRAWING
 	void draw(const TerrainLayer layer, Matrix4)
@@ -242,6 +260,12 @@ class Terrain : Serializable
 				projmat.translate(x * CHUNK_SIZE * TILE_SIZE, y * CHUNK_SIZE * TILE_SIZE, 0.0f);
 				getChunk(x, y, true).draw(projmat);
 			}
+		}
+		
+		if(test)
+		{
+			thread th(funccall(@this, "findAndGenerateChunk"));
+			test = false;
 		}
 	}
 }
