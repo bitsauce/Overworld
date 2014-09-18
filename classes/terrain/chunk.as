@@ -1,6 +1,6 @@
 const int CHUNK_SIZE = 32;
 const float CHUNK_SIZEF = float(CHUNK_SIZE);
-mutex physicsmtx;
+Mutex @physicsmtx = @Mutex();
 
 class TerrainChunk : Serializable
 {
@@ -17,8 +17,8 @@ class TerrainChunk : Serializable
 	private Texture @shadowMap;
 	
 	// MISC
-	private bool dummy;
-	mutex generateMutex;
+	private bool dummy;
+	Mutex @generateMutex = @Mutex();
 		
 	TerrainChunk()
 	{

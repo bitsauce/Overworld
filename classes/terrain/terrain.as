@@ -155,21 +155,21 @@ class Terrain : Serializable
 				return @generateChunk(chunkX, chunkY);
 			}
 			return @TerrainChunk(); // Create dummy
-		}
-		
-		TerrainChunk @chunk = cast<TerrainChunk@>(chunks[key]);
-		if(!chunk.generateMutex.tryLock())
-			return @TerrainChunk(); // Create dummy
+		}
+		
+		TerrainChunk @chunk = cast<TerrainChunk@>(chunks[key]);
+		if(!chunk.generateMutex.tryLock())
+			return @TerrainChunk(); // Create dummy
 		chunk.generateMutex.unlock();
 		return chunk;
 	}
 	
 	private TerrainChunk @generateChunk(const int chunkX, const int chunkY)
 	{
-		TerrainChunk @chunk = @TerrainChunk(@this, chunkX, chunkY);
+		TerrainChunk @chunk = @TerrainChunk(@this, chunkX, chunkY);
 		chunk.generateMutex.lock();
 		@chunks[chunkX+";"+chunkY] = @chunk;
-		generator.generate(@chunk, chunkX, chunkY);
+		generator.generate(@chunk, chunkX, chunkY);
 		chunk.generateMutex.unlock();
 		updateChunk(chunkX, chunkY);
 		return @chunk;
@@ -197,16 +197,17 @@ class Terrain : Serializable
 	}
 	
 	// This works almost perfect, except from the fact that
-	// it eventualy stops generating chunks for some reason
+	// it eventualy stops generating chunks for some reason
+	Thread @generateThread;
 	void findAndGenerateChunk()
 	{
 		int i = 1;
 		while(true)
-		{
+		{
 			Console.log("Loop begin");
 			if(chunks.getSize() >= MAX_PRELOADED_CHUNKS)
 				continue;
-			
+			
 			Console.log("Setup search");
 			Vector2 center = game::camera.position + Vector2(Window.getSize())*0.5f;
 			int chunkX = center.x/CHUNK_SIZE/TILE_SIZE;
@@ -214,7 +215,7 @@ class Terrain : Serializable
 			
 			int step = 1;
 			int dir = 1;
-			bool found = false;
+			bool found = false;
 			Console.log("Search");
 			while(!found)
 			{
@@ -231,7 +232,7 @@ class Terrain : Serializable
 					}
 				}
 				step++;
-			}
+			}
 			Console.log("Chunk found");
 			
 			generateChunk(chunkX, chunkY);
@@ -264,7 +265,8 @@ class Terrain : Serializable
 		
 		if(test)
 		{
-			thread th(funccall(@this, "findAndGenerateChunk"));
+			@generateThread = @debugThread = @Thread(@FuncCall(@this, "findAndGenerateChunk"));
+			generateThread.start();
 			test = false;
 		}
 	}

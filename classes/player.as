@@ -153,8 +153,8 @@ class Player : Humanoid, Serializable
 		
 		// Update camera
 		game::camera.lookAt(position);
-		game::debug.setVariable("Camera", game::camera.position.x + ", "+game::camera.position.y);
-		game::debug.setVariable("Chunk", body.getPosition().x/CHUNK_SIZE/TILE_SIZE+", "+body.getPosition().y/CHUNK_SIZE/TILE_SIZE);
+		game::debug.setVariable("Camera", game::camera.position.x + ", "+game::camera.position.y);
+		game::debug.setVariable("Chunk", Math.floor(body.getPosition().x/CHUNK_SIZE/TILE_SIZE)+", "+Math.floor(body.getPosition().y/CHUNK_SIZE/TILE_SIZE));
 		
 		// Update audio listener
 		Audio.position = position;
