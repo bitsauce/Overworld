@@ -65,7 +65,8 @@ class Player : Humanoid, Serializable
 		float x, y;
 		ss.read(x);
 		ss.read(y);
-		body.setPosition(Vector2(x, y));
+		body.setPosition(Vector2(x, y));
+		game::camera.lookAt(Vector2(x, y));
 
 		// Load inventory
 		string itemString, amountString;

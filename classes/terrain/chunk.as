@@ -17,8 +17,8 @@ class TerrainChunk : Serializable
 	private Texture @shadowMap;
 	
 	// MISC
-	private bool dummy;
-	Mutex @generateMutex = @Mutex();
+	private bool dummy;
+	bool modified;
 		
 	TerrainChunk()
 	{
@@ -36,7 +36,8 @@ class TerrainChunk : Serializable
 	void init(int chunkX, int chunkY)
 	{
 		// Not a dummy
-		dummy = false;
+		dummy = false;
+		modified = false;
 		
 		// Set chunk vars
 		this.chunkX = chunkX;

@@ -88,6 +88,21 @@ class GameScene : Scene
 	// Terrain FBO
 	private Texture @terrainFbo;
 	
+	// TODO:
+	// I really should create a system for managing
+	// manager/global objects such as those below.
+	//
+	// I am thinking along the lines of doing something like
+	// 	cast<Terrain@>(Get("terrain"))
+	//
+	// Alternatively I might want to make them singletons
+	//  Terrain.addTile();
+	//
+	// Maybe have a class Singleton which they inherit from
+	//  
+	// Also, I might want to concider reimplementing a
+	// updating priority queue.
+	
 	// Terrain
 	private Terrain @terrain;
 	Terrain @getTerrain() const { return @terrain; }	
@@ -226,14 +241,15 @@ class GameScene : Scene
 		save();
 		objects.clear();
 		furnitures.clear();
-		players.clear();
+		players.clear();
+		terrain.generateThread.stop();
 	}
 	
 	void update()
 	{
-		// Step Box2D
+		// Step Box2D
 		physicsmtx.lock();
-		Box2D.step(Graphics.dt);
+		Box2D.step(Graphics.dt);
 		physicsmtx.unlock();
 		
 		terrain.update();
@@ -321,7 +337,8 @@ bool loadGame(string worldDir)
 	Console.log("Loading world: " + worldDir + "...");
 	
 	// Make sure required world files exist
-	if(!FileSystem.fileExists(worldDir + "/world.ini")/* || !FileSystem.fileExists(worldPath + "/players.ini")*/) {
+	if(!FileSystem.fileExists(worldDir + "/world.ini")/* || !FileSystem.fileExists(worldPath + "/players.ini")*/)
+	{
 		Console.log("Loading failed (missing files)");
 		return false;
 	}
