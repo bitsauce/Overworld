@@ -1,7 +1,9 @@
 // Texture enum
 enum TextureID
-{
-	BERRY_BUSH_TEXTURE,
+{
+	MENU_BUTTON_TEXTURE,
+	
+	BERRY_BUSH_TEXTURE,
 	STICK_TEXTURE,
 	MAX_TEXTURES
 }

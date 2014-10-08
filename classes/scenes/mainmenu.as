@@ -1,9 +1,12 @@
 class MainMenu : Scene
-{
-	private Batch @batch = @Batch();
-	private array<UiObject@> uiObjects;
-	Texture @textTexture;
-	
+{
+	// Draw batch
+	private Batch @batch = @Batch();
+	
+	// Ui objects
+	private array<UiObject@> uiObjects;
+	
+	// Constructor
 	MainMenu()
 	{
 	}
@@ -11,38 +14,34 @@ class MainMenu : Scene
 	void show()
 	{
 		Console.log("MainMenu: Show");
+		
+		// Create buttons
+		Button @spBtn = @Button("Singleplayer", @ButtonCallback(@showSinglePlayer), null);
+		Button @mpBtn = @Button("Multiplayer", @exit, null);
+		Button @opBtn = @Button("Options", @exit, null);
+		Button @qtBtn = @Button("Quit", @exit, null);
 		
-		Button @singlePlayerButton = @Button("Singleplayer", @ButtonCallback(@showSinglePlayer), null);
-		Button @multiPlayerButton = @Button("Multiplayer", @exit, null);
-		Button @optionButton = @Button("Options", @exit, null);
-		Button @quitButton = @Button("Quit", @exit, null);
+		spBtn.anchor = CENTER;
+		mpBtn.anchor = CENTER;
+		opBtn.anchor = CENTER;
+		qtBtn.anchor = CENTER;
 		
-		singlePlayerButton.setSize(Vector2(0.2f, 0.05f));
-		multiPlayerButton.setSize(Vector2(0.2f, 0.05f));
-		optionButton.setSize(Vector2(0.2f, 0.05f));
-		quitButton.setSize(Vector2(0.2f, 0.05f));
+		spBtn.setPosition(Vector2(0.0f, -0.3f));
+		mpBtn.setPosition(Vector2(0.0f, -0.2f));
+		opBtn.setPosition(Vector2(0.0f, -0.1f));
+		qtBtn.setPosition(Vector2(0.0f,  0.0f));
 		
-		singlePlayerButton.anchor = CENTER;
-		multiPlayerButton.anchor = CENTER;
-		optionButton.anchor = CENTER;
-		quitButton.anchor = CENTER;
-		
-		singlePlayerButton.setPosition(Vector2(0.0f, -0.3f));
-		multiPlayerButton.setPosition(Vector2(0.0f, -0.2f));
-		optionButton.setPosition(Vector2(0.0f, -0.1f));
-		quitButton.setPosition(Vector2(0.0f, 0.0f));
-		
-		uiObjects.insertLast(@singlePlayerButton);
-		uiObjects.insertLast(@multiPlayerButton);
-		uiObjects.insertLast(@optionButton);
-		uiObjects.insertLast(@quitButton);
+		uiObjects.insertLast(@spBtn);
+		uiObjects.insertLast(@mpBtn);
+		uiObjects.insertLast(@opBtn);
+		uiObjects.insertLast(@qtBtn);
 	}
 	
 	void hide()
 	{
 		Console.log("MainMenu: Hide");
 		
-		//uiObjects.clear();
+		uiObjects.clear();
 	}
 	
 	void showSinglePlayer()
@@ -53,24 +52,24 @@ class MainMenu : Scene
 	void update()
 	{
 		// Update all ui objects
-		for(int i = 0; i < uiObjects.size; i++) {
+		for(int i = 0; i < uiObjects.size; i++)
+		{
 			uiObjects[i].update();
 		}
 	}
 	
 	void draw()
-	{
+	{
+		// Clear batch
 		batch.clear();
 		
-		Shape @shape = @Shape(Rect(Vector2(0.0f), Vector2(Window.getSize())));
-		shape.setFillColor(Vector4(0.5f, 0.5f, 0.8f, 1.0f));
-		shape.draw(@batch);
-		
 		// Draw all ui objects
-		for(int i = 0; i < uiObjects.size; i++) {
+		for(int i = 0; i < uiObjects.size; i++)
+		{
 			uiObjects[i].draw(@batch);
 		}
-		
+		
+		// Draw batch
 		batch.draw();
 	}
 }

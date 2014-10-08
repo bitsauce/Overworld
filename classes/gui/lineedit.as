@@ -1,10 +1,10 @@
-funcdef void AcceptCallback();
-
+funcdef void AcceptCallback();
+
 class LineEdit : UiObject, KeyboardListener
 {
 	private string text;
 	private int cursorPos = 0;
-	private float cursorTime = 0.0f;
+	private float cursorTime = 0.0f;
 	AcceptCallback @acceptFunc;
 	
 	LineEdit(UiObject @parent)
@@ -52,28 +52,28 @@ class LineEdit : UiObject, KeyboardListener
 		// Only add text if active
 		//if(!isActive())
 		//	return;
-		
-		switch(code)
-		{
-		case KEY_BACKSPACE:
-			// Remove char behind
-			if(cursorPos != 0) {
-				removeAt(cursorPos);
-				cursorPos--;
-			}
-			break;
-			
-		case KEY_ENTER:
-			// Call accept function
-			if(@acceptFunc != null)
-				acceptFunc();
-			break;
-			
-		default:
-			// Add text
-			insertAt(cursorPos, formatUtf8(code));
-			cursorPos++;
-			break;
+		
+		switch(code)
+		{
+		case KEY_BACKSPACE:
+			// Remove char behind
+			if(cursorPos != 0) {
+				removeAt(cursorPos);
+				cursorPos--;
+			}
+			break;
+			
+		case KEY_ENTER:
+			// Call accept function
+			if(@acceptFunc != null)
+				acceptFunc();
+			break;
+			
+		default:
+			// Add text
+			insertAt(cursorPos, formatUtf8(code));
+			cursorPos++;
+			break;
 		}
 	}
 	
@@ -125,11 +125,11 @@ class LineEdit : UiObject, KeyboardListener
 	
 	void draw(Batch @batch)
 	{
-		Vector2 position = getPosition(true)*Vector2(Window.getSize());
-		Vector2 size = getSize(true)*Vector2(Window.getSize());
-		
-		// Apply center alignment
-		position.x += (size.x - font::large.getStringWidth(text))*0.5f;
+		Vector2 position = getPosition(true);
+		Vector2 size = getSize(true);
+		
+		// Apply center alignment
+		position.x += (size.x - font::large.getStringWidth(text))*0.5f;
 		
 		font::large.setColor(Vector4(1.0f));
 		font::large.draw(@batch, position, text);

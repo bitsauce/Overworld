@@ -60,18 +60,16 @@ class WorldSelectMenu : Scene
 	}
 	
 	void draw()
-	{
+	{
+		// Clear batch
 		batch.clear();
-		
-		Shape @shape = @Shape(Rect(Vector2(0.0f), Vector2(Window.getSize())));
-		shape.setFillColor(Vector4(0.5f, 0.5f, 0.8f, 1.0f));
-		shape.draw(@batch);
 		
 		// Draw all ui objects
 		for(int i = 0; i < uiObjects.size; i++) {
 			uiObjects[i].draw(@batch);
 		}
-		
+		
+		// Draw batch
 		batch.draw();
 	}
 }

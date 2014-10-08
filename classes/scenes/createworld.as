@@ -15,7 +15,7 @@ class CreateWorldMenu : Scene
 		@worldNameEdit = LineEdit(null);
 		worldNameEdit.anchor = CENTER;
 		worldNameEdit.setPosition(Vector2(0.0f, 0.0f));
-		worldNameEdit.setSize(Vector2(0.2f, 0.01f));
+		worldNameEdit.setSize(Vector2(0.2f, 0.01f));
 		@worldNameEdit.acceptFunc = AcceptCallback(@createWorld);
 		
 		Button @createWorldButton = @Button("Create!", ButtonCallback(@createWorld), null);
@@ -43,18 +43,17 @@ class CreateWorldMenu : Scene
 	}
 	
 	void draw()
-	{
+	{
+		// Clear batch
 		batch.clear();
 		
-		Shape @shape = @Shape(Rect(Vector2(0.0f), Vector2(Window.getSize())));
-		shape.setFillColor(Vector4(0.5f, 0.5f, 0.8f, 1.0f));
-		shape.draw(@batch);
-		
 		// Draw all ui objects
-		for(int i = 0; i < uiObjects.size; i++) {
+		for(int i = 0; i < uiObjects.size; i++)
+		{
 			uiObjects[i].draw(@batch);
 		}
-		
+		
+		// Draw batch
 		batch.draw();
 	}
 	

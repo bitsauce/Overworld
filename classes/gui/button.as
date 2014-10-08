@@ -3,78 +3,95 @@ funcdef void ButtonCallbackThis(Button@);
 
 class Button : UiObject
 {
+	// Button text
 	private string text;
+		
+	// Button callback
 	private ButtonCallback @callback;
 	private ButtonCallbackThis @callbackThis;
+		
+	// User data
 	any userData;
 	
-	Shader @outlineShader = @Shader(":/shaders/outline.vert", ":/shaders/outline.frag");
-	
+	// Text texture
 	private Texture @textTexture;
+		
+	// Button sprite
+	private Sprite @buttonSprite = @Sprite(@game::textures[MENU_BUTTON_TEXTURE]);
 	
+	
+	// Constructors
 	Button(string text, ButtonCallback @callback, UiObject @parent)
 	{
+		// Call parent constructor
 		super(@parent);
 		
-		setText(text);
+		// Set callback
 		@this.callback = @callback;
-		setupShader();
+		
+		// Set text
+		setText(text);
 	}
 	
 	Button(string text, ButtonCallbackThis @callbackThis, UiObject @parent)
 	{
+		// Call parent constructor
 		super(@parent);
 		
-		setText(text);
+		// Set callback
 		@this.callbackThis = @callbackThis;
-		setupShader();
-	}
-	
-	void setupShader()
-	{
-		outlineShader.setUniform1f("radius", 1.5f);
-		outlineShader.setUniform1f("step", 0.1f);
-		outlineShader.setUniform3f("color", 0.0f, 0.0f, 0.0f);
-		outlineShader.setUniform2f("resolution", textTexture.getWidth(), textTexture.getHeight());
-		outlineShader.setSampler2D("texture", @textTexture);
+		
+		// Set text
+		setText(text);
 	}
 	
 	void setText(string text)
 	{
+		// Set text
 		this.text = text;
+		
+		// Store text render texture
 		@textTexture = @renderTextToTexture(@font::large, text, 6.0f);
+	}
+	
+	Vector2 getSize(const bool recursive)
+	{
+		Vector2 size = Vector2(282.0f/Window.getSize().x, 55.0f/Window.getSize().y);
+		if(recursive)
+		{
+			size = parent.getSize(recursive) * size;
+			size.x = Math.max(size.x, 282.0f);
+			size.y = size.x * 55.0f/282.0f;
+		}
+		return size;
 	}
 	
 	void draw(Batch @batch)
 	{
-		Vector2 position = getPosition(true)*Vector2(Window.getSize());
-		Vector2 size = getSize(true)*Vector2(Window.getSize());
+		// Get size and position
+		Vector2 position = getPosition(true);
+		Vector2 size = getSize(true);
 		
-		if(isPressed() && isHovered())
-			outlineShader.setUniform3f("color", 1.0f, 1.0f, 0.0f);
-		else if(isPressed())
-			outlineShader.setUniform3f("color", 0.5f, 0.5f, 0.0f);
-		else if(isHovered())
-			outlineShader.setUniform3f("color", 0.9f, 0.9f, 0.2f);
-		else
-			outlineShader.setUniform3f("color", 0.0f, 0.0f, 0.0f);
-		
-		Vector2 textSize = Vector2(Math.min(textTexture.getWidth(), size.x), Math.min(textTexture.getHeight(), size.y));
+		// Draw button sprite
+		buttonSprite.setSize(size);
+		buttonSprite.setPosition(position);
+		buttonSprite.draw(@batch);
 		
-		batch.setShader(@outlineShader);
-		Shape(Rect(position - (textSize-size)*0.5f, textSize)).draw(@batch);
-		batch.setShader(null);
-		
-		Shape @shape = @Shape(Rect(position, size));
-		shape.setFillColor(Vector4(0.7f, 0.7f, 0.7f, 1.0f));
-		shape.draw(@batch);
+		// Draw text
+		/*Shape textShape(Rect(position - (textSize-size)*0.5f, textSize));
+		textShape.setFillTexture(@textTexture);
+		textShape.draw(@batch);*/
+		font::large.setColor(Vector4(1.0f));
+		font::large.draw(@batch, position - (Vector2(font::large.getStringWidth(text), font::large.getStringHeight(text))-size)*0.5f, text);
 	}
 	
 	void click()
 	{
+		// Call click callbacks
 		if(@callback != null) {
 			callback();
 		}
+		
 		if(@callbackThis != null) {
 			callbackThis(@this);
 		}

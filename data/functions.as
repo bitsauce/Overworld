@@ -57,12 +57,12 @@ bool TerrainPlotTest(int x, int y)
 {
 	return scene::game.getTerrain().getTileAt(x, y) <= RESERVED_TILE;
 }
-
+
 Thread @debugThread;
 void DebugCreate()
-{
-	if(@debugThread != null)
-	{
-		debugThread.dump();
+{
+	if(@debugThread != null)
+	{
+		debugThread.dump();
 	}
 }

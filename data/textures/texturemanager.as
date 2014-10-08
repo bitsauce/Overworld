@@ -6,11 +6,13 @@ class TextureManager
 	void init()
 	{
 		// Make sure the manager is not initialized already
-		if(initialized)
-			return;
+		if(initialized) {
+			return;
+		}
 		
-		// Load textures
-		load(BERRY_BUSH_TEXTURE, @Texture(":/sprites/plants/berry_bush.png"));
+		// Load textures
+		load(MENU_BUTTON_TEXTURE, @Texture(":/sprites/gui/menu_button.png"));
+		load(BERRY_BUSH_TEXTURE, @Texture(":/sprites/plants/berry_bush.png"));
 		load(STICK_TEXTURE, @Texture(":/sprites/items/stick2.png"));
 		
 		// Mark as initialized
@@ -20,8 +22,11 @@ class TextureManager
 	private void load(TextureID id, Texture @texture)
 	{
 		// Make sure the manager is not initialized
-		if(initialized)
-			return;
+		if(initialized) {
+			return;
+		}
+		
+		// Set texture
 		@textures[id] = @texture;
 	}
 	
