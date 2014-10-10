@@ -19,8 +19,8 @@ class Terrain : Serializable
 	private dictionary chunks;
 	
 	// Terrain generator
-	TerrainGen generator;
-	Thread @generateThread;
+	TerrainGen generator;
+	Thread @generateThread;
 	private dictionary generating;
 	
 	// For selecting a direction to generate in
@@ -35,10 +35,10 @@ class Terrain : Serializable
 	// SERIALIZATION
 	private void init()
 	{
-		Console.log("Initializing terrain");
-		
-		@generateThread = @debugThread = @Thread(@FuncCall(@this, "findAndGenerateChunk"));
-		generateThread.start();
+		Console.log("Initializing terrain");
+		
+		//@generateThread = @debugThread = @Thread(@FuncCall(@this, "findAndGenerateChunk"));
+		//generateThread.start();
 	}
 	
 	void serialize(StringStream &ss)
@@ -50,10 +50,10 @@ class Terrain : Serializable
 		array<string> @keys = chunks.getKeys();
 		for(int i = 0; i < keys.size; i++)
 		{
-			string key = keys[i];
-			if(cast<TerrainChunk@>(chunks[key]).modified)
+			string key = keys[i];
+			if(cast<TerrainChunk@>(chunks[key]).modified)
 			{
-				Scripts.serialize(cast<Serializable@>(chunks[key]), scene::game.getWorldDir() + "/chunks/" + key + ".obj");
+				Scripts.serialize(cast<Serializable@>(chunks[key]), scene::game.getWorldDir() + "/chunks/" + key + ".obj");
 			}
 		}
 	}
@@ -97,8 +97,8 @@ class Terrain : Serializable
 	bool addTile(const int x, const int y, TileID tile)
 	{
 		if(getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).addTile(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), tile))
-		{
-			getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).modified = true;
+		{
+			getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).modified = true;
 			
 			// Update neighbouring tiles
 			getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(mod(x,   CHUNK_SIZE), mod(y,   CHUNK_SIZE), getTileState(x,   y), true);
@@ -120,8 +120,8 @@ class Terrain : Serializable
 	bool removeTile(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
 	{
 		if(getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).removeTile(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE)))
-		{
-			getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).modified = true;
+		{
+			getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).modified = true;
 			
 			// Update neighbouring tiles
 			getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(mod(x,   CHUNK_SIZE), mod(y,   CHUNK_SIZE), getTileState(x,   y), true);
@@ -152,36 +152,36 @@ class Terrain : Serializable
 			}
 			return @TerrainChunk(); // Create dummy
 		}
-		
-		if(!generating.exists(key) || bool(generating[key]))
+		
+		if(!generating.exists(key) || bool(generating[key]))
 			return @TerrainChunk(); // Create dummy
 		return cast<TerrainChunk@>(chunks[key]);
 	}
 	
 	private TerrainChunk @generateChunk(const int chunkX, const int chunkY)
-	{
-		string key = chunkX+";"+chunkY;
-		if(generating.exists(key))
-			return @TerrainChunk();
-		generating[key] = true;
-		
-		string chunkFile = scene::game.getWorldDir() + "/chunks/"+key+".obj";
-		TerrainChunk@ chunk;
-		if(FileSystem.fileExists(chunkFile))
-		{
-			// Load chunk from file
-			@chunk = cast<TerrainChunk@>(Scripts.deserialize(chunkFile));
-			chunk.setTerrain(@this);
-			@chunks[key] = @chunk;
-		}
-		else
-		{
-			// Generate chunk
-			@chunk = @TerrainChunk(@this, chunkX, chunkY);
-			@chunks[key] = @chunk;
-			generator.generate(@chunk, chunkX, chunkY);
-		}
-		
+	{
+		string key = chunkX+";"+chunkY;
+		if(generating.exists(key))
+			return @TerrainChunk();
+		generating[key] = true;
+		
+		string chunkFile = scene::game.getWorldDir() + "/chunks/"+key+".obj";
+		TerrainChunk@ chunk;
+		if(FileSystem.fileExists(chunkFile))
+		{
+			// Load chunk from file
+			@chunk = cast<TerrainChunk@>(Scripts.deserialize(chunkFile));
+			chunk.setTerrain(@this);
+			@chunks[key] = @chunk;
+		}
+		else
+		{
+			// Generate chunk
+			@chunk = @TerrainChunk(@this, chunkX, chunkY);
+			@chunks[key] = @chunk;
+			generator.generate(@chunk, chunkX, chunkY);
+		}
+		
 		generating[key] = false;
 		updateChunk(chunkX, chunkY);
 		return @chunk;

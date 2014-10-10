@@ -17,8 +17,9 @@ class Button : UiObject
 	private Texture @textTexture;
 		
 	// Button sprite
-	private Sprite @buttonSprite = @Sprite(@game::textures[MENU_BUTTON_TEXTURE]);
-	
+	private Sprite @buttonSprite = @Sprite(null);
+	
+	private float animTime = 0.0f;
 	
 	// Constructors
 	Button(string text, ButtonCallback @callback, UiObject @parent)
@@ -56,31 +57,54 @@ class Button : UiObject
 	
 	Vector2 getSize(const bool recursive)
 	{
-		Vector2 size = Vector2(282.0f/Window.getSize().x, 55.0f/Window.getSize().y);
+		Vector2 size = Vector2(300.0f/Window.getSize().x, 70.0f/Window.getSize().y);
 		if(recursive)
 		{
 			size = parent.getSize(recursive) * size;
-			size.x = Math.max(size.x, 282.0f);
-			size.y = size.x * 55.0f/282.0f;
+			size.x = Math.max(size.x, 300.0f);
+			size.y = size.x * 70.0f/300.0f;
 		}
 		return size;
+	}
+	
+	void update()
+	{
+		if(isHovered())
+		{
+			animTime = Math.min(animTime + Graphics.dt*4.0f, 1.0f);
+		}
+		else
+		{
+			animTime = Math.max(animTime - Graphics.dt*4.0f, 0.0f);
+		}
+		
+		UiObject::update();
 	}
 	
 	void draw(Batch @batch)
 	{
 		// Get size and position
 		Vector2 position = getPosition(true);
-		Vector2 size = getSize(true);
-		
-		// Draw button sprite
-		buttonSprite.setSize(size);
-		buttonSprite.setPosition(position);
+		Vector2 size = getSize(true);
+		
+		// Draw button sprite
+		buttonSprite.setSize(size);
+		buttonSprite.setPosition(position);
+		
+		// Draw hovered sprite
+		if(animTime > 0.0f)
+		{
+			buttonSprite.setColor(Vector4(1.0f, 1.0f, 1.0f, animTime));
+			buttonSprite.setRegion(TextureRegion(@game::textures[MENU_BUTTON_TEXTURE], 0.0f, 0.0f, 1.0f, 0.5f));
+			buttonSprite.draw(@batch);
+		}
+		
+		// Draw default sprite
+		buttonSprite.setColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+		buttonSprite.setRegion(TextureRegion(@game::textures[MENU_BUTTON_TEXTURE], 0.0f, 0.5f, 1.0f, 1.0f));
 		buttonSprite.draw(@batch);
 		
 		// Draw text
-		/*Shape textShape(Rect(position - (textSize-size)*0.5f, textSize));
-		textShape.setFillTexture(@textTexture);
-		textShape.draw(@batch);*/
 		font::large.setColor(Vector4(1.0f));
 		font::large.draw(@batch, position - (Vector2(font::large.getStringWidth(text), font::large.getStringHeight(text))-size)*0.5f, text);
 	}
