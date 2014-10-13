@@ -10,8 +10,8 @@ namespace scene
 // Fonts
 namespace font
 {
-	Font @large = @Font("Arial Bold", 38);
-	Font @small = @Font("Arial", 12);
+	Font @large = @Font(":/PressStart2P.ttf", 20);
+	Font @small = @Font(":/PressStart2P.ttf", 8);
 }
 
 namespace game
