@@ -259,7 +259,7 @@ class Terrain : Serializable
 		int y1 = Math.floor((game::camera.position.y+Window.getSize().y)/CHUNK_SIZE/TILE_SIZE);
 		
 		int i = 0;
-		while(Input.getKeyState(KEY_G))
+		while(Input.getKeyState(KEY_L))
 		{
 			getChunk(x0 + i++, y0, true);
 		}

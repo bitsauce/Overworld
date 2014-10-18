@@ -10,19 +10,22 @@ class TileManager
 		if(initialized)
 			return;
 		
-		// Add tiles
-		for(int i = 0; i < MAX_TILES; i++) {
-			add(TileID(i));
+		// Add tiles
+		for(int i = 0; i < MAX_TILES; i++)
+		{
+			add(TileID(i));
 		}
 		
 		// Store tile textures
 		array<Texture@> textures;
-		for(int i = 0; i < MAX_TILES; i++) {
+		for(int i = 0; i < MAX_TILES; i++)
+		{
 			Tile @tile = @tiles[i];
-			if(@tile.getTexture() == @null)
+			if(@tile.getTexture() == @null)
 			{
 				textures.insertLast(@Texture(32, 48));
-			}else
+			}
+			else
 			{
 				textures.insertLast(@tile.getTexture());
 			}
@@ -61,11 +64,17 @@ class TileManager
 		for(int i = 0; i < tiles.size; i++)
 		{
 			Tile @tile = @tiles[i];
-			if(tile.getItemID() == item) {
+			if(tile.getItemID() == item)
+			{
 				return TileID(i);
 			}
 		}
 		return EMPTY_TILE;
+	}
+	
+	TextureAtlas @getAtlas()
+	{
+		return @atlas;
 	}
 	
 	TextureRegion getTextureRegion(TileID tile, int i)

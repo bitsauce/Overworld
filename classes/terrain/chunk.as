@@ -64,13 +64,14 @@ class TerrainChunk : Serializable
 		
 		// Initialize terrain buffers
 		@batch = @SpriteBatch();
+		TextureAtlas @atlas = @game::tiles.getAtlas();
 		for(int y = 0; y < CHUNK_SIZE; y++)
 		{
 			for(int x = 0; x < CHUNK_SIZE; x++)
 			{
 				for(int j = 0; j < 13; j++)
 				{
-					Sprite @sprite = @Sprite(game::tiles.getTextureRegion(EMPTY_TILE, j));
+					Sprite @sprite = @Sprite(atlas.get(EMPTY_TILE, TILE_TEXTURE_COORDS[0, j], TILE_TEXTURE_COORDS[1, j], TILE_TEXTURE_COORDS[2, j], TILE_TEXTURE_COORDS[3, j]));
 					sprite.setPosition(Vector2(x * TILE_SIZE + TILE_SIZE * 2 * (TILE_TEXTURE_COORDS[0, j] - 0.25f), y * TILE_SIZE + TILE_SIZE * 2 * (0.75 - TILE_TEXTURE_COORDS[3, j] * (3.0f/2.0f))));
 					batch.add(@sprite);
 				}
