@@ -6,7 +6,8 @@ class TerrainChunk : Serializable
 {
 	// CHUNK
 	private int chunkX, chunkY;
-	private grid<TileID> tiles;
+	grid<TileID> tiles;
+	grid<uint> tileState;
 	
 	// PHYSICS
 	private b2Body @body;
@@ -17,7 +18,7 @@ class TerrainChunk : Serializable
 	private Texture @shadowMap;
 	
 	// MISC
-	private bool dummy;
+	bool dummy;
 	bool modified;
 		
 	TerrainChunk()
@@ -56,9 +57,13 @@ class TerrainChunk : Serializable
 		// Resize tile grid
 		fixtures.resize(CHUNK_SIZE, CHUNK_SIZE);
 		tiles.resize(CHUNK_SIZE, CHUNK_SIZE);
-		for(int y = 0; y < CHUNK_SIZE; y++) {
-			for(int x = 0; x < CHUNK_SIZE; x++) {
+		tileState.resize(CHUNK_SIZE, CHUNK_SIZE);
+		for(int y = 0; y < CHUNK_SIZE; y++)
+		{
+			for(int x = 0; x < CHUNK_SIZE; x++)
+			{
 				tiles[x, y] = EMPTY_TILE;
+				tileState[x, y] = 0;
 			}
 		}
 		
@@ -191,12 +196,106 @@ class TerrainChunk : Serializable
 		tiles[x, y] = tile;
 	}
 	
+	void updateTile(const int x, const int y, const bool fixture = false)
+	{
+		float opacity = getOpacity(x, y);
+		array<Vector4> pixel = {
+			Vector4(0.0f, 0.0f, 0.0f, opacity)
+		};
+		shadowMap.updateSection(x, CHUNK_SIZE - y - 1, Pixmap(1, 1, pixel));
+		
+		TileID tile = getTileAt(x, y);
+		int i = (y * CHUNK_SIZE + x) * 13;
+		uint state = tileState[x, y];
+		if(tile > RESERVED_TILE)
+		{
+			// Show/Hide north ledge
+			batch.get(i+1).setColor(Vector4(state & NORTH == 0 ? 1.0f : 0.0f));
+			batch.get(i+2).setColor(Vector4(state & NORTH == 0 ? 1.0f : 0.0f));
+			
+			// Show/Hide east ledge
+			batch.get(i+4).setColor(Vector4(state & EAST == 0 ? 1.0f : 0.0f));
+			batch.get(i+5).setColor(Vector4(state & EAST == 0 ? 1.0f : 0.0f));
+			
+			// Show/Hide south ledge
+			batch.get(i+7).setColor(Vector4(state & SOUTH == 0 ? 1.0f : 0.0f));
+			batch.get(i+8).setColor(Vector4(state & SOUTH == 0 ? 1.0f : 0.0f));
+			
+			// Show/Hide west ledge
+			batch.get(i+10).setColor(Vector4(state & WEST == 0 ? 1.0f : 0.0f));
+			batch.get(i+11).setColor(Vector4(state & WEST == 0 ? 1.0f : 0.0f));
+			
+			// NW corner
+			if(state & NORTH_WEST == 0)
+			{
+				batch.get(i+1).setRegion(game::tiles.getTextureRegion(tile, 1));
+				batch.get(i+11).setRegion(game::tiles.getTextureRegion(tile, 11));
+				
+				// Show/Hide outer corner
+				batch.get(i+0).setColor(Vector4((state & NORTH == 0 && state & WEST == 0) ? 1.0f : 0.0f));
+			}else{
+				batch.get(i+1).setRegion(game::tiles.getTextureRegion(tile, 16));
+				batch.get(i+11).setRegion(game::tiles.getTextureRegion(tile, 14));
+				
+				// Hide outer corner
+				batch.get(i+0).setColor(Vector4(0.0f));
+			}
+			
+			// NE corner
+			if(state & NORTH_EAST == 0)
+			{
+				batch.get(i+2).setRegion(game::tiles.getTextureRegion(tile, 2));
+				batch.get(i+4).setRegion(game::tiles.getTextureRegion(tile, 4));
+				
+				// Show/Hide outer corner
+				batch.get(i+3).setColor(Vector4((state & NORTH == 0 && state & EAST == 0) ? 1.0f : 0.0f));
+			}else{
+				batch.get(i+2).setRegion(game::tiles.getTextureRegion(tile, 15));
+				batch.get(i+4).setRegion(game::tiles.getTextureRegion(tile, 13));
+				
+				// Hide outer corner
+				batch.get(i+3).setColor(Vector4(0.0f));
+			}
+			
+			// SE corner
+			if(state & SOUTH_EAST == 0)
+			{
+				// Show/Hide outer corner
+				batch.get(i+6).setColor(Vector4((state & SOUTH == 0 && state & EAST == 0) ? 1.0f : 0.0f));
+			}else{
+				// Hide outer corner
+				if(state & EAST == 0) batch.get(i+5).setColor(Vector4(0.0f));
+				batch.get(i+6).setColor(Vector4(0.0f));
+				if(state & SOUTH == 0) batch.get(i+7).setColor(Vector4(0.0f));
+			}
+			
+			// SW corner
+			if(state & SOUTH_WEST == 0)
+			{
+				// Show/Hide outer corner
+				batch.get(i+9).setColor(Vector4((state & SOUTH == 0 && state & WEST == 0) ? 1.0f : 0.0f));
+			}else{
+				// Hide outer corner
+				if(state & SOUTH == 0) batch.get(i+8).setColor(Vector4(0.0f));
+				batch.get(i+9).setColor(Vector4(0.0f));
+				if(state & WEST == 0) batch.get(i+10).setColor(Vector4(0.0f));
+			}
+		}
+		
+		if(fixture) {
+			updateFixture(x, y, state);
+		}
+	}
+	
 	void updateTile(const int x, const int y, const uint state, const bool fixture = false)
 	{
-		if(!isValid(x, y))
-			return;
+		tileState[x, y] = state;
 		
-		setOpacity(x, y, getOpacity(x, y));
+		float opacity = getOpacity(x, y);
+		array<Vector4> pixel = {
+			Vector4(0.0f, 0.0f, 0.0f, opacity)
+		};
+		shadowMap.updateSection(x, CHUNK_SIZE - y - 1, Pixmap(1, 1, pixel));
 		
 		TileID tile = getTileAt(x, y);
 		int i = (y * CHUNK_SIZE + x) * 13;
@@ -279,6 +378,102 @@ class TerrainChunk : Serializable
 			updateFixture(x, y, state);
 		}
 	}
+	
+	void updateAllTiles()
+	{
+		TextureAtlas @atlas = @game::tiles.getAtlas();
+		for(int y = 0; y < CHUNK_SIZE; y++)
+		{
+			for(int x = 0; x < CHUNK_SIZE; x++)
+			{
+				float opacity = getOpacity(x, y);
+				array<Vector4> pixel = {
+					Vector4(0.0f, 0.0f, 0.0f, opacity)
+				};
+				shadowMap.updateSection(x, CHUNK_SIZE - y - 1, Pixmap(1, 1, pixel));
+				
+				TileID tile = tiles[x, y];
+				int i = (y * CHUNK_SIZE + x) * 13;
+				uint state = tileState[x, y];
+				if(tile > RESERVED_TILE)
+				{
+					// Show/Hide north ledge
+					batch.get(i+1).setColor(Vector4(state & NORTH == 0 ? 1.0f : 0.0f));
+					batch.get(i+2).setColor(Vector4(state & NORTH == 0 ? 1.0f : 0.0f));
+					
+					// Show/Hide east ledge
+					batch.get(i+4).setColor(Vector4(state & EAST == 0 ? 1.0f : 0.0f));
+					batch.get(i+5).setColor(Vector4(state & EAST == 0 ? 1.0f : 0.0f));
+					
+					// Show/Hide south ledge
+					batch.get(i+7).setColor(Vector4(state & SOUTH == 0 ? 1.0f : 0.0f));
+					batch.get(i+8).setColor(Vector4(state & SOUTH == 0 ? 1.0f : 0.0f));
+					
+					// Show/Hide west ledge
+					batch.get(i+10).setColor(Vector4(state & WEST == 0 ? 1.0f : 0.0f));
+					batch.get(i+11).setColor(Vector4(state & WEST == 0 ? 1.0f : 0.0f));
+					
+					// NW corner
+					if(state & NORTH_WEST == 0)
+					{
+						batch.get(i+1).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 1], TILE_TEXTURE_COORDS[1, 1], TILE_TEXTURE_COORDS[2, 1], TILE_TEXTURE_COORDS[3, 1]));
+						batch.get(i+11).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 11], TILE_TEXTURE_COORDS[1, 11], TILE_TEXTURE_COORDS[2, 11], TILE_TEXTURE_COORDS[3, 11]));
+						
+						// Show/Hide outer corner
+						batch.get(i+0).setColor(Vector4((state & NORTH == 0 && state & WEST == 0) ? 1.0f : 0.0f));
+					}else{
+						batch.get(i+1).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 16], TILE_TEXTURE_COORDS[1, 16], TILE_TEXTURE_COORDS[2, 16], TILE_TEXTURE_COORDS[3, 16]));
+						batch.get(i+11).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 14], TILE_TEXTURE_COORDS[1, 14], TILE_TEXTURE_COORDS[2, 14], TILE_TEXTURE_COORDS[3, 14]));
+						
+						// Hide outer corner
+						batch.get(i+0).setColor(Vector4(0.0f));
+					}
+					
+					// NE corner
+					if(state & NORTH_EAST == 0)
+					{
+						batch.get(i+2).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 2], TILE_TEXTURE_COORDS[1, 2], TILE_TEXTURE_COORDS[2, 2], TILE_TEXTURE_COORDS[3, 2]));
+						batch.get(i+4).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 4], TILE_TEXTURE_COORDS[1, 4], TILE_TEXTURE_COORDS[2, 4], TILE_TEXTURE_COORDS[3, 4]));
+						
+						// Show/Hide outer corner
+						batch.get(i+3).setColor(Vector4((state & NORTH == 0 && state & EAST == 0) ? 1.0f : 0.0f));
+					}else{
+						batch.get(i+2).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 15], TILE_TEXTURE_COORDS[1, 15], TILE_TEXTURE_COORDS[2, 15], TILE_TEXTURE_COORDS[3, 15]));
+						batch.get(i+4).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 13], TILE_TEXTURE_COORDS[1, 13], TILE_TEXTURE_COORDS[2, 13], TILE_TEXTURE_COORDS[3, 13]));
+						
+						// Hide outer corner
+						batch.get(i+3).setColor(Vector4(0.0f));
+					}
+					
+					// SE corner
+					if(state & SOUTH_EAST == 0)
+					{
+						// Show/Hide outer corner
+						batch.get(i+6).setColor(Vector4((state & SOUTH == 0 && state & EAST == 0) ? 1.0f : 0.0f));
+					}else{
+						// Hide outer corner
+						if(state & EAST == 0) batch.get(i+5).setColor(Vector4(0.0f));
+						batch.get(i+6).setColor(Vector4(0.0f));
+						if(state & SOUTH == 0) batch.get(i+7).setColor(Vector4(0.0f));
+					}
+					
+					// SW corner
+					if(state & SOUTH_WEST == 0)
+					{
+						// Show/Hide outer corner
+						batch.get(i+9).setColor(Vector4((state & SOUTH == 0 && state & WEST == 0) ? 1.0f : 0.0f));
+					}else{
+						// Hide outer corner
+						if(state & SOUTH == 0) batch.get(i+8).setColor(Vector4(0.0f));
+						batch.get(i+9).setColor(Vector4(0.0f));
+						if(state & WEST == 0) batch.get(i+10).setColor(Vector4(0.0f));
+					}
+				}
+				
+				updateFixture(x, y, state);
+			}
+		}
+	}
 
 	// SHADOWS
 	float getOpacity(const int x, const int y)
@@ -289,18 +484,6 @@ class TerrainChunk : Serializable
 		float opacity = 0.0f;
 		opacity += game::tiles[getTileAt(x, y)].getOpacity();
 		return opacity;
-	}
-	
-	void setOpacity(const int x, const int y, const float opacity)
-	{
-		if(dummy)
-			return;
-
-		array<Vector4> pixel = {
-			Vector4(0.0f, 0.0f, 0.0f, opacity)
-		};
-
-		shadowMap.updateSection(x, CHUNK_SIZE - y - 1, Pixmap(1, 1, pixel));
 	}
 	
 	// PHYSICS
