@@ -64,11 +64,14 @@ class MainMenu : Scene
 		batch.clear();
 		
 		// Draw all ui objects
-		for(int i = 0; i < uiObjects.size; i++)
+		for(int i = 0; i < uiObjects.size; i++)
 		{
 			uiObjects[i].draw(@batch);
 		}
-		
+		
+		Shape @shape = Shape(Rect(Vector2(0, -1900), Vector2(2048)));		shape.setFillTexture(@game::tiles.getAtlas().getTexture());
+		shape.draw(@batch);
+		
 		// Draw batch
 		batch.draw();
 	}

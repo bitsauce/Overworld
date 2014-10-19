@@ -27,17 +27,17 @@ enum TileID
 }
 
 array<Texture@> TILE_TEXTURES = {
-	null, // NULL_TILE
-	null, // EMPTY_TILE
-	null, // RESERVED_TILE
+	@Texture(":/sprites/tiles/empty_tile.png"), // NULL_TILE
+	@Texture(":/sprites/tiles/empty_tile.png"), // EMPTY_TILE
+	@Texture(":/sprites/tiles/empty_tile.png"), // RESERVED_TILE
 	@Texture(":/sprites/tiles/grass_tile.png"),
 	@Texture(":/sprites/tiles/stone_tile.png"),
-	null, // SCENE_TILES
+	@Texture(":/sprites/tiles/empty_tile.png"), // SCENE_TILES
 	@Texture(":/sprites/tiles/wood_tile.png"),
-	null, // BACKGROUND_TILES
+	@Texture(":/sprites/tiles/empty_tile.png"), // BACKGROUND_TILES
 	@Texture(":/sprites/tiles/leaf_tile.png"),
-	null, // FOREGROUND_TILES
-	null  // MAX_TILES
+	@Texture(":/sprites/tiles/empty_tile.png"), // FOREGROUND_TILES
+	@Texture(":/sprites/tiles/empty_tile.png")  // MAX_TILES
 };
 
 array<ItemID> TILE_ITEMS = {
