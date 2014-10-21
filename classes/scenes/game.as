@@ -248,9 +248,7 @@ class GameScene : Scene
 	void update()
 	{
 		// Step Box2D
-		physicsmtx.lock();
 		Box2D.step(Graphics.dt);
-		physicsmtx.unlock();
 		
 		terrain.update();
 		timeOfDay.update();

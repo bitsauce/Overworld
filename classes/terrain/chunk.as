@@ -1,6 +1,5 @@
 const int CHUNK_SIZE = 32;
 const float CHUNK_SIZEF = float(CHUNK_SIZE);
-Mutex @physicsmtx = @Mutex();
 
 class TerrainChunk : Serializable
 {
@@ -18,7 +17,7 @@ class TerrainChunk : Serializable
 	private Texture @shadowMap;
 	
 	// MISC
-	bool dummy;
+	bool dummy;
 	bool modified;
 		
 	TerrainChunk()
@@ -37,7 +36,7 @@ class TerrainChunk : Serializable
 	void init(int chunkX, int chunkY)
 	{
 		// Not a dummy
-		dummy = false;
+		dummy = false;
 		modified = false;
 		
 		// Set chunk vars
@@ -50,9 +49,7 @@ class TerrainChunk : Serializable
 		def.position.set(chunkX * CHUNK_SIZE * TILE_SIZE, chunkY * CHUNK_SIZE * TILE_SIZE);
 		def.allowSleep = true;
 		
-		physicsmtx.lock();
 		@body = b2Body(def);
-		physicsmtx.unlock();
 		
 		// Resize tile grid
 		fixtures.resize(CHUNK_SIZE, CHUNK_SIZE);
@@ -74,12 +71,25 @@ class TerrainChunk : Serializable
 		{
 			for(int x = 0; x < CHUNK_SIZE; x++)
 			{
-				for(int j = 0; j < 13; j++)
-				{
-					Sprite @sprite = @Sprite(atlas.get(EMPTY_TILE, TILE_TEXTURE_COORDS[0, j], TILE_TEXTURE_COORDS[1, j], TILE_TEXTURE_COORDS[2, j], TILE_TEXTURE_COORDS[3, j]));
-					sprite.setPosition(Vector2(x * TILE_SIZE + TILE_SIZE * 2 * (TILE_TEXTURE_COORDS[0, j] - 0.25f), y * TILE_SIZE + TILE_SIZE * 2 * (0.75 - TILE_TEXTURE_COORDS[3, j] * (3.0f/2.0f))));
-					batch.add(@sprite);
-				}
+				Sprite @q1 = @Sprite(atlas.get(EMPTY_TILE, 0.1f, 0.1f, 0.1f, 0.1f));
+				Sprite @q2 = @Sprite(atlas.get(EMPTY_TILE, 0.1f, 0.1f, 0.1f, 0.1f));
+				Sprite @q3 = @Sprite(atlas.get(EMPTY_TILE, 0.1f, 0.1f, 0.1f, 0.1f));
+				Sprite @q4 = @Sprite(atlas.get(EMPTY_TILE, 0.1f, 0.1f, 0.1f, 0.1f));
+				
+				q1.setSize(TILE_SIZE, TILE_SIZE);
+				q2.setSize(TILE_SIZE, TILE_SIZE);
+				q3.setSize(TILE_SIZE, TILE_SIZE);
+				q4.setSize(TILE_SIZE, TILE_SIZE);
+				
+				q1.setPosition(x * TILE_SIZE + TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f);
+				q2.setPosition(x * TILE_SIZE + TILE_SIZE * 0.5f, y * TILE_SIZE + TILE_SIZE * 0.5f);
+				q3.setPosition(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE + TILE_SIZE * 0.5f);
+				q4.setPosition(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f);
+				
+				batch.add(@q1);
+				batch.add(@q2);
+				batch.add(@q3);
+				batch.add(@q4);
 			}
 		}
 		
@@ -187,10 +197,10 @@ class TerrainChunk : Serializable
 	private void setTile(const int x, const int y, const TileID tile)
 	{
 		// Setup tile regions
-		int i = (y * CHUNK_SIZE + x) * 13;
+		/*int i = (y * CHUNK_SIZE + x) * 13;
 		for(int j = 0; j < 13; j++) {
 			batch.get(i+j).setRegion(game::tiles.getTextureRegion(tile, j));
-		}
+		}*/
 		
 		// Set the tile value
 		tiles[x, y] = tile;
@@ -204,82 +214,35 @@ class TerrainChunk : Serializable
 		};
 		shadowMap.updateSection(x, CHUNK_SIZE - y - 1, Pixmap(1, 1, pixel));
 		
-		TileID tile = getTileAt(x, y);
-		int i = (y * CHUNK_SIZE + x) * 13;
+		TileID tile = tiles[x, y];
+		int i = (y * CHUNK_SIZE + x) * 4;
 		uint state = tileState[x, y];
+		TextureAtlas @atlas = @game::tiles.getAtlas();
 		if(tile > RESERVED_TILE)
 		{
-			// Show/Hide north ledge
-			batch.get(i+1).setColor(Vector4(state & NORTH == 0 ? 1.0f : 0.0f));
-			batch.get(i+2).setColor(Vector4(state & NORTH == 0 ? 1.0f : 0.0f));
+			uint8 q1 = ((state >> 0) & 0x7) + 0x00;
+			uint8 q2 = ((state >> 2) & 0x7) + 0x08;
+			uint8 q3 = ((state >> 4) & 0x7) + 0x10;
+			uint8 q4 = (((state >> 6) & 0x7) | ((state << 2) & 0x7)) + 0x18;
 			
-			// Show/Hide east ledge
-			batch.get(i+4).setColor(Vector4(state & EAST == 0 ? 1.0f : 0.0f));
-			batch.get(i+5).setColor(Vector4(state & EAST == 0 ? 1.0f : 0.0f));
+			Console.log("x: "+x);
+			Console.log("y: "+y);
+			Console.log("q1: "+q1);
+			Console.log("q2: "+q2);
+			Console.log("q3: "+q3);
+			Console.log("q4: "+q4);
 			
-			// Show/Hide south ledge
-			batch.get(i+7).setColor(Vector4(state & SOUTH == 0 ? 1.0f : 0.0f));
-			batch.get(i+8).setColor(Vector4(state & SOUTH == 0 ? 1.0f : 0.0f));
-			
-			// Show/Hide west ledge
-			batch.get(i+10).setColor(Vector4(state & WEST == 0 ? 1.0f : 0.0f));
-			batch.get(i+11).setColor(Vector4(state & WEST == 0 ? 1.0f : 0.0f));
-			
-			// NW corner
-			if(state & NORTH_WEST == 0)
-			{
-				batch.get(i+1).setRegion(game::tiles.getTextureRegion(tile, 1));
-				batch.get(i+11).setRegion(game::tiles.getTextureRegion(tile, 11));
-				
-				// Show/Hide outer corner
-				batch.get(i+0).setColor(Vector4((state & NORTH == 0 && state & WEST == 0) ? 1.0f : 0.0f));
-			}else{
-				batch.get(i+1).setRegion(game::tiles.getTextureRegion(tile, 16));
-				batch.get(i+11).setRegion(game::tiles.getTextureRegion(tile, 14));
-				
-				// Hide outer corner
-				batch.get(i+0).setColor(Vector4(0.0f));
-			}
-			
-			// NE corner
-			if(state & NORTH_EAST == 0)
-			{
-				batch.get(i+2).setRegion(game::tiles.getTextureRegion(tile, 2));
-				batch.get(i+4).setRegion(game::tiles.getTextureRegion(tile, 4));
-				
-				// Show/Hide outer corner
-				batch.get(i+3).setColor(Vector4((state & NORTH == 0 && state & EAST == 0) ? 1.0f : 0.0f));
-			}else{
-				batch.get(i+2).setRegion(game::tiles.getTextureRegion(tile, 15));
-				batch.get(i+4).setRegion(game::tiles.getTextureRegion(tile, 13));
-				
-				// Hide outer corner
-				batch.get(i+3).setColor(Vector4(0.0f));
-			}
-			
-			// SE corner
-			if(state & SOUTH_EAST == 0)
-			{
-				// Show/Hide outer corner
-				batch.get(i+6).setColor(Vector4((state & SOUTH == 0 && state & EAST == 0) ? 1.0f : 0.0f));
-			}else{
-				// Hide outer corner
-				if(state & EAST == 0) batch.get(i+5).setColor(Vector4(0.0f));
-				batch.get(i+6).setColor(Vector4(0.0f));
-				if(state & SOUTH == 0) batch.get(i+7).setColor(Vector4(0.0f));
-			}
-			
-			// SW corner
-			if(state & SOUTH_WEST == 0)
-			{
-				// Show/Hide outer corner
-				batch.get(i+9).setColor(Vector4((state & SOUTH == 0 && state & WEST == 0) ? 1.0f : 0.0f));
-			}else{
-				// Hide outer corner
-				if(state & SOUTH == 0) batch.get(i+8).setColor(Vector4(0.0f));
-				batch.get(i+9).setColor(Vector4(0.0f));
-				if(state & WEST == 0) batch.get(i+10).setColor(Vector4(0.0f));
-			}
+			batch.get(i+0).setRegion(atlas.get(tile, q1/32.0f, 0.0f, (q1+1)/32.0f, 1.0f));
+			batch.get(i+1).setRegion(atlas.get(tile, q2/32.0f, 0.0f, (q2+1)/32.0f, 1.0f));
+			batch.get(i+2).setRegion(atlas.get(tile, q3/32.0f, 0.0f, (q3+1)/32.0f, 1.0f));
+			batch.get(i+3).setRegion(atlas.get(tile, q4/32.0f, 0.0f, (q4+1)/32.0f, 1.0f));
+		}
+		else
+		{
+			batch.get(i+0).setRegion(atlas.get(EMPTY_TILE));
+			batch.get(i+1).setRegion(atlas.get(EMPTY_TILE));
+			batch.get(i+2).setRegion(atlas.get(EMPTY_TILE));
+			batch.get(i+3).setRegion(atlas.get(EMPTY_TILE));
 		}
 		
 		if(fixture) {
@@ -290,93 +253,7 @@ class TerrainChunk : Serializable
 	void updateTile(const int x, const int y, const uint state, const bool fixture = false)
 	{
 		tileState[x, y] = state;
-		
-		float opacity = getOpacity(x, y);
-		array<Vector4> pixel = {
-			Vector4(0.0f, 0.0f, 0.0f, opacity)
-		};
-		shadowMap.updateSection(x, CHUNK_SIZE - y - 1, Pixmap(1, 1, pixel));
-		
-		TileID tile = getTileAt(x, y);
-		int i = (y * CHUNK_SIZE + x) * 13;
-		if(tile > RESERVED_TILE)
-		{
-			// Show/Hide north ledge
-			batch.get(i+1).setColor(Vector4(state & NORTH == 0 ? 1.0f : 0.0f));
-			batch.get(i+2).setColor(Vector4(state & NORTH == 0 ? 1.0f : 0.0f));
-			
-			// Show/Hide east ledge
-			batch.get(i+4).setColor(Vector4(state & EAST == 0 ? 1.0f : 0.0f));
-			batch.get(i+5).setColor(Vector4(state & EAST == 0 ? 1.0f : 0.0f));
-			
-			// Show/Hide south ledge
-			batch.get(i+7).setColor(Vector4(state & SOUTH == 0 ? 1.0f : 0.0f));
-			batch.get(i+8).setColor(Vector4(state & SOUTH == 0 ? 1.0f : 0.0f));
-			
-			// Show/Hide west ledge
-			batch.get(i+10).setColor(Vector4(state & WEST == 0 ? 1.0f : 0.0f));
-			batch.get(i+11).setColor(Vector4(state & WEST == 0 ? 1.0f : 0.0f));
-			
-			// NW corner
-			if(state & NORTH_WEST == 0)
-			{
-				batch.get(i+1).setRegion(game::tiles.getTextureRegion(tile, 1));
-				batch.get(i+11).setRegion(game::tiles.getTextureRegion(tile, 11));
-				
-				// Show/Hide outer corner
-				batch.get(i+0).setColor(Vector4((state & NORTH == 0 && state & WEST == 0) ? 1.0f : 0.0f));
-			}else{
-				batch.get(i+1).setRegion(game::tiles.getTextureRegion(tile, 16));
-				batch.get(i+11).setRegion(game::tiles.getTextureRegion(tile, 14));
-				
-				// Hide outer corner
-				batch.get(i+0).setColor(Vector4(0.0f));
-			}
-			
-			// NE corner
-			if(state & NORTH_EAST == 0)
-			{
-				batch.get(i+2).setRegion(game::tiles.getTextureRegion(tile, 2));
-				batch.get(i+4).setRegion(game::tiles.getTextureRegion(tile, 4));
-				
-				// Show/Hide outer corner
-				batch.get(i+3).setColor(Vector4((state & NORTH == 0 && state & EAST == 0) ? 1.0f : 0.0f));
-			}else{
-				batch.get(i+2).setRegion(game::tiles.getTextureRegion(tile, 15));
-				batch.get(i+4).setRegion(game::tiles.getTextureRegion(tile, 13));
-				
-				// Hide outer corner
-				batch.get(i+3).setColor(Vector4(0.0f));
-			}
-			
-			// SE corner
-			if(state & SOUTH_EAST == 0)
-			{
-				// Show/Hide outer corner
-				batch.get(i+6).setColor(Vector4((state & SOUTH == 0 && state & EAST == 0) ? 1.0f : 0.0f));
-			}else{
-				// Hide outer corner
-				if(state & EAST == 0) batch.get(i+5).setColor(Vector4(0.0f));
-				batch.get(i+6).setColor(Vector4(0.0f));
-				if(state & SOUTH == 0) batch.get(i+7).setColor(Vector4(0.0f));
-			}
-			
-			// SW corner
-			if(state & SOUTH_WEST == 0)
-			{
-				// Show/Hide outer corner
-				batch.get(i+9).setColor(Vector4((state & SOUTH == 0 && state & WEST == 0) ? 1.0f : 0.0f));
-			}else{
-				// Hide outer corner
-				if(state & SOUTH == 0) batch.get(i+8).setColor(Vector4(0.0f));
-				batch.get(i+9).setColor(Vector4(0.0f));
-				if(state & WEST == 0) batch.get(i+10).setColor(Vector4(0.0f));
-			}
-		}
-		
-		if(fixture) {
-			updateFixture(x, y, state);
-		}
+		updateTile(x, y, fixture);
 	}
 	
 	void updateAllTiles()
@@ -393,83 +270,27 @@ class TerrainChunk : Serializable
 				shadowMap.updateSection(x, CHUNK_SIZE - y - 1, Pixmap(1, 1, pixel));
 				
 				TileID tile = tiles[x, y];
-				int i = (y * CHUNK_SIZE + x) * 13;
+				int i = (y * CHUNK_SIZE + x) * 4;
 				uint state = tileState[x, y];
 				if(tile > RESERVED_TILE)
 				{
-					// Show/Hide north ledge
-					batch.get(i+1).setColor(Vector4(state & NORTH == 0 ? 1.0f : 0.0f));
-					batch.get(i+2).setColor(Vector4(state & NORTH == 0 ? 1.0f : 0.0f));
+					uint8 q1 = ((state >> 0) & 0x7) + 0x00;
+					uint8 q2 = ((state >> 2) & 0x7) + 0x08;
+					uint8 q3 = ((state >> 4) & 0x7) + 0x10;
+					uint8 q4 = (((state >> 6) & 0x7) | ((state << 2) & 0x7)) + 0x18;
 					
-					// Show/Hide east ledge
-					batch.get(i+4).setColor(Vector4(state & EAST == 0 ? 1.0f : 0.0f));
-					batch.get(i+5).setColor(Vector4(state & EAST == 0 ? 1.0f : 0.0f));
-					
-					// Show/Hide south ledge
-					batch.get(i+7).setColor(Vector4(state & SOUTH == 0 ? 1.0f : 0.0f));
-					batch.get(i+8).setColor(Vector4(state & SOUTH == 0 ? 1.0f : 0.0f));
-					
-					// Show/Hide west ledge
-					batch.get(i+10).setColor(Vector4(state & WEST == 0 ? 1.0f : 0.0f));
-					batch.get(i+11).setColor(Vector4(state & WEST == 0 ? 1.0f : 0.0f));
-					
-					// NW corner
-					if(state & NORTH_WEST == 0)
-					{
-						batch.get(i+1).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 1], TILE_TEXTURE_COORDS[1, 1], TILE_TEXTURE_COORDS[2, 1], TILE_TEXTURE_COORDS[3, 1]));
-						batch.get(i+11).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 11], TILE_TEXTURE_COORDS[1, 11], TILE_TEXTURE_COORDS[2, 11], TILE_TEXTURE_COORDS[3, 11]));
-						
-						// Show/Hide outer corner
-						batch.get(i+0).setColor(Vector4((state & NORTH == 0 && state & WEST == 0) ? 1.0f : 0.0f));
-					}else{
-						batch.get(i+1).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 16], TILE_TEXTURE_COORDS[1, 16], TILE_TEXTURE_COORDS[2, 16], TILE_TEXTURE_COORDS[3, 16]));
-						batch.get(i+11).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 14], TILE_TEXTURE_COORDS[1, 14], TILE_TEXTURE_COORDS[2, 14], TILE_TEXTURE_COORDS[3, 14]));
-						
-						// Hide outer corner
-						batch.get(i+0).setColor(Vector4(0.0f));
-					}
-					
-					// NE corner
-					if(state & NORTH_EAST == 0)
-					{
-						batch.get(i+2).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 2], TILE_TEXTURE_COORDS[1, 2], TILE_TEXTURE_COORDS[2, 2], TILE_TEXTURE_COORDS[3, 2]));
-						batch.get(i+4).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 4], TILE_TEXTURE_COORDS[1, 4], TILE_TEXTURE_COORDS[2, 4], TILE_TEXTURE_COORDS[3, 4]));
-						
-						// Show/Hide outer corner
-						batch.get(i+3).setColor(Vector4((state & NORTH == 0 && state & EAST == 0) ? 1.0f : 0.0f));
-					}else{
-						batch.get(i+2).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 15], TILE_TEXTURE_COORDS[1, 15], TILE_TEXTURE_COORDS[2, 15], TILE_TEXTURE_COORDS[3, 15]));
-						batch.get(i+4).setRegion(atlas.get(tile, TILE_TEXTURE_COORDS[0, 13], TILE_TEXTURE_COORDS[1, 13], TILE_TEXTURE_COORDS[2, 13], TILE_TEXTURE_COORDS[3, 13]));
-						
-						// Hide outer corner
-						batch.get(i+3).setColor(Vector4(0.0f));
-					}
-					
-					// SE corner
-					if(state & SOUTH_EAST == 0)
-					{
-						// Show/Hide outer corner
-						batch.get(i+6).setColor(Vector4((state & SOUTH == 0 && state & EAST == 0) ? 1.0f : 0.0f));
-					}else{
-						// Hide outer corner
-						if(state & EAST == 0) batch.get(i+5).setColor(Vector4(0.0f));
-						batch.get(i+6).setColor(Vector4(0.0f));
-						if(state & SOUTH == 0) batch.get(i+7).setColor(Vector4(0.0f));
-					}
-					
-					// SW corner
-					if(state & SOUTH_WEST == 0)
-					{
-						// Show/Hide outer corner
-						batch.get(i+9).setColor(Vector4((state & SOUTH == 0 && state & WEST == 0) ? 1.0f : 0.0f));
-					}else{
-						// Hide outer corner
-						if(state & SOUTH == 0) batch.get(i+8).setColor(Vector4(0.0f));
-						batch.get(i+9).setColor(Vector4(0.0f));
-						if(state & WEST == 0) batch.get(i+10).setColor(Vector4(0.0f));
-					}
+					batch.get(i+0).setRegion(atlas.get(tile, q1/32.0f, 0.0f, (q1+1)/32.0f, 1.0f));
+					batch.get(i+1).setRegion(atlas.get(tile, q2/32.0f, 0.0f, (q2+1)/32.0f, 1.0f));
+					batch.get(i+2).setRegion(atlas.get(tile, q3/32.0f, 0.0f, (q3+1)/32.0f, 1.0f));
+					batch.get(i+3).setRegion(atlas.get(tile, q4/32.0f, 0.0f, (q4+1)/32.0f, 1.0f));
 				}
-				
+				else
+				{
+					batch.get(i+0).setRegion(atlas.get(EMPTY_TILE));
+					batch.get(i+1).setRegion(atlas.get(EMPTY_TILE));
+					batch.get(i+2).setRegion(atlas.get(EMPTY_TILE));
+					batch.get(i+3).setRegion(atlas.get(EMPTY_TILE));
+				}
 				updateFixture(x, y, state);
 			}
 		}
@@ -489,10 +310,7 @@ class TerrainChunk : Serializable
 	// PHYSICS
 	private void createFixture(const int x, const int y)
 	{
-		physicsmtx.lock();
 		b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f, TILE_SIZE*2, TILE_SIZE*2), 0.0f);
-		physicsmtx.unlock();
-		
 		game::tiles[getTileAt(x, y)].setupFixture(@fixture);
 		@fixtures[x, y] = @fixture;
 	}
@@ -535,6 +353,6 @@ class TerrainChunk : Serializable
 		Sprite @shadows = @Sprite(TextureRegion(@shadowMap, 0.0f, 0.0f, 1.0f, 1.0f));
 		shadows.setPosition(chunkX*CHUNK_SIZE*TILE_SIZE, chunkY*CHUNK_SIZE*TILE_SIZE);
 		shadows.setSize(CHUNK_SIZE*TILE_SIZE, CHUNK_SIZE*TILE_SIZE);
-		shadows.draw(@scene::game.getBatch(SCENE));
+		//shadows.draw(@scene::game.getBatch(SCENE));
 	}
 }

@@ -52,14 +52,14 @@ class MainMenu : Scene
 	void update()
 	{
 		// Update all ui objects
-		for(int i = 0; i < uiObjects.size; i++)
+		for(int i = 0; i < uiObjects.size; i++)
 		{
 			uiObjects[i].update();
 		}
 	}
 	
 	void draw()
-	{
+	{
 		// Clear batch
 		batch.clear();
 		
@@ -69,8 +69,8 @@ class MainMenu : Scene
 			uiObjects[i].draw(@batch);
 		}
 		
-		Shape @shape = Shape(Rect(Vector2(0, -1900), Vector2(2048)));		shape.setFillTexture(@game::tiles.getAtlas().getTexture());
-		shape.draw(@batch);
+		Sprite @sprite = Sprite(game::tiles.getAtlas().get(GRASS_TILE));
+		sprite.draw(@batch);
 		
 		// Draw batch
 		batch.draw();
