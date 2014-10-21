@@ -1,6 +1,3 @@
-const int CHUNK_SIZE = 32;
-const float CHUNK_SIZEF = float(CHUNK_SIZE);
-
 class TerrainChunk : Serializable
 {
 	// CHUNK
@@ -263,11 +260,11 @@ class TerrainChunk : Serializable
 		{
 			for(int x = 0; x < CHUNK_SIZE; x++)
 			{
-				float opacity = getOpacity(x, y);
+				/*float opacity = getOpacity(x, y);
 				array<Vector4> pixel = {
 					Vector4(0.0f, 0.0f, 0.0f, opacity)
 				};
-				shadowMap.updateSection(x, CHUNK_SIZE - y - 1, Pixmap(1, 1, pixel));
+				shadowMap.updateSection(x, CHUNK_SIZE - y - 1, Pixmap(1, 1, pixel));*/
 				
 				TileID tile = tiles[x, y];
 				int i = (y * CHUNK_SIZE + x) * 4;
@@ -335,7 +332,8 @@ class TerrainChunk : Serializable
 		if(shouldContainFixture && !isFixtureAt(x, y))
 		{
 			createFixture(x, y);
-		}else if(!shouldContainFixture && isFixtureAt(x, y))
+		}
+		else if(!shouldContainFixture && isFixtureAt(x, y))
 		{
 			removeFixture(x, y);
 		}

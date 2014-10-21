@@ -16,10 +16,11 @@ class TerrainGen
 		
 		for(int x = 0; x < CHUNK_SIZE; x++)
 		{
-			float h = noise.valueAt((seed + tileX + x), seed) * 7;
+			float h = 32;//noise.valueAt((seed + tileX + x), seed) * 7;
 			for(int y = CHUNK_SIZE - 1; y >= 0 && tileY + y >= h; y--)
 			{
-				if(noise.valueAt(seed + tileX+x, seed + tileY+y) < 0.5f - Math.atan((tileY+y - h - 30) * 0.1f)/Math.PI)
+				if(tileY+y > 0)
+				//if(noise.valueAt(seed + tileX+x, seed + tileY+y) < 0.5f - Math.atan((tileY+y - h - 30) * 0.1f)/Math.PI)
 				{
 					chunk.addTile(x, y, GRASS_TILE);
 				}

@@ -1,11 +1,9 @@
 class MainMenu : Scene
-{
+{
 	// Draw batch
 	private Batch @batch = @Batch();
-	
 	// Ui objects
 	private array<UiObject@> uiObjects;
-	
 	// Constructor
 	MainMenu()
 	{
@@ -68,9 +66,6 @@ class MainMenu : Scene
 		{
 			uiObjects[i].draw(@batch);
 		}
-		
-		Sprite @sprite = Sprite(game::tiles.getAtlas().get(GRASS_TILE));
-		sprite.draw(@batch);
 		
 		// Draw batch
 		batch.draw();
