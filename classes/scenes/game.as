@@ -122,8 +122,8 @@ class GameScene : Scene
 	private Background @background;
 	Background @getBackground() const { return @background; }
 	
-	private Water @water;
-	Water @getWater() const { return @water; }
+	//private Water @water;
+	//Water @getWater() const { return @water; }
 	
 	void setWorldDir(string worldDir)
 	{
@@ -159,7 +159,7 @@ class GameScene : Scene
 		@debug = @DebugTextDrawer();
 		@spawner = @Spawner();
 		@background = @Background();
-		@water = @Water();
+		//@water = @Water();
 		
 		// Create player
 		Console.log("Creating player...");
@@ -190,7 +190,7 @@ class GameScene : Scene
 		@debug = @DebugTextDrawer();
 		@spawner = @Spawner();
 		@background = @Background();
-		@water = @Water();
+		//@water = @Water();
 		
 		// Load all objects
 		array<string> @objectFiles = @FileSystem.listFiles(worldDir + "/objects", "*.obj");
@@ -242,7 +242,7 @@ class GameScene : Scene
 		objects.clear();
 		furnitures.clear();
 		players.clear();
-		terrain.generateThread.stop();
+		//terrain.generateThread.stop();
 	}
 	
 	void update()
@@ -254,7 +254,7 @@ class GameScene : Scene
 		timeOfDay.update();
 		background.update();
 		spawner.update();
-		water.update();
+		//water.update();
 		
 		// Update all game objects
 		for(int i = 0; i < objects.size; i++) {
@@ -276,7 +276,7 @@ class GameScene : Scene
 		background.draw();
 		timeOfDay.draw();
 		spawner.draw();
-		water.draw();
+		//water.draw();
 		
 		if(Input.getKeyState(KEY_Z)) {
 			debug.draw();
@@ -291,7 +291,7 @@ class GameScene : Scene
 		batches[BACKGROUND].draw();
 		
 		// Draw terrain background
-		terrain.draw(TERRAIN_BACKGROUND, projmat);
+		terrain.draw(TERRAIN_BACKGROUND, @batches[BACKGROUND]);
 		
 		// Draw scene content
 		batches[SCENE].draw();

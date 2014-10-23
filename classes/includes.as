@@ -22,7 +22,7 @@
 // Environment
 #include "environment/background.as"
 #include "environment/timeofday.as"
-#include "environment/water.as"
+//#include "environment/water.as"
 
 // Mobs
 #include "mobs/spawner.as"

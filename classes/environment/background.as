@@ -13,10 +13,26 @@ Vector4 blendRgb(Vector4 dst, Vector4 src)
 	return ret;
 }
 
+class Color
+{
+	Color(uint8 r, uint8 g, uint8 b, uint8 a = 255)
+	{
+		this.r = r;
+		this.g = g;
+		this.b = b;
+		this.a = a;
+	}
+	
+	uint8 r;
+	uint8 g;
+	uint8 b;
+	uint8 a;
+}
+
 class Background
 {
-	Vector4 topColor = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	Vector4 bottomColor = Vector4(0.35f, 0.67f, 1.0f, 1.0f);
+	Color topColor(255, 255, 255, 255);
+	Color bottomColor(90, 170, 255, 255);
 	Sprite @sun = @Sprite(@Texture(":/sprites/sky/sun.png"));
 	Sprite @moon = @Sprite(@Texture(":/sprites/sky/moon.png"));
 	float wind = 0.04f;
@@ -68,13 +84,13 @@ class Background
 			{
 				// Percentage of sunrise
 				float minscale = 1.0f - (540-time)/180.0f; // Aka. (9*60-time)/(6*60-9*60)
-				topColor = blendRgb(Vector4(0.0f, 0.0f, 0.0f, 1.0f), rgbvec(255, 255, 255, 255*minscale));
-				bottomColor = blendRgb(rgbvec(10, 60, 110, 255), rgbvec(90, 170, 255, 255*minscale));
+				//topColor = blendRgb(Vector4(0.0f, 0.0f, 0.0f, 1.0f), rgbvec(255, 255, 255, 255*minscale));
+				//bottomColor = blendRgb(rgbvec(10, 60, 110, 255), rgbvec(90, 170, 255, 255*minscale));
 			}else
 			{
 				// Set day gradient
-				topColor = rgbvec(255, 255, 255);
-				bottomColor = rgbvec(90, 170, 255);
+				//topColor = rgbvec(255, 255, 255);
+				//bottomColor = rgbvec(90, 170, 255);
 			}
 			
 			// Place sun
@@ -91,13 +107,13 @@ class Background
 			{
 				// Percentage of sunset
 				float minscale = 1.0f - (1260-time)/180.0f; // Aka. (21*60-time)/(18*60-21*60)
-				topColor = blendRgb(rgbvec(255, 255, 255, 255), rgbvec(0, 0, 0, 255*minscale));
-				bottomColor = blendRgb(rgbvec(90, 170, 255, 255), rgbvec(10, 60, 110, 255*minscale));
+				//topColor = blendRgb(rgbvec(255, 255, 255, 255), rgbvec(0, 0, 0, 255*minscale));
+				//bottomColor = blendRgb(rgbvec(90, 170, 255, 255), rgbvec(10, 60, 110, 255*minscale));
 			}else
 			{
 				// Set night gradient
-				topColor = rgbvec(0, 0, 0);
-				bottomColor = rgbvec(10, 60, 110);
+				//topColor = rgbvec(0, 0, 0);
+				//bottomColor = rgbvec(10, 60, 110);
 			}
 				
 			// Place moon
@@ -117,18 +133,14 @@ class Background
 	{
 		// Draw sky gradient
 		array<Vertex> vertices(4);
-		
-		vertices[0].position.set(0.0f, 0.0f);
-		vertices[0].color = topColor;
-		
-		vertices[1].position.set(Window.getSize().x, 0.0f);
-		vertices[1].color = topColor;
-		
-		vertices[2].position.set(Window.getSize().x, Window.getSize().y);
-		vertices[2].color = bottomColor;
-		
-		vertices[3].position.set(0, Window.getSize().y);
-		vertices[3].color = bottomColor;
+		vertices[0].set4f(VERTEX_POSITION, 0.0f, 0.0f);
+		vertices[0].set4ub(VERTEX_COLOR, topColor.r, topColor.g, topColor.b, topColor.a);
+		vertices[1].set4f(VERTEX_POSITION, Window.getSize().x, 0.0f);
+		vertices[1].set4ub(VERTEX_COLOR, topColor.r, topColor.g, topColor.b, topColor.a);
+		vertices[2].set4f(VERTEX_POSITION, Window.getSize().x, Window.getSize().y);
+		vertices[2].set4ub(VERTEX_COLOR, bottomColor.r, bottomColor.g, bottomColor.b, bottomColor.a);
+		vertices[3].set4f(VERTEX_POSITION, 0, Window.getSize().y);
+		vertices[3].set4ub(VERTEX_COLOR, bottomColor.r, bottomColor.g, bottomColor.b, bottomColor.a);
 		
 		Batch @background = scene::game.getBatch(BACKGROUND);
 		background.addVertices(vertices, QUAD_INDICES);

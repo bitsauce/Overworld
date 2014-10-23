@@ -3,7 +3,7 @@ const int TILE_SIZE = 16;
 const float TILE_SIZEF = TILE_SIZE;
 
 const int CHUNK_SIZE = 16;
-const float CHUNK_SIZEF = float(CHUNK_SIZE);
+const float CHUNK_SIZEF = CHUNK_SIZE;
 // Tile texture coordinates
 grid<float> TILE_TEXTURE_COORDS =
 {

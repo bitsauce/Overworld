@@ -2,16 +2,16 @@ class TerrainChunk : Serializable
 {
 	// CHUNK
 	private int chunkX, chunkY;
-	grid<TileID> tiles;
-	grid<uint> tileState;
+	private grid<TileID> tiles;
 	
 	// PHYSICS
 	private b2Body @body;
 	private grid<b2Fixture@> fixtures;
 	
 	// DRAWING
-	private SpriteBatch @batch;
+	private VertexBuffer @vbo;
 	private Texture @shadowMap;
+	private TextureAtlas @tileAtlas;
 	
 	// MISC
 	bool dummy;
@@ -25,12 +25,12 @@ class TerrainChunk : Serializable
 	
 	TerrainChunk(Terrain @terrain, int chunkX, int chunkY)
 	{
-		init(chunkX, chunkY);
+		init(chunkX, chunkY, @terrain);
 		setTerrain(@terrain);
 	}
 	
 	// SERIALIZATION
-	void init(int chunkX, int chunkY)
+	void init(int chunkX, int chunkY, Terrain @terrain)
 	{
 		// Not a dummy
 		dummy = false;
@@ -49,53 +49,20 @@ class TerrainChunk : Serializable
 		@body = b2Body(def);
 		
 		// Resize tile grid
-		fixtures.resize(CHUNK_SIZE, CHUNK_SIZE);
-		tiles.resize(CHUNK_SIZE, CHUNK_SIZE);
-		tileState.resize(CHUNK_SIZE, CHUNK_SIZE);
-		for(int y = 0; y < CHUNK_SIZE; y++)
-		{
-			for(int x = 0; x < CHUNK_SIZE; x++)
-			{
-				tiles[x, y] = EMPTY_TILE;
-				tileState[x, y] = 0;
-			}
-		}
+		fixtures = grid<b2Fixture@>(CHUNK_SIZE, CHUNK_SIZE, null);
+		tiles = grid<TileID>(CHUNK_SIZE, CHUNK_SIZE, EMPTY_TILE);
 		
-		// Initialize terrain buffers
-		@batch = @SpriteBatch();
-		TextureAtlas @atlas = @game::tiles.getAtlas();
-		for(int y = 0; y < CHUNK_SIZE; y++)
-		{
-			for(int x = 0; x < CHUNK_SIZE; x++)
-			{
-				Sprite @q1 = @Sprite(atlas.get(EMPTY_TILE, 0.1f, 0.1f, 0.1f, 0.1f));
-				Sprite @q2 = @Sprite(atlas.get(EMPTY_TILE, 0.1f, 0.1f, 0.1f, 0.1f));
-				Sprite @q3 = @Sprite(atlas.get(EMPTY_TILE, 0.1f, 0.1f, 0.1f, 0.1f));
-				Sprite @q4 = @Sprite(atlas.get(EMPTY_TILE, 0.1f, 0.1f, 0.1f, 0.1f));
-				
-				q1.setSize(TILE_SIZE, TILE_SIZE);
-				q2.setSize(TILE_SIZE, TILE_SIZE);
-				q3.setSize(TILE_SIZE, TILE_SIZE);
-				q4.setSize(TILE_SIZE, TILE_SIZE);
-				
-				q1.setPosition(x * TILE_SIZE + TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f);
-				q2.setPosition(x * TILE_SIZE + TILE_SIZE * 0.5f, y * TILE_SIZE + TILE_SIZE * 0.5f);
-				q3.setPosition(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE + TILE_SIZE * 0.5f);
-				q4.setPosition(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f);
-				
-				batch.add(@q1);
-				batch.add(@q2);
-				batch.add(@q3);
-				batch.add(@q4);
-			}
-		}
+		// Store texture atlas
+		@tileAtlas = @game::tiles.getAtlas();
 		
+		// Make the chunk buffer static
+		@vbo = @terrain.getEmptyChunkBuffer();
+		vbo.makeStatic();
+		
+		// Setup shadow map
 		@shadowMap = @Texture(CHUNK_SIZE, CHUNK_SIZE);
 		shadowMap.setFiltering(LINEAR);
 		shadowMap.setWrapping(CLAMP_TO_EDGE);
-		
-		// Make it static
-		batch.makeStatic();
 	}
 	
 	void serialize(StringStream &ss)
@@ -127,7 +94,7 @@ class TerrainChunk : Serializable
 		
 		Console.log("Loading chunk ["+chunkX+";"+chunkY+"]...");
 		
-		init(chunkX, chunkY);
+		init(chunkX, chunkY, scene::game.getTerrain());
 		
 		// Load tiles from file
 		for(int y = 0; y < CHUNK_SIZE; y++)
@@ -171,8 +138,8 @@ class TerrainChunk : Serializable
 		if(!isValid(x, y) || isTileAt(x, y) || tile == EMPTY_TILE)
 			return false;
 		
-		// Set tile
-		setTile(x, y, tile);
+		// Set the tile value
+		tiles[x, y] = tile;
 		
 		// Return true
 		return true;
@@ -184,26 +151,14 @@ class TerrainChunk : Serializable
 		if(!isValid(x, y) || !isTileAt(x, y))
 			return false;
 		
-		// Set tile
-		setTile(x, y, EMPTY_TILE);
+		// Set the tile value
+		tiles[x, y] = EMPTY_TILE;
 		
 		// Return true
 		return true;
 	}
 	
-	private void setTile(const int x, const int y, const TileID tile)
-	{
-		// Setup tile regions
-		/*int i = (y * CHUNK_SIZE + x) * 13;
-		for(int j = 0; j < 13; j++) {
-			batch.get(i+j).setRegion(game::tiles.getTextureRegion(tile, j));
-		}*/
-		
-		// Set the tile value
-		tiles[x, y] = tile;
-	}
-	
-	void updateTile(const int x, const int y, const bool fixture = false)
+	void updateTile(const int x, const int y, const uint state, const bool fixture = false)
 	{
 		float opacity = getOpacity(x, y);
 		array<Vector4> pixel = {
@@ -212,9 +167,8 @@ class TerrainChunk : Serializable
 		shadowMap.updateSection(x, CHUNK_SIZE - y - 1, Pixmap(1, 1, pixel));
 		
 		TileID tile = tiles[x, y];
-		int i = (y * CHUNK_SIZE + x) * 4;
-		uint state = tileState[x, y];
-		TextureAtlas @atlas = @game::tiles.getAtlas();
+		int i = (y * CHUNK_SIZE + x) * 16;
+		TextureRegion region;
 		if(tile > RESERVED_TILE)
 		{
 			uint8 q1 = ((state >> 0) & 0x7) + 0x00;
@@ -222,74 +176,65 @@ class TerrainChunk : Serializable
 			uint8 q3 = ((state >> 4) & 0x7) + 0x10;
 			uint8 q4 = (((state >> 6) & 0x7) | ((state << 2) & 0x7)) + 0x18;
 			
-			Console.log("x: "+x);
-			Console.log("y: "+y);
-			Console.log("q1: "+q1);
-			Console.log("q2: "+q2);
-			Console.log("q3: "+q3);
-			Console.log("q4: "+q4);
+			array<Vertex> vertices = vbo.getVertices(i, 16);
 			
-			batch.get(i+0).setRegion(atlas.get(tile, q1/32.0f, 0.0f, (q1+1)/32.0f, 1.0f));
-			batch.get(i+1).setRegion(atlas.get(tile, q2/32.0f, 0.0f, (q2+1)/32.0f, 1.0f));
-			batch.get(i+2).setRegion(atlas.get(tile, q3/32.0f, 0.0f, (q3+1)/32.0f, 1.0f));
-			batch.get(i+3).setRegion(atlas.get(tile, q4/32.0f, 0.0f, (q4+1)/32.0f, 1.0f));
+			region = tileAtlas.get(tile, q1/32.0f, 0.0f, (q1+1)/32.0f, 1.0f);
+			vertices[0].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv1.y);
+			vertices[1].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv1.y);
+			vertices[2].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv0.y);
+			vertices[3].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv0.y);
+			
+			region = tileAtlas.get(tile, q2/32.0f, 0.0f, (q2+1)/32.0f, 1.0f);
+			vertices[4].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv1.y);
+			vertices[5].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv1.y);
+			vertices[6].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv0.y);
+			vertices[7].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv0.y);
+			
+			region = tileAtlas.get(tile, q3/32.0f, 0.0f, (q3+1)/32.0f, 1.0f);
+			vertices[8].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv1.y);
+			vertices[9].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv1.y);
+			vertices[10].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv0.y);
+			vertices[11].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv0.y);
+			
+			region = tileAtlas.get(tile, q4/32.0f, 0.0f, (q4+1)/32.0f, 1.0f);
+			vertices[12].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv1.y);
+			vertices[13].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv1.y);
+			vertices[14].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv0.y);
+			vertices[15].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv0.y);
+			
+			vbo.modifyVertices(i, vertices);
 		}
 		else
 		{
-			batch.get(i+0).setRegion(atlas.get(EMPTY_TILE));
-			batch.get(i+1).setRegion(atlas.get(EMPTY_TILE));
-			batch.get(i+2).setRegion(atlas.get(EMPTY_TILE));
-			batch.get(i+3).setRegion(atlas.get(EMPTY_TILE));
+			array<Vertex> vertices = vbo.getVertices(i, 16);
+			
+			vertices[0].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			vertices[1].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			vertices[2].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			vertices[3].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			
+			vertices[4].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			vertices[5].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			vertices[6].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			vertices[7].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			
+			vertices[8].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			vertices[9].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			vertices[10].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			vertices[11].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			
+			vertices[12].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			vertices[13].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			vertices[14].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			vertices[15].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
+			
+			vbo.modifyVertices(i, vertices);
 		}
 		
-		if(fixture) {
-			updateFixture(x, y, state);
-		}
-	}
-	
-	void updateTile(const int x, const int y, const uint state, const bool fixture = false)
-	{
-		tileState[x, y] = state;
-		updateTile(x, y, fixture);
-	}
-	
-	void updateAllTiles()
-	{
-		TextureAtlas @atlas = @game::tiles.getAtlas();
-		for(int y = 0; y < CHUNK_SIZE; y++)
+		// Update fixtures
+		if(fixture)
 		{
-			for(int x = 0; x < CHUNK_SIZE; x++)
-			{
-				/*float opacity = getOpacity(x, y);
-				array<Vector4> pixel = {
-					Vector4(0.0f, 0.0f, 0.0f, opacity)
-				};
-				shadowMap.updateSection(x, CHUNK_SIZE - y - 1, Pixmap(1, 1, pixel));*/
-				
-				TileID tile = tiles[x, y];
-				int i = (y * CHUNK_SIZE + x) * 4;
-				uint state = tileState[x, y];
-				if(tile > RESERVED_TILE)
-				{
-					uint8 q1 = ((state >> 0) & 0x7) + 0x00;
-					uint8 q2 = ((state >> 2) & 0x7) + 0x08;
-					uint8 q3 = ((state >> 4) & 0x7) + 0x10;
-					uint8 q4 = (((state >> 6) & 0x7) | ((state << 2) & 0x7)) + 0x18;
-					
-					batch.get(i+0).setRegion(atlas.get(tile, q1/32.0f, 0.0f, (q1+1)/32.0f, 1.0f));
-					batch.get(i+1).setRegion(atlas.get(tile, q2/32.0f, 0.0f, (q2+1)/32.0f, 1.0f));
-					batch.get(i+2).setRegion(atlas.get(tile, q3/32.0f, 0.0f, (q3+1)/32.0f, 1.0f));
-					batch.get(i+3).setRegion(atlas.get(tile, q4/32.0f, 0.0f, (q4+1)/32.0f, 1.0f));
-				}
-				else
-				{
-					batch.get(i+0).setRegion(atlas.get(EMPTY_TILE));
-					batch.get(i+1).setRegion(atlas.get(EMPTY_TILE));
-					batch.get(i+2).setRegion(atlas.get(EMPTY_TILE));
-					batch.get(i+3).setRegion(atlas.get(EMPTY_TILE));
-				}
-				updateFixture(x, y, state);
-			}
+			updateFixture(x, y, state);
 		}
 	}
 
@@ -342,15 +287,17 @@ class TerrainChunk : Serializable
 	// DRAWING
 	void draw(const Matrix4 &in projmat)
 	{
-		if(dummy)
-			return;
+		if(!dummy)
+		{
+			Batch @batch = @Batch();
+			batch.setProjectionMatrix(projmat);
+			vbo.draw(@batch, @tileAtlas.getTexture());
+			batch.draw();
 			
-		batch.setProjectionMatrix(projmat);
-		batch.draw();
-		
-		Sprite @shadows = @Sprite(TextureRegion(@shadowMap, 0.0f, 0.0f, 1.0f, 1.0f));
-		shadows.setPosition(chunkX*CHUNK_SIZE*TILE_SIZE, chunkY*CHUNK_SIZE*TILE_SIZE);
-		shadows.setSize(CHUNK_SIZE*TILE_SIZE, CHUNK_SIZE*TILE_SIZE);
-		//shadows.draw(@scene::game.getBatch(SCENE));
+			//Sprite @shadows = @Sprite(TextureRegion(@shadowMap, 0.0f, 0.0f, 1.0f, 1.0f));
+			//shadows.setPosition(chunkX*CHUNK_SIZE*TILE_SIZE, chunkY*CHUNK_SIZE*TILE_SIZE);
+			//shadows.setSize(CHUNK_SIZE*TILE_SIZE, CHUNK_SIZE*TILE_SIZE);
+			//shadows.draw(@scene::game.getBatch(SCENE));
+		}
 	}
 }

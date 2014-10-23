@@ -16,6 +16,8 @@ class Terrain : Serializable
 	TerrainGen generator;
 	Thread @generateThread;
 	private dictionary generating;
+		
+	private VertexBuffer @chunkBuffer;
 	
 	// For selecting a direction to generate in
 	Vector2 prevCameraPos;
@@ -31,8 +33,56 @@ class Terrain : Serializable
 	{
 		Console.log("Initializing terrain");
 		
+		// Setup vertex format
+		VertexFormat fmt;
+		fmt.set(VERTEX_POSITION, 2);
+		fmt.set(VERTEX_TEX_COORD, 2);
+		
+		// Create chunk buffer
+		@chunkBuffer = @VertexBuffer(fmt);
+		for(int y = 0; y < CHUNK_SIZE; y++)
+		{
+			for(int x = 0; x < CHUNK_SIZE; x++)
+			{
+				array<Vertex> vertices = fmt.createVertices(4);
+				
+				vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
+				vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
+				vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
+				vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
+				
+				chunkBuffer.addVertices(vertices, QUAD_INDICES);
+				
+				vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
+				vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
+				vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
+				vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
+				
+				chunkBuffer.addVertices(vertices, QUAD_INDICES);
+				
+				vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
+				vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
+				vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
+				vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
+				
+				chunkBuffer.addVertices(vertices, QUAD_INDICES);
+				
+				vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
+				vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
+				vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
+				vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
+				
+				chunkBuffer.addVertices(vertices, QUAD_INDICES);
+			}
+		}
+		
 		//@generateThread = @debugThread = @Thread(@FuncCall(@this, "findAndGenerateChunk"));
 		//generateThread.start();
+	}
+	
+	VertexBuffer @getEmptyChunkBuffer()
+	{
+		return @chunkBuffer.copy();
 	}
 	
 	void serialize(StringStream &ss)
@@ -184,39 +234,15 @@ class Terrain : Serializable
 	private void updateChunk(const int chunkX, const int chunkY)
 	{
 		TerrainChunk @chunk = getChunk(chunkX,   chunkY);
-		TerrainChunk @chunkE  = getChunk(chunkX+1, chunkY);
-		TerrainChunk @chunkSE = getChunk(chunkX+1, chunkY+1);
-		TerrainChunk @chunkS  = getChunk(chunkX,   chunkY+1);
-		TerrainChunk @chunkSW = getChunk(chunkX-1, chunkY+1);
-		TerrainChunk @chunkW  = getChunk(chunkX-1, chunkY);
-		TerrainChunk @chunkNW = getChunk(chunkX-1, chunkY-1);
-		TerrainChunk @chunkN  = getChunk(chunkX-1, chunkY);
-		TerrainChunk @chunkNE = getChunk(chunkX-1, chunkY+1);
 		if(!chunk.dummy)
 		{
-			if(!chunkNE.dummy && chunkNE.tiles[0, CHUNK_SIZE-1] != EMPTY_TILE) chunk.tileState[CHUNK_SIZE-1, 0] |= NORTH_EAST;
-			if(!chunkNW.dummy && chunkNW.tiles[CHUNK_SIZE-1, CHUNK_SIZE-1] != EMPTY_TILE) chunk.tileState[0, 0] |= NORTH_WEST;
-			if(!chunkSE.dummy && chunkSE.tiles[0, 0] != EMPTY_TILE) chunk.tileState[CHUNK_SIZE-1, CHUNK_SIZE-1] |= SOUTH_EAST;
-			if(!chunkSW.dummy && chunkSW.tiles[CHUNK_SIZE-1, 0] != EMPTY_TILE) chunk.tileState[0, CHUNK_SIZE-1] |= SOUTH_WEST;
-			if(!chunkN.dummy) for(int i = 0; i < CHUNK_SIZE; i++) { if(chunkN.tiles[i, CHUNK_SIZE-1] != EMPTY_TILE) chunk.tileState[i, 0] |= NORTH; }
-			if(!chunkE.dummy) for(int i = 0; i < CHUNK_SIZE; i++) { if(chunkE.tiles[CHUNK_SIZE-1, i] != EMPTY_TILE) chunk.tileState[0, i] |= EAST;  }
-			if(!chunkS.dummy) for(int i = 0; i < CHUNK_SIZE; i++) { if(chunkS.tiles[i, 0] != EMPTY_TILE) chunk.tileState[i, CHUNK_SIZE-1] |= SOUTH; }
-			if(!chunkW.dummy) for(int i = 0; i < CHUNK_SIZE; i++) { if(chunkW.tiles[0, i] != EMPTY_TILE) chunk.tileState[CHUNK_SIZE-1, i] |= WEST;  }
 			for(int y = 0; y < CHUNK_SIZE; y++)
 			{
 				for(int x = 0; x < CHUNK_SIZE; x++)
 				{
-					if(y != 0 && chunk.tiles[x, y-1] != EMPTY_TILE) chunk.tileState[x, y] |= NORTH;
-					if(y != CHUNK_SIZE-1 && chunk.tiles[x, y+1] != EMPTY_TILE) chunk.tileState[x, y] |= SOUTH;
-					if(x != CHUNK_SIZE-1 && chunk.tiles[x+1, y] != EMPTY_TILE) chunk.tileState[x, y] |= EAST;
-					if(x != 0 && chunk.tiles[x-1, y] != EMPTY_TILE) chunk.tileState[x, y] |= WEST;
-					if(x != CHUNK_SIZE-1 && y != 0 && chunk.tiles[x+1, y-1] != EMPTY_TILE) chunk.tileState[x, y] |= NORTH_EAST;
-					if(x != 0 && y != 0 && chunk.tiles[x-1, y-1] != EMPTY_TILE) chunk.tileState[x, y] |= NORTH_WEST;
-					if(x != CHUNK_SIZE-1 && y != CHUNK_SIZE-1 && chunk.tiles[x+1, y+1] != EMPTY_TILE) chunk.tileState[x, y] |= SOUTH_EAST;
-					if(x != 0 && y != CHUNK_SIZE-1 && chunk.tiles[x-1, y+1] != EMPTY_TILE) chunk.tileState[x, y] |= SOUTH_WEST;
+					chunk.updateTile(x, y, getTileState(chunkX *CHUNK_SIZE + x, chunkY *CHUNK_SIZE + y), true);
 				}
 			}
-			chunk.updateAllTiles();
 		}
 	}
 	
@@ -269,7 +295,7 @@ class Terrain : Serializable
 	}
 	
 	// DRAWING
-	void draw(const TerrainLayer layer, Matrix4)
+	void draw(const TerrainLayer layer, Batch @batch)
 	{
 		int x0 = Math.floor(game::camera.position.x/CHUNK_SIZE/TILE_SIZE);
 		int y0 = Math.floor(game::camera.position.y/CHUNK_SIZE/TILE_SIZE);
