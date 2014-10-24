@@ -367,7 +367,7 @@ class Inventory
 	{
 		ItemDrop drop(@item, amount);
 		drop.body.setPosition(player.body.getPosition());
-		Vector2 dt = Input.position + game::camera.position - player.body.getPosition();
+		Vector2 dt = Input.position + Camera.position - player.body.getPosition();
 		if(dt.x >= 0.0f) {
 			drop.body.applyImpulse(Vector2(1.0f, -1.0f)*5000.0f, drop.body.getCenter());
 		}else{

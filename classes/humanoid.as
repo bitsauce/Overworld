@@ -100,7 +100,7 @@ class Humanoid : GameObject
 	void beginContact(b2Contact @contact)
 	{
 		// Check for foot sensor collision
-		Terrain @terrain;
+		TerrainManager @terrain;
 		if(contact.bodyB.getObject(@terrain))
 		{
 			if(@footSensor == @contact.fixtureA)
@@ -113,7 +113,7 @@ class Humanoid : GameObject
 	void endContact(b2Contact @contact)
 	{
 		// Check for foot sensor collision
-		Terrain @terrain;
+		TerrainManager @terrain;
 		if(contact.bodyB.getObject(@terrain))
 		{
 			if(@footSensor == @contact.fixtureA)
@@ -126,7 +126,7 @@ class Humanoid : GameObject
 	void preSolve(b2Contact @contact)
 	{
 		// This gives friction to the controller while avoiding the wall-sticking problem
-		Terrain @terrain;
+		TerrainManager @terrain;
 		if(contact.bodyB.getObject(@terrain) && numGroundContact > 0)
 		{
 			contact.setFriction(0.9f);

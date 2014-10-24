@@ -103,28 +103,6 @@ class GameScene : Scene
 	// Also, I might want to concider reimplementing a
 	// updating priority queue.
 	
-	// Terrain
-	private Terrain @terrain;
-	Terrain @getTerrain() const { return @terrain; }	
-	
-	private TimeOfDay @timeOfDay;
-	TimeOfDay @getTimeOfDay() const { return @timeOfDay; }
-	
-	private Camera @camera;
-	Camera @getCamera() const { return @camera; }
-	
-	private DebugTextDrawer @debug;
-	DebugTextDrawer @getDebug() const { return @debug; }
-	
-	private Spawner @spawner;
-	Spawner @getSpawner() const { return @spawner; }
-	
-	private Background @background;
-	Background @getBackground() const { return @background; }
-	
-	//private Water @water;
-	//Water @getWater() const { return @water; }
-	
 	void setWorldDir(string worldDir)
 	{
 		// Set world directory
@@ -147,19 +125,11 @@ class GameScene : Scene
 		worldFile.save();
 		
 		// Create terrain
-		Console.log("Creating terrain...");
-		@terrain = @Terrain();
+		//Console.log("Creating terrain...");
+		//@terrain = @Terrain();
 		
 		// Generate world
 		//terrain.generate(250, 50);
-		
-		// Create global objects
-		@timeOfDay = @TimeOfDay();
-		@camera = @Camera();
-		@debug = @DebugTextDrawer();
-		@spawner = @Spawner();
-		@background = @Background();
-		//@water = @Water();
 		
 		// Create player
 		Console.log("Creating player...");
@@ -180,16 +150,14 @@ class GameScene : Scene
 		setWorldDir(worldDir);
 		
 		// Load terrain
-		@terrain = cast<Terrain@>(@Scripts.deserialize(worldDir + "/terrain.obj"));
+		//@terrain = cast<Terrain@>(@Scripts.deserialize(worldDir + "/terrain.obj"));
 		
 		// Load time of day
-		@timeOfDay = cast<TimeOfDay@>(Scripts.deserialize(worldDir + "/timeOfDay.obj"));
+		//@timeOfDay = cast<TimeOfDay@>(Scripts.deserialize(worldDir + "/timeOfDay.obj"));
 		
 		// Create global objects
-		@camera = @Camera();
-		@debug = @DebugTextDrawer();
-		@spawner = @Spawner();
-		@background = @Background();
+		//@spawner = @Spawner();
+		//@background = @Background();
 		//@water = @Water();
 		
 		// Load all objects
@@ -210,10 +178,10 @@ class GameScene : Scene
 	void save()
 	{
 		// Save terrain
-		Scripts.serialize(@terrain, worldDir + "/terrain.obj");
+		//Scripts.serialize(@terrain, worldDir + "/terrain.obj");
 		
 		// Save time of day
-		Scripts.serialize(@timeOfDay, worldDir + "/timeOfDay.obj");
+		//Scripts.serialize(@timeOfDay, worldDir + "/timeOfDay.obj");
 		
 		// Save game objects
 		FileSystem.remove(worldDir + "/objects");
@@ -250,11 +218,11 @@ class GameScene : Scene
 		// Step Box2D
 		Box2D.step(Graphics.dt);
 		
-		terrain.update();
-		timeOfDay.update();
-		background.update();
-		spawner.update();
-		//water.update();
+		Terrain.update();
+		TimeOfDay.update();
+		Background.update();
+		Spawner.update();
+		//Water.update();
 		
 		// Update all game objects
 		for(int i = 0; i < objects.size; i++) {
@@ -270,16 +238,14 @@ class GameScene : Scene
 		}
 	
 		// Create translation matrix
-		Matrix4 projmat = camera.getProjectionMatrix();
+		Matrix4 projmat = Camera.getProjectionMatrix();
 		batches[SCENE].setProjectionMatrix(projmat);
 		
-		background.draw();
-		timeOfDay.draw();
-		spawner.draw();
-		//water.draw();
+		Background.draw(@batches[BACKGROUND]);
+		//Water.draw();
 		
 		if(Input.getKeyState(KEY_Z)) {
-			debug.draw();
+			Debug.draw();
 		}
 		
 		// Draw game object into batches
@@ -291,7 +257,7 @@ class GameScene : Scene
 		batches[BACKGROUND].draw();
 		
 		// Draw terrain background
-		terrain.draw(TERRAIN_BACKGROUND, @batches[BACKGROUND]);
+		Terrain.draw(TERRAIN_BACKGROUND, @batches[BACKGROUND]);
 		
 		// Draw scene content
 		batches[SCENE].draw();
@@ -322,7 +288,7 @@ class GameScene : Scene
 		}
 		
 		// Draw debug text to screen
-		debug.setVariable("FPS", ""+Graphics.FPS);
+		Debug.setVariable("FPS", ""+Graphics.FPS);
 	}
 	
 	void resized(int width, int height)

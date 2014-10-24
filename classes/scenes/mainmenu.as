@@ -12,7 +12,7 @@ class MainMenu : Scene
 	void show()
 	{
 		Console.log("MainMenu: Show");
-		
+		
 		// Create buttons
 		Button @spBtn = @Button("Singleplayer", @ButtonCallback(@showSinglePlayer), null);
 		Button @mpBtn = @Button("Multiplayer", @exit, null);
@@ -33,6 +33,9 @@ class MainMenu : Scene
 		uiObjects.insertLast(@mpBtn);
 		uiObjects.insertLast(@opBtn);
 		uiObjects.insertLast(@qtBtn);
+		
+		Camera.lookAt(Vector2(0, -200.0f));
+		Terrain.loadVisibleChunks();
 	}
 	
 	void hide()
@@ -49,6 +52,8 @@ class MainMenu : Scene
 	
 	void update()
 	{
+		Terrain.update();
+		
 		// Update all ui objects
 		for(int i = 0; i < uiObjects.size; i++)
 		{
@@ -61,10 +66,27 @@ class MainMenu : Scene
 		// Clear batch
 		batch.clear();
 		
+		// Draw background first
+		Background.draw(@batch);
+		
+		batch.draw();
+		batch.clear();
+		
+		// Draw terrain
+		Terrain.draw(TERRAIN_BACKGROUND, @batch);
+		
+		Shadows.setProjectionMatrix(Camera.getProjectionMatrix());
+		Shadows.draw();
+		Shadows.clear();
+		
 		// Draw all ui objects
 		for(int i = 0; i < uiObjects.size; i++)
 		{
 			uiObjects[i].draw(@batch);
+		}
+		
+		if(Input.getKeyState(KEY_Z)) {
+			Debug.draw();
 		}
 		
 		// Draw batch

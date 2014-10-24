@@ -7,7 +7,7 @@ TerrainLayer getLayerByTile(TileID tile)
 
 const int MAX_LOADED_CHUNKS = 128;
 
-class Terrain : Serializable
+class TerrainManager : Serializable
 {
 	// Terrain chunks
 	private array<TerrainChunk@> loadedChunks;
@@ -23,7 +23,7 @@ class Terrain : Serializable
 	// For selecting a direction to generate in
 	Vector2 prevCameraPos;
 	
-	Terrain()
+	TerrainManager()
 	{
 		init();
 		generator.seed = Math.getRandomInt();
@@ -191,7 +191,7 @@ class Terrain : Serializable
 				Console.log("Chunk ["+chunkX+", "+chunkY+"] added to queue");
 			
 				// Create new chunk
-				TerrainChunk @chunk = @TerrainChunk(@this, chunkX, chunkY);
+				TerrainChunk @chunk = @TerrainChunk(chunkX, chunkY);
 				@chunks[key] = @chunk;
 				chunkLoadQueue.insertAt(0, @chunk); // Add to load queue
 				return @chunk;
@@ -240,13 +240,34 @@ class Terrain : Serializable
 		}
 	}*/
 	
+	void loadVisibleChunks()
+	{
+		int x0 = Math.floor(Camera.position.x/CHUNK_SIZE/TILE_SIZE);
+		int y0 = Math.floor(Camera.position.y/CHUNK_SIZE/TILE_SIZE);
+		int x1 = Math.floor((Camera.position.x+Window.getSize().x)/CHUNK_SIZE/TILE_SIZE);
+		int y1 = Math.floor((Camera.position.y+Window.getSize().y)/CHUNK_SIZE/TILE_SIZE);
+		
+		TerrainChunk @chunk;
+		for(int y = y0; y <= y1; y++)
+		{
+			for(int x = x0; x <= x1; x++)
+			{
+				if((@chunk = @getChunk(x, y, true)).getState() != CHUNK_INITIALIZED)
+				{
+					while(!chunk.loadNext());
+				}
+			}
+		}
+		chunkLoadQueue.clear();
+	}
+	
 	// UPDATING
 	void update()
 	{
-		game::debug.setVariable("Chunks", "" + chunks.getSize());
+		Debug.setVariable("Chunks", "" + chunks.getSize());
 		
-		int cx = Math.floor(game::camera.getCenter().x/CHUNK_SIZEF/TILE_SIZEF);
-		int cy = Math.floor(game::camera.getCenter().y/CHUNK_SIZEF/TILE_SIZEF);
+		int cx = Math.floor(Camera.getCenter().x/CHUNK_SIZEF/TILE_SIZEF);
+		int cy = Math.floor(Camera.getCenter().y/CHUNK_SIZEF/TILE_SIZEF);
 		TerrainChunk @chunk;
 		if((@chunk = @getChunk(cx, cy, true)).getState() != CHUNK_INITIALIZED)
 		{
@@ -269,12 +290,12 @@ class Terrain : Serializable
 		
 		// Load queued chunk
 		@chunk = @chunkLoadQueue[chunkLoadQueue.size-1];
-		for(int i = 0; i < chunkLoadSpeed; i++)
+		//for(int i = 0; i < chunkLoadSpeed; i++)
 		{
-			if(chunk.loadNext())
+			while(!chunk.loadNext());
 			{
 				chunkLoadQueue.removeLast();
-				break;
+				//break;
 			}
 		}
 	}
@@ -282,10 +303,10 @@ class Terrain : Serializable
 	// DRAWING
 	void draw(const TerrainLayer layer, Batch @batch)
 	{
-		int x0 = Math.floor(game::camera.position.x/CHUNK_SIZE/TILE_SIZE);
-		int y0 = Math.floor(game::camera.position.y/CHUNK_SIZE/TILE_SIZE);
-		int x1 = Math.floor((game::camera.position.x+Window.getSize().x)/CHUNK_SIZE/TILE_SIZE);
-		int y1 = Math.floor((game::camera.position.y+Window.getSize().y)/CHUNK_SIZE/TILE_SIZE);
+		int x0 = Math.floor(Camera.position.x/CHUNK_SIZE/TILE_SIZE);
+		int y0 = Math.floor(Camera.position.y/CHUNK_SIZE/TILE_SIZE);
+		int x1 = Math.floor((Camera.position.x+Window.getSize().x)/CHUNK_SIZE/TILE_SIZE);
+		int y1 = Math.floor((Camera.position.y+Window.getSize().y)/CHUNK_SIZE/TILE_SIZE);
 		
 		/*int i = 0;
 		while(Input.getKeyState(KEY_L))
@@ -297,7 +318,7 @@ class Terrain : Serializable
 		{
 			for(int x = x0; x <= x1; x++)
 			{
-				Matrix4 projmat = game::camera.getProjectionMatrix();
+				Matrix4 projmat = Camera.getProjectionMatrix();
 				projmat.translate(x * CHUNK_SIZE * TILE_SIZE, y * CHUNK_SIZE * TILE_SIZE, 0.0f);
 				getChunk(x, y, true).draw(projmat);
 			}

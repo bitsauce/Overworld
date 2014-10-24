@@ -1,23 +1,23 @@
-class Spawner
+class SpawnManager
 {
-	float timer = 0.0f;
-	int maxMobCount = 5;
+	float timer = 0.0f;
+	int maxMobCount = 5;
 	int mobCount = 0;
+	bool peacefull = true;
 	
 	void update()
 	{
-		if(game::timeOfDay.isNight() && timer <= 0.0f && mobCount < maxMobCount)
+		if(peacefull) return;
+		
+		if(TimeOfDay.isNight() && timer <= 0.0f && mobCount < maxMobCount)
 		{
 			Zombie z();
-			z.body.setPosition(Vector2(game::camera.position.x, game::terrain.generator.getGroundHeight(game::camera.position.x/TILE_SIZE)*TILE_SIZE));
+			z.body.setPosition(Vector2(Camera.position.x, Terrain.generator.getGroundHeight(Camera.position.x/TILE_SIZE)*TILE_SIZE));
 			timer = 10.0f;
 			mobCount++;
 		}
 		timer -= Graphics.dt;
-	}
-	
-	void draw()
-	{
-		scene::game.getDebug().setVariable("Mob Count", ""+mobCount);
+		
+		Debug.setVariable("Mob Count", ""+mobCount);
 	}
 }

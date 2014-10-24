@@ -1,4 +1,4 @@
-class Camera
+class CameraManager
 {
 	Vector2 position = Vector2(0.0f, 0.0f);
 	float zoom = 1.0f;

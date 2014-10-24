@@ -8,7 +8,7 @@ class Bow : Item
 	
 	void use(Player @player)
 	{
-		Vector2 dt = Input.position + game::camera.position - player.body.getPosition();
+		Vector2 dt = Input.position + Camera.position - player.body.getPosition();
 		
 		Projectile p();
 		p.body.setPosition(player.body.getPosition());

@@ -10,15 +10,15 @@ class BlockItem : Item
 	
 	void use(Player @player)
 	{
-		Vector2 dt = Input.position + game::camera.position - player.body.getPosition();
+		Vector2 dt = Input.position + Camera.position - player.body.getPosition();
 		if(dt.length() <= ITEM_PICKUP_RADIUS)
 		{
 			TerrainLayer layer = getLayerByTile(tile);
-			Vector2 pos = (Input.position + game::camera.position)/TILE_SIZE;
+			Vector2 pos = (Input.position + Camera.position)/TILE_SIZE;
 			pos.x = Math.floor(pos.x); pos.y = Math.floor(pos.y);
-			if(!game::terrain.isTileAt(pos.x, pos.y, layer) && player.inventory.removeItem(@this))
+			if(!Terrain.isTileAt(pos.x, pos.y, layer) && player.inventory.removeItem(@this))
 			{
-				game::terrain.addTile(pos.x, pos.y, tile);
+				Terrain.addTile(pos.x, pos.y, tile);
 			}
 		}
 	}

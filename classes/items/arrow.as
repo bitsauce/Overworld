@@ -10,7 +10,7 @@ class ArrowItem : Item
 	{
 		if(player.inventory.removeItem(@this))
 		{
-			Vector2 dt = Input.position + game::camera.position - player.body.getPosition();
+			Vector2 dt = Input.position + Camera.position - player.body.getPosition();
 			
 			Projectile p();
 			p.body.setPosition(player.body.getPosition());

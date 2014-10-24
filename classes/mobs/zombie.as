@@ -69,14 +69,14 @@ class Zombie : Humanoid, Serializable
 	}
 	
 	void update()
-	{
-		// Check for daytime
-		if(scene::game.getTimeOfDay().isDay())
-		{
-			scene::game.getSpawner().mobCount--;
-			remove();
-			return;
-		}
+	{
+		// Check for daytime
+		if(TimeOfDay.isDay())
+		{
+			Spawner.mobCount--;
+			remove();
+			return;
+		}
 		
 		// Find target player
 		Player @target = @scene::game.getClosestPlayer(body.getCenter());
@@ -88,7 +88,8 @@ class Zombie : Humanoid, Serializable
 		if(dt.x < 0.0f)
 		{
 			moveLeft();
-		}else if(dt.x > 0.0f)
+		}
+		else if(dt.x > 0.0f)
 		{
 			moveRight();
 		}

@@ -1,5 +1,6 @@
 array<uint> QUAD_INDICES = { 0,3,1, 1,3,2 };
 
+// TODO: Add background colors again...
 Vector4 rgbvec(uint8 r, uint8 g, uint8 b, uint8 a = 255)
 {
 	return Vector4(r/255.0f, g/255.0f, b/255.0f, a/255.0f);
@@ -29,7 +30,7 @@ class Color
 	uint8 a;
 }
 
-class Background
+class BackgroundManager
 {
 	Color topColor(255, 255, 255, 255);
 	Color bottomColor(90, 170, 255, 255);
@@ -48,7 +49,7 @@ class Background
 	Batch @fbo = @Batch();
 	Texture @fboTexture = @Texture(800, 600);
 	
-	Background()
+	BackgroundManager()
 	{
 		// Set god ray uniforms
 		godRayShader.setUniform1f("exposure", exposure);
@@ -72,12 +73,12 @@ class Background
 	void update()
 	{
 		// Get hour and mintue
-		int hour = game::timeOfDay.getHour();
-		int minute = game::timeOfDay.getMinute();
-		float time = game::timeOfDay.getTime();
+		int hour = TimeOfDay.getHour();
+		int minute = TimeOfDay.getMinute();
+		float time = TimeOfDay.getTime();
 		
 		// Change background depending on time
-		if(game::timeOfDay.isDay())
+		if(TimeOfDay.isDay())
 		{
 			// Apply sunrise from 6:00 to 9:00
 			if(hour >= 6 && hour < 9)
@@ -129,7 +130,7 @@ class Background
 		cloudTime += wind * Graphics.dt;
 	}
 	
-	void draw()
+	void draw(Batch @background)
 	{
 		// Draw sky gradient
 		array<Vertex> vertices(4);
@@ -142,12 +143,12 @@ class Background
 		vertices[3].set4f(VERTEX_POSITION, 0, Window.getSize().y);
 		vertices[3].set4ub(VERTEX_COLOR, bottomColor.r, bottomColor.g, bottomColor.b, bottomColor.a);
 		
-		Batch @background = scene::game.getBatch(BACKGROUND);
+		//Batch @background = scene::game.getBatch(BACKGROUND);
 		background.addVertices(vertices, QUAD_INDICES);
 		
 		if(!Input.getKeyState(KEY_G))
 		{
-			int hour = game::timeOfDay.getHour();
+			int hour = TimeOfDay.getHour();
 			if(hour >= 6 && hour < 18)
 			{
 				sun.draw(@background);
@@ -159,7 +160,7 @@ class Background
 		{
 			// Draw sun/moon
 			Vector2 lightPos;
-			int hour = game::timeOfDay.getHour();
+			int hour = TimeOfDay.getHour();
 			if(hour >= 6 && hour < 18)
 			{
 				sun.draw(@fbo);

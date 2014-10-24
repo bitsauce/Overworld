@@ -66,7 +66,7 @@ class Player : Humanoid, Serializable
 		ss.read(x);
 		ss.read(y);
 		body.setPosition(Vector2(x, y));
-		game::camera.lookAt(Vector2(x, y));
+		Camera.lookAt(Vector2(x, y));
 
 		// Load inventory
 		string itemString, amountString;
@@ -153,9 +153,9 @@ class Player : Humanoid, Serializable
 		updateAnimations();
 		
 		// Update camera
-		game::camera.lookAt(position);
-		game::debug.setVariable("Camera", game::camera.position.x + ", "+game::camera.position.y);
-		game::debug.setVariable("Chunk", Math.floor(body.getPosition().x/CHUNK_SIZE/TILE_SIZE)+", "+Math.floor(body.getPosition().y/CHUNK_SIZE/TILE_SIZE));
+		Camera.lookAt(position);
+		Debug.setVariable("Camera", Camera.position.x + ", " + Camera.position.y);
+		Debug.setVariable("Chunk", Math.floor(body.getPosition().x/CHUNK_SIZE/TILE_SIZE)+", "+Math.floor(body.getPosition().y/CHUNK_SIZE/TILE_SIZE));
 		
 		// Update audio listener
 		Audio.position = position;

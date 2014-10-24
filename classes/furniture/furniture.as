@@ -21,10 +21,9 @@ class Furniture : GameObject, Serializable
 	void remove()
 	{
 		// Remove invisible tiles
-		Terrain @terrain = @scene::game.getTerrain();
 		for(int j = 0; j < height; j++) {
 			for(int i = 0; i < width; i++) {
-				terrain.removeTile(x+i, y+j);
+				Terrain.removeTile(x+i, y+j);
 			}
 		}
 		
@@ -58,17 +57,16 @@ class Furniture : GameObject, Serializable
 		{
 			for(int i = 0; i < width; i++)
 			{
-				if(game::terrain.isTileAt(x+i, y+j)) {
+				if(Terrain.isTileAt(x+i, y+j)) {
 					return false;
 				}
 			}
 		}
 		
 		// Fill terrain with reserved tiles
-		Terrain @terrain = @scene::game.getTerrain();
 		for(int j = 0; j < height; j++) {
 			for(int i = 0; i < width; i++) {
-				terrain.addTile(x+i, y+j, RESERVED_TILE);
+				Terrain.addTile(x+i, y+j, RESERVED_TILE);
 			}
 		}
 		
@@ -86,7 +84,7 @@ class Furniture : GameObject, Serializable
 	
 	bool isHovered() const
 	{
-		Vector2 cursor = Input.position + game::camera.position;
+		Vector2 cursor = Input.position + Camera.position;
 		return Rect(sprite.getPosition(), sprite.getSize()).contains(cursor);
 	}
 	

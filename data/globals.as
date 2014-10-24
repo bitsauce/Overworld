@@ -7,6 +7,13 @@ namespace scene
 	GameScene game;
 }
 
+DebugManager Debug;
+TerrainManager Terrain;
+CameraManager Camera;
+BackgroundManager Background;
+TimeOfDayManager TimeOfDay;
+SpawnManager Spawner;
+
 // Fonts
 namespace font
 {
@@ -16,13 +23,6 @@ namespace font
 
 namespace game
 {
-	// Global objects
-	TimeOfDay @get_timeOfDay()		{ return @scene::game.getTimeOfDay(); }
-	Terrain @get_terrain()			{ return @scene::game.getTerrain(); }
-	Camera @get_camera()			{ return @scene::game.getCamera(); }
-	DebugTextDrawer @get_debug()	{ return @scene::game.getDebug(); }
-	Spawner @get_spawner()			{ return @scene::game.getSpawner(); }
-	
 	// Global managers
 	ItemManager items;
 	TextureManager textures;

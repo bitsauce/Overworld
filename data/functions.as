@@ -22,12 +22,12 @@ void toggleProfiler()
 
 void zoomIn()
 {
-	game::camera.zoom += 0.1f;
+	Camera.zoom += 0.1f;
 }
 
 void zoomOut()
 {
-	game::camera.zoom -= 0.1f;
+	Camera.zoom -= 0.1f;
 }
 
 void exit()
@@ -55,7 +55,7 @@ Texture @renderTextToTexture(Font @font, string text, int padding = 2.0f)
 
 bool TerrainPlotTest(int x, int y)
 {
-	return scene::game.getTerrain().getTileAt(x, y) <= RESERVED_TILE;
+	return Terrain.getTileAt(x, y) <= RESERVED_TILE;
 }
 
 Thread @debugThread;

@@ -1,4 +1,4 @@
-class DebugTextDrawer
+class DebugManager
 {
 	private dictionary variables;
 	
