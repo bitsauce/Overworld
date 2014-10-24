@@ -5,19 +5,20 @@ TerrainLayer getLayerByTile(TileID tile)
 	return TERRAIN_FOREGROUND;
 }
 
-const int MAX_PRELOADED_CHUNKS = 128;
+const int MAX_LOADED_CHUNKS = 128;
 
 class Terrain : Serializable
 {
 	// Terrain chunks
+	private array<TerrainChunk@> loadedChunks;
+	private array<TerrainChunk@> chunkLoadNowQueue;
+	private array<TerrainChunk@> chunkLoadQueue;
 	private dictionary chunks;
+	private VertexBuffer @chunkBuffer;
+	private int chunkLoadSpeed;
 	
 	// Terrain generator
 	TerrainGen generator;
-	Thread @generateThread;
-	private dictionary generating;
-		
-	private VertexBuffer @chunkBuffer;
 	
 	// For selecting a direction to generate in
 	Vector2 prevCameraPos;
@@ -76,8 +77,7 @@ class Terrain : Serializable
 			}
 		}
 		
-		//@generateThread = @debugThread = @Thread(@FuncCall(@this, "findAndGenerateChunk"));
-		//generateThread.start();
+		chunkLoadSpeed = 12;
 	}
 	
 	VertexBuffer @getEmptyChunkBuffer()
@@ -141,9 +141,7 @@ class Terrain : Serializable
 	bool addTile(const int x, const int y, TileID tile)
 	{
 		if(getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).addTile(Math.mod(x, CHUNK_SIZE), Math.mod(y, CHUNK_SIZE), tile))
-		{
-			getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).modified = true;
-			
+		{	
 			// Update neighbouring tiles
 			getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(Math.mod(x,   CHUNK_SIZE), Math.mod(y,   CHUNK_SIZE), getTileState(x,   y), true);
 			getChunk(Math.floor((x+1) / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(Math.mod(x+1, CHUNK_SIZE), Math.mod(y,   CHUNK_SIZE), getTileState(x+1, y), true);
@@ -165,8 +163,6 @@ class Terrain : Serializable
 	{
 		if(getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).removeTile(Math.mod(x, CHUNK_SIZE), Math.mod(y, CHUNK_SIZE)))
 		{
-			getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).modified = true;
-			
 			// Update neighbouring tiles
 			getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(Math.mod(x,   CHUNK_SIZE), Math.mod(y,   CHUNK_SIZE), getTileState(x,   y), true);
 			getChunk(Math.floor((x+1) / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(Math.mod(x+1, CHUNK_SIZE), Math.mod(y,   CHUNK_SIZE), getTileState(x+1, y), true);
@@ -192,23 +188,22 @@ class Terrain : Serializable
 		{
 			if(generate)
 			{
-				return @generateChunk(chunkX, chunkY);
+				Console.log("Chunk ["+chunkX+", "+chunkY+"] added to queue");
+			
+				// Create new chunk
+				TerrainChunk @chunk = @TerrainChunk(@this, chunkX, chunkY);
+				@chunks[key] = @chunk;
+				chunkLoadQueue.insertAt(0, @chunk); // Add to load queue
+				return @chunk;
 			}
 			return @TerrainChunk(); // Create dummy
 		}
-		
-		if(!generating.exists(key) || bool(generating[key]))
-			return @TerrainChunk(); // Create dummy
 		return cast<TerrainChunk@>(chunks[key]);
 	}
 	
-	private TerrainChunk @generateChunk(const int chunkX, const int chunkY)
+	/*private TerrainChunk @generateChunk(const int chunkX, const int chunkY)
 	{
 		string key = chunkX+";"+chunkY;
-		if(generating.exists(key))
-			return @TerrainChunk();
-		generating[key] = true;
-		
 		string chunkFile = scene::game.getWorldDir() + "/chunks/"+key+".obj";
 		TerrainChunk@ chunk;
 		if(FileSystem.fileExists(chunkFile))
@@ -226,7 +221,6 @@ class Terrain : Serializable
 			generator.generate(@chunk, chunkX, chunkY);
 		}
 		
-		generating[key] = false;
 		updateChunk(chunkX, chunkY);
 		return @chunk;
 	}
@@ -244,53 +238,44 @@ class Terrain : Serializable
 				}
 			}
 		}
-	}
+	}*/
 	
 	// UPDATING
 	void update()
 	{
-		game::debug.setVariable("Chunks", ""+chunks.getSize());
-	}
-	
-	// This works almost perfect, except from the fact that
-	// it eventualy stops generating chunks for some reason
-	void findAndGenerateChunk()
-	{
-		int i = 1;
-		while(true)
+		game::debug.setVariable("Chunks", "" + chunks.getSize());
+		
+		int cx = Math.floor(game::camera.getCenter().x/CHUNK_SIZEF/TILE_SIZEF);
+		int cy = Math.floor(game::camera.getCenter().y/CHUNK_SIZEF/TILE_SIZEF);
+		TerrainChunk @chunk;
+		if((@chunk = @getChunk(cx, cy, true)).getState() != CHUNK_INITIALIZED)
 		{
-			if(chunks.getSize() >= MAX_PRELOADED_CHUNKS)
-				continue;
+			Console.log("Insta-loading chunk ["+cx+", "+cy+"]");
 			
-			Vector2 center = game::camera.position + Vector2(Window.getSize())*0.5f;
-			int chunkX = center.x/CHUNK_SIZE/TILE_SIZE;
-			int chunkY = center.x/CHUNK_SIZE/TILE_SIZE;
-			
-			int step = 1;
-			int dir = 1;
-			bool found = false;
-			while(!found)
+			// Since we're not a big fan of invisible collisions, we
+			// will force a instantanious load of the chunk where
+			// the player currently is
+			int idx = chunkLoadQueue.findByRef(@chunk);
+			TerrainChunk @chunk = @chunkLoadQueue[idx];
+			chunkLoadQueue.removeAt(idx);
+			while(!chunk.loadNext());
+		}
+		
+		if(chunkLoadQueue.isEmpty())
+		{
+			return;
+			//(@chunk = @getChunk(cx, cy, true))
+		}
+		
+		// Load queued chunk
+		@chunk = @chunkLoadQueue[chunkLoadQueue.size-1];
+		for(int i = 0; i < chunkLoadSpeed; i++)
+		{
+			if(chunk.loadNext())
 			{
-				dir = step % 2 == 0 ? -1 : 1;
-				for(int j = 0; !found && j < 2; j++)
-				{
-					int dx = (1-j)*dir;
-					int dy = j*dir;
-					for(int i = 0; !found && i < step; i++)
-					{
-						chunkX += dx;
-						chunkY += dy;
-						found = !chunks.exists(chunkX+";"+chunkY);
-					}
-				}
-				step++;
+				chunkLoadQueue.removeLast();
+				break;
 			}
-			
-			generateChunk(chunkX, chunkY);
-			/*funccall call(@this, "generateChunk");
-			call.setArg(0, chunkX);
-			call.setArg(1, chunkY);
-			thread th(call);*/
 		}
 	}
 	
@@ -302,11 +287,11 @@ class Terrain : Serializable
 		int x1 = Math.floor((game::camera.position.x+Window.getSize().x)/CHUNK_SIZE/TILE_SIZE);
 		int y1 = Math.floor((game::camera.position.y+Window.getSize().y)/CHUNK_SIZE/TILE_SIZE);
 		
-		int i = 0;
+		/*int i = 0;
 		while(Input.getKeyState(KEY_L))
 		{
 			getChunk(x0 + i++, y0, true);
-		}
+		}*/
 		
 		for(int y = y0; y <= y1; y++)
 		{

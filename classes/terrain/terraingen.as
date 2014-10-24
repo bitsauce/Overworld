@@ -3,16 +3,27 @@ class TerrainGen
 	int seed;
 	Simplex2D noise;
 	
-	void generate(TerrainChunk @chunk, const int chunkX, const int chunkY)
+	TerrainGen()
 	{
-		Console.log("Generating chunk ["+chunkX+";"+chunkY+"]...");
-		
-		int tileX = chunkX*CHUNK_SIZE;
-		int tileY = chunkY*CHUNK_SIZE;
-		
 		noise.octaves = 8;
 		noise.frequency = 0.01f;
 		noise.gain = 0.5f;
+	}
+	
+	TileID getTileAt(const int x, const int y)
+	{
+		float h = noise.valueAt((seed + x), seed) * 7;
+		if(y > h && noise.valueAt(seed + x, seed + y) < 0.5f - Math.atan((y - h - 30) * 0.1f)/Math.PI)
+			return GRASS_TILE;
+		return EMPTY_TILE;
+	}
+	
+	void generate(TerrainChunk @chunk, const int chunkX, const int chunkY)
+	{
+		/*Console.log("Generating chunk ["+chunkX+";"+chunkY+"]...");
+		
+		int tileX = chunkX*CHUNK_SIZE;
+		int tileY = chunkY*CHUNK_SIZE;
 		
 		for(int x = 0; x < CHUNK_SIZE; x++)
 		{
@@ -26,8 +37,7 @@ class TerrainGen
 				}
 			}
 		}
-		
-		Console.log("Chunk generated");
+		Console.log("Chunk generated");*/
 		
 		/*@this.terrain = @terrain;
 		width = terrain.getWidth();

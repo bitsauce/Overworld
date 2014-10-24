@@ -1,5 +1,18 @@
+enum ChunkState
+{
+	CHUNK_UNINITIALIZED,
+	CHUNK_LOAD_TILES,
+	CHUNK_UPDATE_TILES,
+	CHUNK_INITIALIZED
+}
+
 class TerrainChunk : Serializable
 {
+	// PARTIAL LOADING
+	private ChunkState state;
+	private Terrain @terrain;
+	private int loadPos;
+	
 	// CHUNK
 	private int chunkX, chunkY;
 	private grid<TileID> tiles;
@@ -26,7 +39,6 @@ class TerrainChunk : Serializable
 	TerrainChunk(Terrain @terrain, int chunkX, int chunkY)
 	{
 		init(chunkX, chunkY, @terrain);
-		setTerrain(@terrain);
 	}
 	
 	// SERIALIZATION
@@ -34,35 +46,96 @@ class TerrainChunk : Serializable
 	{
 		// Not a dummy
 		dummy = false;
-		modified = false;
+		modified = false; // not modified
 		
-		// Set chunk vars
+		// Set chunk position
 		this.chunkX = chunkX;
 		this.chunkY = chunkY;
-		
-		// Create body
-		b2BodyDef def;
-		def.type = b2_staticBody;
-		def.position.set(chunkX * CHUNK_SIZE * TILE_SIZE, chunkY * CHUNK_SIZE * TILE_SIZE);
-		def.allowSleep = true;
-		
-		@body = b2Body(def);
-		
-		// Resize tile grid
-		fixtures = grid<b2Fixture@>(CHUNK_SIZE, CHUNK_SIZE, null);
-		tiles = grid<TileID>(CHUNK_SIZE, CHUNK_SIZE, EMPTY_TILE);
-		
+		@this.terrain = @terrain;
+		this.state = CHUNK_UNINITIALIZED;
+		this.loadPos = 0;
+			
 		// Store texture atlas
 		@tileAtlas = @game::tiles.getAtlas();
+	}
+	
+	bool loadNext()
+	{
+		switch(state)
+		{
+		case CHUNK_UNINITIALIZED:
+		{
+			// Create body
+			b2BodyDef def;
+			def.type = b2_staticBody;
+			def.position.set(chunkX * CHUNK_SIZE * TILE_SIZE, chunkY * CHUNK_SIZE * TILE_SIZE);
+			def.allowSleep = true;
+			@body = @b2Body(def);
+			body.setObject(@terrain);
+			
+			// Resize tile grid
+			fixtures = grid<b2Fixture@>(CHUNK_SIZE, CHUNK_SIZE, null);
+			tiles = grid<TileID>(CHUNK_SIZE, CHUNK_SIZE, EMPTY_TILE);
+			
+			// Make the chunk buffer static
+			@vbo = @terrain.getEmptyChunkBuffer();
+			vbo.makeStatic();
+			
+			// Setup shadow map
+			@shadowMap = @Texture(CHUNK_SIZE, CHUNK_SIZE);
+			shadowMap.setFiltering(LINEAR);
+			shadowMap.setWrapping(CLAMP_TO_EDGE);
+			
+			// Go to next load state
+			state = CHUNK_LOAD_TILES;
+			break;
+		}
 		
-		// Make the chunk buffer static
-		@vbo = @terrain.getEmptyChunkBuffer();
-		vbo.makeStatic();
+		case CHUNK_LOAD_TILES:
+		{
+			int x = loadPos % CHUNK_SIZE;
+			int y = loadPos / CHUNK_SIZE;
+			TileID tile = terrain.generator.getTileAt(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y);
+			
+			if(x == 0 || y == 0 || x == CHUNK_SIZE-1 || y == CHUNK_SIZE-1)
+				terrain.addTile(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y, tile);
+			else
+				addTile(x, y, tile);
+				
+			loadPos++;
+			if(loadPos >= CHUNK_SIZE*CHUNK_SIZE)
+			{
+				state = CHUNK_UPDATE_TILES;
+				loadPos = 0;
+			}
+			break;
+		}
 		
-		// Setup shadow map
-		@shadowMap = @Texture(CHUNK_SIZE, CHUNK_SIZE);
-		shadowMap.setFiltering(LINEAR);
-		shadowMap.setWrapping(CLAMP_TO_EDGE);
+		case CHUNK_UPDATE_TILES:
+		{
+			int x = loadPos % CHUNK_SIZE;
+			int y = loadPos / CHUNK_SIZE;
+			updateTile(x, y, terrain.getTileState(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y), true);
+			loadPos++;
+			if(loadPos >= CHUNK_SIZE*CHUNK_SIZE)
+			{
+				state = CHUNK_INITIALIZED;
+				loadPos = 0;
+				Console.log("Chunk ["+chunkX+", "+chunkY+"] loaded");
+				return true; // loading done
+			}
+			break;
+		}
+		
+		case CHUNK_INITIALIZED:
+			return true;
+		}
+		return false;
+	}
+	
+	ChunkState getState() const
+	{
+		return state;
 	}
 	
 	void serialize(StringStream &ss)
@@ -108,18 +181,12 @@ class TerrainChunk : Serializable
 		}
 	}
 	
-	// TODO: Better solution?
-	void setTerrain(Terrain @terrain)
-	{
-		body.setObject(@terrain);
-	}
-	
 	int getX() const { return chunkX; }
 	int getY() const { return chunkY; }
 	
 	bool isValid(const int x, const int y) const
 	{
-		return !dummy && x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE;
+		return dummy == false && state != CHUNK_UNINITIALIZED && x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE;
 	}
 	
 	TileID getTileAt(const int x, const int y) const
@@ -140,6 +207,7 @@ class TerrainChunk : Serializable
 		
 		// Set the tile value
 		tiles[x, y] = tile;
+		if(state == CHUNK_INITIALIZED) modified = true;
 		
 		// Return true
 		return true;
@@ -153,13 +221,17 @@ class TerrainChunk : Serializable
 		
 		// Set the tile value
 		tiles[x, y] = EMPTY_TILE;
+		if(state == CHUNK_INITIALIZED) modified = true;
 		
 		// Return true
 		return true;
 	}
 	
-	void updateTile(const int x, const int y, const uint state, const bool fixture = false)
+	void updateTile(const int x, const int y, const uint tileState, const bool fixture = false)
 	{
+		if(dummy || state < CHUNK_UPDATE_TILES)
+			return;
+	
 		float opacity = getOpacity(x, y);
 		array<Vector4> pixel = {
 			Vector4(0.0f, 0.0f, 0.0f, opacity)
@@ -171,10 +243,10 @@ class TerrainChunk : Serializable
 		TextureRegion region;
 		if(tile > RESERVED_TILE)
 		{
-			uint8 q1 = ((state >> 0) & 0x7) + 0x00;
-			uint8 q2 = ((state >> 2) & 0x7) + 0x08;
-			uint8 q3 = ((state >> 4) & 0x7) + 0x10;
-			uint8 q4 = (((state >> 6) & 0x7) | ((state << 2) & 0x7)) + 0x18;
+			uint8 q1 = ((tileState >> 0) & 0x7) + 0x00;
+			uint8 q2 = ((tileState >> 2) & 0x7) + 0x08;
+			uint8 q3 = ((tileState >> 4) & 0x7) + 0x10;
+			uint8 q4 = (((tileState >> 6) & 0x7) | ((tileState << 2) & 0x7)) + 0x18;
 			
 			array<Vertex> vertices = vbo.getVertices(i, 16);
 			
@@ -234,7 +306,7 @@ class TerrainChunk : Serializable
 		// Update fixtures
 		if(fixture)
 		{
-			updateFixture(x, y, state);
+			updateFixture(x, y, tileState);
 		}
 	}
 
@@ -287,7 +359,7 @@ class TerrainChunk : Serializable
 	// DRAWING
 	void draw(const Matrix4 &in projmat)
 	{
-		if(!dummy)
+		if(!dummy && state == CHUNK_INITIALIZED)
 		{
 			Batch @batch = @Batch();
 			batch.setProjectionMatrix(projmat);
