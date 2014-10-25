@@ -12,7 +12,7 @@ class WorldSelectMenu : Scene
 		Console.log("WorldSelectMenu: Show");
 		
 		array<string> @worlds = @FileSystem.listFolders("saves:/Overworld/", "*");
-		for(int i = 0; i < worlds.size; i++)
+		for(int i = 0; i < worlds.size; ++i)
 		{
 			Button @button = @Button(IniFile(worlds[i] + "/world.ini").getValue("world", "name"), @ButtonCallbackThis(@worldClicked), null);
 			button.anchor = CENTER;
@@ -53,22 +53,39 @@ class WorldSelectMenu : Scene
 	
 	void update()
 	{
+		TimeOfDay.update();
+		Background.update();
+		Terrain.update();
+		
 		// Update all ui objects
-		for(int i = 0; i < uiObjects.size; i++) {
+		for(int i = 0; i < uiObjects.size; ++i) {
 			uiObjects[i].update();
 		}
 	}
 	
 	void draw()
-	{
+	{
 		// Clear batch
 		batch.clear();
 		
+		// Draw background first
+		Background.draw(@batch);
+		
+		batch.draw();
+		batch.clear();
+		
+		// Draw terrain
+		Terrain.draw(TERRAIN_BACKGROUND, @batch);
+		
+		Shadows.setProjectionMatrix(Camera.getProjectionMatrix());
+		Shadows.draw();
+		Shadows.clear();
+		
 		// Draw all ui objects
-		for(int i = 0; i < uiObjects.size; i++) {
+		for(int i = 0; i < uiObjects.size; ++i) {
 			uiObjects[i].draw(@batch);
 		}
-		
+		
 		// Draw batch
 		batch.draw();
 	}

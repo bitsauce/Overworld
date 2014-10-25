@@ -41,43 +41,46 @@ class TerrainManager : Serializable
 		
 		// Create chunk buffer
 		@chunkBuffer = @VertexBuffer(fmt);
-		for(int y = 0; y < CHUNK_SIZE; y++)
+		//for(int i = 0; i < 2; ++i)
 		{
-			for(int x = 0; x < CHUNK_SIZE; x++)
+			for(int y = 0; y < CHUNK_SIZE; ++y)
 			{
-				array<Vertex> vertices = fmt.createVertices(4);
-				
-				vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
-				vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
-				vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
-				vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
-				
-				chunkBuffer.addVertices(vertices, QUAD_INDICES);
-				
-				vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
-				vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
-				vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
-				vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
-				
-				chunkBuffer.addVertices(vertices, QUAD_INDICES);
-				
-				vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
-				vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
-				vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
-				vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
-				
-				chunkBuffer.addVertices(vertices, QUAD_INDICES);
-				
-				vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
-				vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
-				vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
-				vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
-				
-				chunkBuffer.addVertices(vertices, QUAD_INDICES);
+				for(int x = 0; x < CHUNK_SIZE; ++x)
+				{
+					array<Vertex> vertices = fmt.createVertices(4);
+					
+					vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
+					vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
+					vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
+					vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
+					
+					chunkBuffer.addVertices(vertices, QUAD_INDICES);
+					
+					vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
+					vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
+					vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
+					vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
+					
+					chunkBuffer.addVertices(vertices, QUAD_INDICES);
+					
+					vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
+					vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
+					vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
+					vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
+					
+					chunkBuffer.addVertices(vertices, QUAD_INDICES);
+					
+					vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
+					vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
+					vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
+					vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
+					
+					chunkBuffer.addVertices(vertices, QUAD_INDICES);
+				}
 			}
 		}
 		
-		chunkLoadSpeed = 12;
+		chunkLoadSpeed = 257;
 	}
 	
 	VertexBuffer @getEmptyChunkBuffer()
@@ -92,7 +95,7 @@ class TerrainManager : Serializable
 		ss.write(generator.seed);
 		
 		array<string> @keys = chunks.getKeys();
-		for(int i = 0; i < keys.size; i++)
+		for(int i = 0; i < keys.size; ++i)
 		{
 			string key = keys[i];
 			if(cast<TerrainChunk@>(chunks[key]).modified)
@@ -124,23 +127,116 @@ class TerrainManager : Serializable
 	
 	uint getTileState(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE) const
 	{
-		// Set state
+		// Get state
 		uint state = 0;
-		if(getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor((y-1) / CHUNK_SIZEF)).isTileAt(Math.mod(x,   CHUNK_SIZE), Math.mod(y-1, CHUNK_SIZE))) state |= NORTH;
-		if(getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor((y+1) / CHUNK_SIZEF)).isTileAt(Math.mod(x,   CHUNK_SIZE), Math.mod(y+1, CHUNK_SIZE))) state |= SOUTH;
-		if(getChunk(Math.floor((x+1) / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).isTileAt(Math.mod(x+1, CHUNK_SIZE), Math.mod(y,   CHUNK_SIZE))) state |= EAST;
-		if(getChunk(Math.floor((x-1) / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).isTileAt(Math.mod(x-1, CHUNK_SIZE), Math.mod(y,   CHUNK_SIZE))) state |= WEST;
-		if(getChunk(Math.floor((x+1) / CHUNK_SIZEF), Math.floor((y-1) / CHUNK_SIZEF)).isTileAt(Math.mod(x+1, CHUNK_SIZE), Math.mod(y-1, CHUNK_SIZE))) state |= NORTH_EAST;
-		if(getChunk(Math.floor((x-1) / CHUNK_SIZEF), Math.floor((y-1) / CHUNK_SIZEF)).isTileAt(Math.mod(x-1, CHUNK_SIZE), Math.mod(y-1, CHUNK_SIZE))) state |= NORTH_WEST;
-		if(getChunk(Math.floor((x+1) / CHUNK_SIZEF), Math.floor((y+1) / CHUNK_SIZEF)).isTileAt(Math.mod(x+1, CHUNK_SIZE), Math.mod(y+1, CHUNK_SIZE))) state |= SOUTH_EAST;
-		if(getChunk(Math.floor((x-1) / CHUNK_SIZEF), Math.floor((y+1) / CHUNK_SIZEF)).isTileAt(Math.mod(x-1, CHUNK_SIZE), Math.mod(y+1, CHUNK_SIZE))) state |= SOUTH_WEST;
+		int chunkX = Math.floor(x / CHUNK_SIZEF), chunkY = Math.floor(y / CHUNK_SIZEF), tileX = Math.mod(x, CHUNK_SIZE), tileY = Math.mod(y, CHUNK_SIZE);
+		TerrainChunk @chunk = @getChunk(chunkX, chunkY), chunkN, chunkS;
+		if(chunk.getState() == CHUNK_DUMMY) return 0;
+		
+		if(tileY == 0)
+		{
+			@chunkN = @getChunk(chunkX, chunkY-1);
+			if(chunkN.isTileAt(tileX, CHUNK_SIZE-1)) state |= NORTH;
+		}
+		else if(tileY == CHUNK_SIZE-1)
+		{
+			@chunkS = @getChunk(chunkX, chunkY+1);
+			if(chunkS.isTileAt(tileX, 0)) state |= SOUTH;
+		}
+		else
+		{
+			if(chunk.isTileAt(tileX, tileY-1)) state |= NORTH;
+			if(chunk.isTileAt(tileX, tileY+1)) state |= SOUTH;
+		}
+		
+		if(tileX == 0)
+		{
+			TerrainChunk @chunkW = @getChunk(chunkX-1, chunkY);
+			if(chunkW.isTileAt(CHUNK_SIZE-1, tileY)) state |= WEST;
+			if(tileY == 0)
+			{
+				if(getChunk(chunkX-1, chunkY-1).isTileAt(CHUNK_SIZE-1, CHUNK_SIZE-1)) state |= NORTH_WEST;
+				if(chunkW.isTileAt(CHUNK_SIZE-1, tileY+1)) state |= SOUTH_WEST;
+				if(chunkN.isTileAt(tileX+1, CHUNK_SIZE-1)) state |= NORTH_EAST;
+				if(chunk.isTileAt(tileX+1, tileY+1)) state |= SOUTH_EAST;
+			}
+			else if(tileY == CHUNK_SIZE-1)
+			{
+				if(getChunk(chunkX-1, chunkY+1).isTileAt(CHUNK_SIZE-1, 0)) state |= SOUTH_WEST;
+				if(chunkW.isTileAt(CHUNK_SIZE-1, tileY-1)) state |= NORTH_WEST;
+				if(chunk.isTileAt(tileX+1, tileY-1)) state |= NORTH_EAST;
+				if(chunkS.isTileAt(tileX+1, 0)) state |= SOUTH_EAST;
+			}
+			else
+			{
+				if(chunkW.isTileAt(CHUNK_SIZE-1, tileY-1)) state |= NORTH_WEST;
+				if(chunkW.isTileAt(CHUNK_SIZE-1, tileY+1)) state |= SOUTH_WEST;
+				if(chunk.isTileAt(tileX+1, tileY-1)) state |= NORTH_EAST;
+				if(chunk.isTileAt(tileX+1, tileY+1)) state |= SOUTH_EAST;
+			}
+			if(chunk.isTileAt(tileX+1, tileY)) state |= EAST;
+		}
+		else if(tileX == CHUNK_SIZE-1)
+		{
+			TerrainChunk @chunkE = @getChunk(chunkX+1, chunkY);
+			if(chunkE.isTileAt(0, tileY)) state |= EAST;
+			if(tileY == 0)
+			{
+				if(getChunk(chunkX+1, chunkY-1).isTileAt(0, CHUNK_SIZE-1)) state |= NORTH_EAST;
+				if(chunkE.isTileAt(0, tileY+1)) state |= SOUTH_EAST;
+				if(chunkN.isTileAt(tileX-1, CHUNK_SIZE-1)) state |= NORTH_WEST;
+				if(chunk.isTileAt(tileX-1, tileY+1)) state |= SOUTH_WEST;
+			}
+			else if(tileY == CHUNK_SIZE-1)
+			{
+				if(getChunk(chunkX+1, chunkY+1).isTileAt(0, 0)) state |= SOUTH_EAST;
+				if(chunkE.isTileAt(0, tileY-1)) state |= NORTH_EAST;
+				if(chunk.isTileAt(tileX-1, tileY-1)) state |= NORTH_WEST;
+				if(chunkS.isTileAt(tileX-1, 0)) state |= SOUTH_WEST;
+			}
+			else
+			{
+				if(chunkE.isTileAt(0, tileY-1)) state |= NORTH_EAST;
+				if(chunkE.isTileAt(0, tileY+1)) state |= SOUTH_EAST;
+				if(chunk.isTileAt(tileX-1, tileY-1)) state |= NORTH_WEST;
+				if(chunk.isTileAt(tileX-1, tileY+1)) state |= SOUTH_WEST;
+			}
+			if(chunk.isTileAt(tileX-1, tileY)) state |= WEST;
+		}
+		else
+		{
+			if(chunk.isTileAt(tileX-1, tileY)) state |= WEST;
+			if(chunk.isTileAt(tileX+1, tileY)) state |= EAST;
+			if(tileY == 0)
+			{
+				if(chunkN.isTileAt(tileX+1, CHUNK_SIZE-1)) state |= NORTH_EAST;
+				if(chunkN.isTileAt(tileX-1, CHUNK_SIZE-1)) state |= NORTH_WEST;
+				if(chunk.isTileAt(tileX+1, tileY+1)) state |= SOUTH_EAST;
+				if(chunk.isTileAt(tileX-1, tileY+1)) state |= SOUTH_WEST;
+			}
+			else if(tileY == CHUNK_SIZE-1)
+			{
+				if(chunkS.isTileAt(tileX+1, 0)) state |= SOUTH_EAST;
+				if(chunkS.isTileAt(tileX-1, 0)) state |= SOUTH_WEST;
+				if(chunk.isTileAt(tileX+1, tileY-1)) state |= NORTH_EAST;
+				if(chunk.isTileAt(tileX-1, tileY-1)) state |= NORTH_WEST;
+			}
+			else
+			{
+				if(chunk.isTileAt(tileX+1, tileY-1)) state |= NORTH_EAST;
+				if(chunk.isTileAt(tileX-1, tileY-1)) state |= NORTH_WEST;
+				if(chunk.isTileAt(tileX+1, tileY+1)) state |= SOUTH_EAST;
+				if(chunk.isTileAt(tileX-1, tileY+1)) state |= SOUTH_WEST;
+			}
+		}
+		
 		return state;
 	}
 	
 	// TILE MODIFICATION
-	bool addTile(const int x, const int y, TileID tile)
+	bool setTile(const int x, const int y, TileID tile)
 	{
-		if(getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).addTile(Math.mod(x, CHUNK_SIZE), Math.mod(y, CHUNK_SIZE), tile))
+		if(getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).setTile(Math.mod(x, CHUNK_SIZE), Math.mod(y, CHUNK_SIZE), tile))
 		{	
 			// Update neighbouring tiles
 			getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(Math.mod(x,   CHUNK_SIZE), Math.mod(y,   CHUNK_SIZE), getTileState(x,   y), true);
@@ -161,7 +257,7 @@ class TerrainManager : Serializable
 	
 	bool removeTile(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
 	{
-		if(getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).removeTile(Math.mod(x, CHUNK_SIZE), Math.mod(y, CHUNK_SIZE)))
+		if(getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).setTile(Math.mod(x, CHUNK_SIZE), Math.mod(y, CHUNK_SIZE), EMPTY_TILE))
 		{
 			// Update neighbouring tiles
 			getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(Math.mod(x,   CHUNK_SIZE), Math.mod(y,   CHUNK_SIZE), getTileState(x,   y), true);
@@ -290,12 +386,12 @@ class TerrainManager : Serializable
 		
 		// Load queued chunk
 		@chunk = @chunkLoadQueue[chunkLoadQueue.size-1];
-		//for(int i = 0; i < chunkLoadSpeed; i++)
+		for(int i = 0; i < chunkLoadSpeed; ++i)
 		{
-			while(!chunk.loadNext());
+			if(chunk.loadNext())
 			{
 				chunkLoadQueue.removeLast();
-				//break;
+				break;
 			}
 		}
 	}
@@ -311,7 +407,7 @@ class TerrainManager : Serializable
 		/*int i = 0;
 		while(Input.getKeyState(KEY_L))
 		{
-			getChunk(x0 + i++, y0, true);
+			getChunk(x0 + ++i, y0, true);
 		}*/
 		
 		for(int y = y0; y <= y1; y++)

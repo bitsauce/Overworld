@@ -22,7 +22,7 @@ class Furniture : GameObject, Serializable
 	{
 		// Remove invisible tiles
 		for(int j = 0; j < height; j++) {
-			for(int i = 0; i < width; i++) {
+			for(int i = 0; i < width; ++i) {
 				Terrain.removeTile(x+i, y+j);
 			}
 		}
@@ -55,7 +55,7 @@ class Furniture : GameObject, Serializable
 		// Validate placement
 		for(int j = 0; j < height; j++)
 		{
-			for(int i = 0; i < width; i++)
+			for(int i = 0; i < width; ++i)
 			{
 				if(Terrain.isTileAt(x+i, y+j)) {
 					return false;
@@ -65,8 +65,8 @@ class Furniture : GameObject, Serializable
 		
 		// Fill terrain with reserved tiles
 		for(int j = 0; j < height; j++) {
-			for(int i = 0; i < width; i++) {
-				Terrain.addTile(x+i, y+j, RESERVED_TILE);
+			for(int i = 0; i < width; ++i) {
+				Terrain.setTile(x+i, y+j, RESERVED_TILE);
 			}
 		}
 		

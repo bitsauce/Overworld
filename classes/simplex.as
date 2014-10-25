@@ -57,7 +57,7 @@ class Simplex2D
 		// because each octave adds more, and we need a value in [-1, 1].
 		float maxAmplitude = 0;
 		
-		for(int i = 0; i < octaves; i++)
+		for(int i = 0; i < octaves; ++i)
 		{
 			total += rawNoise(x * freq, y * freq) * amplitude;
 			freq *= 2;
@@ -164,7 +164,7 @@ class Simplex3D
 		// because each octave adds more, and we need a value in [-1, 1].
 		float maxAmplitude = 0;
 		
-		for(int i = 0; i < octaves; i++)
+		for(int i = 0; i < octaves; ++i)
 		{
 			total += rawNoise(x * freq, y * freq, z * freq) * amplitude;
 			freq *= 2;

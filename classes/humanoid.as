@@ -90,7 +90,7 @@ class Humanoid : GameObject
 		changeAnimation("idle");
 		
 		walkDirtSounds.resize(4);
-		for(int i = 0; i < 4; i++) {
+		for(int i = 0; i < 4; ++i) {
 			@walkDirtSounds[i] = @AudioSource(":/sounds/player/walk_dirt_"+(i+1)+".wav");
 			walkDirtSounds[i].looping = false;
 		}

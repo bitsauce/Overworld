@@ -11,14 +11,14 @@ class TileManager
 			return;
 		
 		// Add tiles
-		for(int i = 0; i < MAX_TILES; i++)
+		for(int i = 0; i < MAX_TILES; ++i)
 		{
 			add(TileID(i));
 		}
 		
 		// Store tile textures
 		array<Texture@> textures;
-		for(int i = 0; i < MAX_TILES; i++)
+		for(int i = 0; i < MAX_TILES; ++i)
 		{
 			Tile @tile = @tiles[i];
 			
@@ -88,7 +88,7 @@ class TileManager
 			return EMPTY_TILE;
 		
 		// Find the tile which cooresponds to the given item
-		for(int i = 0; i < tiles.size; i++)
+		for(int i = 0; i < tiles.size; ++i)
 		{
 			Tile @tile = @tiles[i];
 			if(tile.getItemID() == item)

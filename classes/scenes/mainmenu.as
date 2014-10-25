@@ -1,3 +1,10 @@
+grid<int> TITLE_TILES = {
+	{ 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0 },
+	{ 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1 },
+	{ 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1 },
+	{ 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0 }
+};
+
 class MainMenu : Scene
 {
 	// Draw batch
@@ -24,10 +31,10 @@ class MainMenu : Scene
 		opBtn.anchor = CENTER;
 		qtBtn.anchor = CENTER;
 		
-		spBtn.setPosition(Vector2(0.0f, -0.3f));
-		mpBtn.setPosition(Vector2(0.0f, -0.2f));
-		opBtn.setPosition(Vector2(0.0f, -0.1f));
-		qtBtn.setPosition(Vector2(0.0f,  0.0f));
+		spBtn.setPosition(Vector2(0.0f, -0.1f));
+		mpBtn.setPosition(Vector2(0.0f,  0.0f));
+		opBtn.setPosition(Vector2(0.0f,  0.1f));
+		qtBtn.setPosition(Vector2(0.0f,  0.2f));
 		
 		uiObjects.insertLast(@spBtn);
 		uiObjects.insertLast(@mpBtn);
@@ -36,6 +43,17 @@ class MainMenu : Scene
 		
 		Camera.lookAt(Vector2(0, -200.0f));
 		Terrain.loadVisibleChunks();
+		
+		for(int y = 0; y < TITLE_TILES.height(); ++y)
+		{
+			for(int x = 0; x < TITLE_TILES.width(); ++x)
+			{
+				if(TITLE_TILES[x, y] == 1)
+				{
+					Terrain.setTile(x - 18, y - 28, LEAF_TILE);
+				}
+			}
+		}
 	}
 	
 	void hide()
@@ -52,10 +70,12 @@ class MainMenu : Scene
 	
 	void update()
 	{
+		TimeOfDay.update();
+		Background.update();
 		Terrain.update();
 		
 		// Update all ui objects
-		for(int i = 0; i < uiObjects.size; i++)
+		for(int i = 0; i < uiObjects.size; ++i)
 		{
 			uiObjects[i].update();
 		}
@@ -80,7 +100,7 @@ class MainMenu : Scene
 		Shadows.clear();
 		
 		// Draw all ui objects
-		for(int i = 0; i < uiObjects.size; i++)
+		for(int i = 0; i < uiObjects.size; ++i)
 		{
 			uiObjects[i].draw(@batch);
 		}

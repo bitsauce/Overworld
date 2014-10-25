@@ -36,23 +36,25 @@ class CreateWorldMenu : Scene
 	
 	void update()
 	{
+		Terrain.update();
+		
 		// Update all ui objects
-		for(int i = 0; i < uiObjects.size; i++) {
+		for(int i = 0; i < uiObjects.size; ++i) {
 			uiObjects[i].update();
 		}
 	}
 	
 	void draw()
-	{
+	{
 		// Clear batch
 		batch.clear();
 		
 		// Draw all ui objects
-		for(int i = 0; i < uiObjects.size; i++)
+		for(int i = 0; i < uiObjects.size; ++i)
 		{
 			uiObjects[i].draw(@batch);
 		}
-		
+		
 		// Draw batch
 		batch.draw();
 	}

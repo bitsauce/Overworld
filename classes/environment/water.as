@@ -150,7 +150,7 @@ class Water
 	void update()
 	{
 		Terrain @terrain = @scene::game.getTerrain();
-		for(int i = 0; i < waterList.size; i++)
+		for(int i = 0; i < waterList.size; ++i)
 		{
 			WaterTile @water = @waterList[i];
 			
@@ -190,7 +190,7 @@ class Water
 	
 	void draw()
 	{
-		for(int i = 0; i < waterList.size; i++) {
+		for(int i = 0; i < waterList.size; ++i) {
 			waterList[i].draw();
 		}
 	}

@@ -12,8 +12,8 @@ class TerrainGen
 	
 	TileID getTileAt(const int x, const int y)
 	{
-		float h = noise.valueAt((seed + x), seed) * 7;
-		if(y > h && noise.valueAt(seed + x, seed + y) < 0.5f - Math.atan((y - h - 30) * 0.1f)/Math.PI)
+		float h = 0;//noise.valueAt((seed + x), seed) * 7;
+		if(y > h)// && noise.valueAt(seed + x, seed + y) < 0.5f - Math.atan((y - h - 30) * 0.1f)/Math.PI)
 			return GRASS_TILE;
 		return EMPTY_TILE;
 	}
@@ -75,7 +75,7 @@ class TerrainGen
 				int r = 5;
 				for(int j = -r; j <= r; j++)
 				{
-					for(int i = -r; i <= r; i++)
+					for(int i = -r; i <= r; ++i)
 					{
 						if(Math.sqrt(j*j+i*i) >= r)
 							continue;
@@ -102,7 +102,7 @@ class TerrainGen
 			int treeRadius = treeHeight/2.0f;
 			for(int j = -treeRadius; j < treeHeight; j++)
 			{
-				for(int i = -treeRadius; i < treeHeight; i++)
+				for(int i = -treeRadius; i < treeHeight; ++i)
 				{
 					if(Math.sqrt(i*i+j*j) >= treeRadius) continue;
 					terrain.addTile(x + i, ground + j - treeHeight + 3, LEAF_TILE);
@@ -128,7 +128,7 @@ class TerrainGen
 					bushCount--;
 					i += Math.getRandomInt(4, 8);
 				}else{
-					i++;
+					++i;
 				}
 			}
 		} while(x < width);*/

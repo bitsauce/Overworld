@@ -12,7 +12,7 @@ class DebugManager
 		font::large.setColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 		string drawString;
 		array<string> @keys = variables.getKeys();
-		for(int i = 0; i < keys.size; i++)
+		for(int i = 0; i < keys.size; ++i)
 		{
 			string str;
 			variables.get(keys[i], str);

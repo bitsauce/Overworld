@@ -331,7 +331,7 @@ class Inventory
 	
 	void updateCrafing()
 	{
-		for(int i = 0; i < recipies.size; i++)
+		for(int i = 0; i < recipies.size; ++i)
 		{
 			bool match = true;
 			for(int y = 0; y < 3; y++)

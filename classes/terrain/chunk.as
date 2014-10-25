@@ -91,9 +91,9 @@ class TerrainChunk : Serializable
 			TileID tile = Terrain.generator.getTileAt(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y);
 			
 			if(x == 0 || y == 0 || x == CHUNK_SIZE-1 || y == CHUNK_SIZE-1)
-				Terrain.addTile(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y, tile);
+				Terrain.setTile(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y, tile);
 			else
-				addTile(x, y, tile);
+				setTile(x, y, tile);
 				
 			loadPos++;
 			if(loadPos >= CHUNK_SIZE*CHUNK_SIZE)
@@ -172,7 +172,7 @@ class TerrainChunk : Serializable
 			{
 				int tile;
 				ss.read(tile);
-				addTile(x, y, TileID(tile));
+				setTile(x, y, TileID(tile));
 			}
 		}
 	}
@@ -187,7 +187,7 @@ class TerrainChunk : Serializable
 	
 	TileID getTileAt(const int x, const int y) const
 	{
-		return isValid(x, y) ? tiles[x, y] : NULL_TILE;
+		return state > CHUNK_LOAD_BUFFERS ? tiles[x, y] : NULL_TILE;
 	}
 	
 	bool isTileAt(const int x, const int y, const bool reserved = true) const
@@ -195,32 +195,17 @@ class TerrainChunk : Serializable
 		return reserved ? (getTileAt(x, y) > RESERVED_TILE) : (getTileAt(x, y) != EMPTY_TILE);
 	}
 	
-	bool addTile(const int x, const int y, const TileID tile)
+	bool setTile(const int x, const int y, const TileID tile)
 	{
 		// Make sure we can add a tile here
-		if(!isValid(x, y) || isTileAt(x, y) || tile == EMPTY_TILE)
-			return false;
-		
-		// Set the tile value
-		tiles[x, y] = tile;
-		if(state == CHUNK_INITIALIZED) modified = true;
-		
-		// Return true
-		return true;
-	}
-	
-	bool removeTile(const int x, const int y)
-	{
-		// Make sure there is a tile to remove
-		if(!isValid(x, y) || !isTileAt(x, y))
-			return false;
-		
-		// Set the tile value
-		tiles[x, y] = EMPTY_TILE;
-		if(state == CHUNK_INITIALIZED) modified = true;
-		
-		// Return true
-		return true;
+		if(isValid(x, y) && tiles[x, y] != tile)
+		{
+			// Set the tile value
+			tiles[x, y] = tile;
+			if(state == CHUNK_INITIALIZED) modified = true; // mark chunk as modified
+			return true; // return true as something was changed
+		}
+		return false; // nothing changed
 	}
 	
 	void updateTile(const int x, const int y, const uint tileState, const bool fixture = false)

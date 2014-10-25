@@ -35,7 +35,7 @@ class GameScene : Scene
 	
 	Furniture @getHoveredFurniture() const
 	{
-		for(int i = 0; i < furnitures.size; i++)
+		for(int i = 0; i < furnitures.size; ++i)
 		{
 			if(furnitures[i].isHovered())
 				return @furnitures[i];
@@ -65,7 +65,7 @@ class GameScene : Scene
 		
 		Player @player = null;
 		float minDist = 0.0f;
-		for(int i = 0; i < players.size; i++)
+		for(int i = 0; i < players.size; ++i)
 		{
 			float tmpDist = (players[i].body.getCenter() - position).length();
 			if(tmpDist < minDist || @player == null) {
@@ -162,7 +162,7 @@ class GameScene : Scene
 		
 		// Load all objects
 		array<string> @objectFiles = @FileSystem.listFiles(worldDir + "/objects", "*.obj");
-		for(int i = 0; i < objectFiles.size; i++)
+		for(int i = 0; i < objectFiles.size; ++i)
 		{
 			GameObject @object = cast<GameObject>(@Scripts.deserialize(objectFiles[i]));
 			objects.insertLast(@object);
@@ -185,7 +185,7 @@ class GameScene : Scene
 		
 		// Save game objects
 		FileSystem.remove(worldDir + "/objects");
-		for(int i = 0; i < objects.size; i++) {
+		for(int i = 0; i < objects.size; ++i) {
 			Scripts.serialize(cast<Serializable>(@objects[i]), worldDir + "/objects/" + i + ".obj");
 		}
 	}
@@ -197,7 +197,7 @@ class GameScene : Scene
 		resized(Window.getSize().x, Window.getSize().y);
 		
 		// Create layer batches
-		for(int i = 0; i < batches.size; i++) {
+		for(int i = 0; i < batches.size; ++i) {
 			@batches[i] = @Batch();
 		}
 	}
@@ -225,7 +225,7 @@ class GameScene : Scene
 		//Water.update();
 		
 		// Update all game objects
-		for(int i = 0; i < objects.size; i++) {
+		for(int i = 0; i < objects.size; ++i) {
 			objects[i].update();
 		}
 	}
@@ -233,7 +233,7 @@ class GameScene : Scene
 	void draw()
 	{
 		// Clear batches
-		for(int i = 0; i < batches.size; i++) {
+		for(int i = 0; i < batches.size; ++i) {
 			batches[i].clear();
 		}
 	
@@ -249,7 +249,7 @@ class GameScene : Scene
 		}
 		
 		// Draw game object into batches
-		for(int i = 0; i < objects.size; i++) {
+		for(int i = 0; i < objects.size; ++i) {
 			objects[i].draw();
 		}
 		
@@ -283,7 +283,7 @@ class GameScene : Scene
 		batches[FOREGROUND].draw();
 		
 		// Draw remaining batches
-		for(int i = FOREGROUND + 1; i < batches.size; i++) {
+		for(int i = FOREGROUND + 1; i < batches.size; ++i) {
 			batches[i].draw();
 		}
 		

@@ -1,6 +1,6 @@
 class TimeOfDayManager
 {
-	private float time = 13*60; // one o' clock
+	private float time = 10*60;
 	void serialize(StringStream &ss)
 	{
 		ss.write(time);
@@ -45,7 +45,8 @@ class TimeOfDayManager
 		if(Input.getKeyState(KEY_0))
 		{
 			time += 10.0f;
-		}else if(Input.getKeyState(KEY_9))
+		}
+		else if(Input.getKeyState(KEY_9))
 		{
 			time -= 10.0f;
 		}

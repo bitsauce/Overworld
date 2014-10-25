@@ -6,28 +6,53 @@ Vector4 rgbvec(uint8 r, uint8 g, uint8 b, uint8 a = 255)
 	return Vector4(r/255.0f, g/255.0f, b/255.0f, a/255.0f);
 }
 
-Vector4 blendRgb(Vector4 dst, Vector4 src)
+Vector3 mixColors(const Vector3 &in c1, const Vector3 &in c2, const float a)
 {
-	// Alpha blending
-	Vector4 ret(1.0f);
-	ret.rgb = src.rgb*src.a + dst.rgb*(1.0f-src.a);
-	return ret;
+	return c1*a + c2 * (1.0f - a);
 }
 
 class Color
 {
-	Color(uint8 r, uint8 g, uint8 b, uint8 a = 255)
+	Color(uint8 r = 255, uint8 g = 255, uint8 b = 255, uint8 a = 255)
 	{
-		this.r = r;
-		this.g = g;
-		this.b = b;
-		this.a = a;
+		colorVec.set(r/255.0f, g/255.0f, b/255.0f, a/255.0f);
 	}
 	
-	uint8 r;
-	uint8 g;
-	uint8 b;
-	uint8 a;
+	uint8 get_r() const { return colorVec.r*255; }
+	uint8 get_g() const { return colorVec.g*255; }
+	uint8 get_b() const { return colorVec.b*255; }
+	uint8 get_a() const { return colorVec.a*255; }
+	
+	Color &opAssign(const Color &in other)
+	{
+		colorVec = other.colorVec;
+		return this;
+	}
+	
+	Color &opAssign(const Vector3 &in other)
+	{
+		colorVec.rgb = other;
+		return this;
+	}
+	
+	Vector3 opImplConv() const
+	{
+		return colorVec.rgb;
+	}
+	
+	Color blend(const Color &in dst) const
+	{
+		Color res;
+		res.colorVec.rgb = colorVec.rgb * colorVec.a + dst.colorVec.rgb * (1.0f - colorVec.a);
+		return res;
+	}
+	
+	void dump()
+	{
+		Console.log("("+r+", "+g+", "+b+", "+a+")");
+	}
+	
+	Vector4 colorVec;
 }
 
 class BackgroundManager
@@ -85,13 +110,14 @@ class BackgroundManager
 			{
 				// Percentage of sunrise
 				float minscale = 1.0f - (540-time)/180.0f; // Aka. (9*60-time)/(6*60-9*60)
-				//topColor = blendRgb(Vector4(0.0f, 0.0f, 0.0f, 1.0f), rgbvec(255, 255, 255, 255*minscale));
-				//bottomColor = blendRgb(rgbvec(10, 60, 110, 255), rgbvec(90, 170, 255, 255*minscale));
-			}else
+				topColor = mixColors(Color(255, 255, 255), Color(0, 0, 0), minscale);
+				bottomColor = mixColors(Color(90, 170, 255), Color(10, 60, 110), minscale);
+			}
+			else
 			{
 				// Set day gradient
-				//topColor = rgbvec(255, 255, 255);
-				//bottomColor = rgbvec(90, 170, 255);
+				topColor = Color(255, 255, 255);
+				bottomColor = Color(90, 170, 255);
 			}
 			
 			// Place sun
@@ -101,20 +127,21 @@ class BackgroundManager
 			sun.setPosition(Vector2(windowSize.x/2.0f - sunSize.x/2.0f + Math.cos(Math.PI*ang) * (windowSize.x/2.0f + sunSize.x/4.0f),
 									windowSize.y/2.0f - Math.sin(Math.PI*ang) * (windowSize.y/2.0f + 64)));
 			sun.setRotation(180*(1.0f-ang));
-		}else
+		}
+		else
 		{
 			// Apply sunset from 18:00 to 21:00
 			if(hour >= 18 && hour < 21)
 			{
 				// Percentage of sunset
 				float minscale = 1.0f - (1260-time)/180.0f; // Aka. (21*60-time)/(18*60-21*60)
-				//topColor = blendRgb(rgbvec(255, 255, 255, 255), rgbvec(0, 0, 0, 255*minscale));
-				//bottomColor = blendRgb(rgbvec(90, 170, 255, 255), rgbvec(10, 60, 110, 255*minscale));
+				topColor = mixColors(Color(0, 0, 0, 255), Color(255, 255, 255), minscale);
+				bottomColor = mixColors(Color(10, 60, 110, 255), Color(90, 170, 255), minscale);
 			}else
 			{
 				// Set night gradient
-				//topColor = rgbvec(0, 0, 0);
-				//bottomColor = rgbvec(10, 60, 110);
+				topColor = Color(0, 0, 0);
+				bottomColor = Color(10, 60, 110);
 			}
 				
 			// Place moon
@@ -152,11 +179,13 @@ class BackgroundManager
 			if(hour >= 6 && hour < 18)
 			{
 				sun.draw(@background);
-			}else
+			}
+			else
 			{
 				moon.draw(@background);
 			}
-		}else
+		}
+		else
 		{
 			// Draw sun/moon
 			Vector2 lightPos;
@@ -165,7 +194,9 @@ class BackgroundManager
 			{
 				sun.draw(@fbo);
 				lightPos = sun.getCenter();
-			}else{
+			}
+			else
+			{
 				moon.draw(@fbo);
 				lightPos = moon.getCenter();
 			}
