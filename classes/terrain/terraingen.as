@@ -1,3 +1,8 @@
+float lerp(float v0, float v1, float t)
+{
+	return (1.0f-t)*v0 + t*v1;
+}
+
 class TerrainGen
 {
 	int seed;
@@ -12,8 +17,8 @@ class TerrainGen
 	
 	TileID getTileAt(const int x, const int y)
 	{
-		float h = 0;//noise.valueAt((seed + x), seed) * 7;
-		if(y > h)// && noise.valueAt(seed + x, seed + y) < 0.5f - Math.atan((y - h - 30) * 0.1f)/Math.PI)
+		float h = noise.valueAt((seed + x), seed) * 7;
+		if(noise.valueAt(seed + x, seed + y) < lerp(0.0f, 1.0f, y/10.0f))
 			return GRASS_TILE;
 		return EMPTY_TILE;
 	}

@@ -180,25 +180,25 @@ class TerrainChunk : Serializable
 	int getX() const { return chunkX; }
 	int getY() const { return chunkY; }
 	
-	bool isValid(const int x, const int y) const
-	{
-		return state > CHUNK_LOAD_BUFFERS && x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE;
-	}
-	
 	TileID getTileAt(const int x, const int y) const
 	{
 		return state > CHUNK_LOAD_BUFFERS ? tiles[x, y] : NULL_TILE;
 	}
 	
-	bool isTileAt(const int x, const int y, const bool reserved = true) const
+	bool isTileAt(const int x, const int y) const
 	{
-		return reserved ? (getTileAt(x, y) > RESERVED_TILE) : (getTileAt(x, y) != EMPTY_TILE);
+		return state > CHUNK_LOAD_BUFFERS && tiles[x, y] != EMPTY_TILE;
+	}
+	
+	bool isReservedTileAt(const int x, const int y) const
+	{
+		return state > CHUNK_LOAD_BUFFERS && tiles[x, y] > RESERVED_TILE;
 	}
 	
 	bool setTile(const int x, const int y, const TileID tile)
 	{
 		// Make sure we can add a tile here
-		if(isValid(x, y) && tiles[x, y] != tile)
+		if(state > CHUNK_LOAD_BUFFERS && tiles[x, y] != tile)
 		{
 			// Set the tile value
 			tiles[x, y] = tile;
@@ -296,9 +296,6 @@ class TerrainChunk : Serializable
 	// SHADOWS
 	float getOpacity(const int x, const int y)
 	{
-		if(!isValid(x, y))
-			return 0.0f;
-		
 		float opacity = 0.0f;
 		opacity += game::tiles[getTileAt(x, y)].getOpacity();
 		return opacity;
@@ -320,13 +317,13 @@ class TerrainChunk : Serializable
 	
 	private bool isFixtureAt(const int x, const int y)
 	{
-		return isValid(x, y) ? @fixtures[x, y] != null : false;
+		return state > CHUNK_LOAD_BUFFERS ? @fixtures[x, y] != null : false;
 	}
 	
 	private void updateFixture(const int x, const int y, const uint state)
 	{
 		// Find out if this tile should contain a fixture
-		bool shouldContainFixture = isTileAt(x, y, true) && (state & NESW != NESW);
+		bool shouldContainFixture = isReservedTileAt(x, y) && (state & NESW != NESW);
 		
 		// Create or remove fixture
 		if(shouldContainFixture && !isFixtureAt(x, y))
