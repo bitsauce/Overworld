@@ -11,7 +11,6 @@ class TerrainManager : Serializable
 {
 	// Terrain chunks
 	private array<TerrainChunk@> loadedChunks;
-	private array<TerrainChunk@> chunkLoadNowQueue;
 	private array<TerrainChunk@> chunkLoadQueue;
 	private dictionary chunks;
 	private VertexBuffer @chunkBuffer;
@@ -137,11 +136,13 @@ class TerrainManager : Serializable
 		{
 			@chunkN = @getChunk(chunkX, chunkY-1);
 			if(chunkN.isTileAt(tileX, CHUNK_SIZE-1)) state |= NORTH;
+			if(chunk.isTileAt(tileX, tileY+1)) state |= SOUTH;
 		}
 		else if(tileY == CHUNK_SIZE-1)
 		{
 			@chunkS = @getChunk(chunkX, chunkY+1);
 			if(chunkS.isTileAt(tileX, 0)) state |= SOUTH;
+			if(chunk.isTileAt(tileX, tileY-1)) state |= NORTH;
 		}
 		else
 		{

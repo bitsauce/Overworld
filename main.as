@@ -27,10 +27,6 @@ void main()
 	Engine.pushScene(@scene::main);
 }
 
-void draw()
-{
-}
-
 void update()
 {
 	exit();
