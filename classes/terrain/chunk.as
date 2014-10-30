@@ -7,6 +7,9 @@ enum ChunkState
 	CHUNK_INITIALIZED
 }
 
+Shader @blurHShader = @Shader(":/shaders/blur_h.vert", ":/shaders/blur_h.frag");
+Shader @blurVShader = @Shader(":/shaders/blur_v.vert", ":/shaders/blur_v.frag");
+
 class TerrainChunk : Serializable
 {
 	// PARTIAL LOADING
@@ -22,8 +25,11 @@ class TerrainChunk : Serializable
 	private grid<b2Fixture@> fixtures;
 	
 	// DRAWING
-	private VertexBuffer @vbo;
+	private VertexBuffer vbo;
 	private Texture @shadowMap;
+	private Texture @shadowPass1;
+	private Texture @shadowPass2;
+	private int shadowRadius;
 	private TextureAtlas @tileAtlas;
 	
 	// MISC
@@ -50,6 +56,11 @@ class TerrainChunk : Serializable
 		this.loadPos = 0;
 		this.modified = false; // not modified
 		@this.tileAtlas = @game::tiles.getAtlas();
+		this.shadowRadius = 4;
+		@this.shadowMap = @Texture(CHUNK_SIZE + shadowRadius*2, CHUNK_SIZE + shadowRadius*2);
+		@this.shadowPass1 = @Texture(CHUNK_SIZE + shadowRadius*2, CHUNK_SIZE + shadowRadius*2);
+		@this.shadowPass2 = @Texture(CHUNK_SIZE + shadowRadius*2, CHUNK_SIZE + shadowRadius*2);
+		this.shadowPass2.setFiltering(LINEAR);
 	}
 	
 	bool loadNext()
@@ -71,13 +82,10 @@ class TerrainChunk : Serializable
 			tiles = grid<TileID>(CHUNK_SIZE, CHUNK_SIZE, EMPTY_TILE);
 			
 			// Make the chunk buffer static
-			@vbo = @Terrain.getEmptyChunkBuffer();
-			vbo.makeStatic();
+			vbo = Terrain.getEmptyChunkBuffer();
+			vbo.setBufferType(DYNAMIC_BUFFER);
 			
 			// Setup shadow map
-			@shadowMap = @Texture(CHUNK_SIZE, CHUNK_SIZE);
-			shadowMap.setFiltering(LINEAR);
-			shadowMap.setWrapping(CLAMP_TO_EDGE);
 			
 			// Go to next load state
 			state = CHUNK_LOAD_TILES;
@@ -213,11 +221,9 @@ class TerrainChunk : Serializable
 		if(state >= CHUNK_UPDATE_TILES)
 		{
 			// Update shadow map
-			float opacity = getOpacity(x, y);
-			array<Vector4> pixel = {
-				Vector4(0.0f, 0.0f, 0.0f, opacity)
-			};
-			shadowMap.updateSection(x, CHUNK_SIZE - y - 1, Pixmap(1, 1, pixel));
+			/*float opacity = getOpacity(x, y);
+			array<Vector4> pixel = { Vector4(0.0f, 0.0f, 0.0f, opacity) };
+			shadowMap.updateSection(x + shadowRadius, CHUNK_SIZE - y - 1 + shadowRadius, Pixmap(1, 1, pixel));*/
 			
 			// Get tile
 			TileID tile = tiles[x, y];
@@ -336,21 +342,62 @@ class TerrainChunk : Serializable
 		}
 	}
 	
+	private void updateShadows()
+	{
+		for(int y = -shadowRadius; y <= CHUNK_SIZE + shadowRadius; ++y)
+		{
+			for(int x = -shadowRadius; x <= CHUNK_SIZE + shadowRadius; ++x)
+			{
+				int tileX = chunkX*CHUNK_SIZE + x, tileY = chunkY*CHUNK_SIZE + y;
+				float opacity = Terrain.getChunk(Math.floor(tileX / CHUNK_SIZEF), Math.floor(tileY / CHUNK_SIZEF)).getOpacity(Math.mod(tileX, CHUNK_SIZE), Math.mod(tileY, CHUNK_SIZE));
+				array<Vector4> pixel = { Vector4(0.0f, 0.0f, 0.0f, opacity) };
+				shadowMap.updateSection(x + shadowRadius, CHUNK_SIZE - y - 1 + shadowRadius, Pixmap(1, 1, pixel));
+			}
+		}
+		
+		Batch @batch = @Batch();
+		
+		// Blur horizontally
+		shadowPass1.clear();
+		blurHShader.setSampler2D("u_texture", @shadowMap);
+		blurHShader.setUniform1i("u_width", CHUNK_SIZE + shadowRadius*2);
+		blurHShader.setUniform1i("u_radius", shadowRadius-1);
+		batch.setShader(@blurHShader);
+		Shape(Rect(0, 0, CHUNK_SIZE + shadowRadius*2, CHUNK_SIZE + shadowRadius*2)).draw(@batch);
+		batch.renderToTexture(@shadowPass1);
+		batch.clear();
+		
+		// Blur vertically
+		shadowPass2.clear();
+		blurVShader.setSampler2D("u_texture", @shadowPass1);
+		blurVShader.setSampler2D("u_filter", @shadowMap);
+		blurVShader.setUniform1i("u_height", CHUNK_SIZE + shadowRadius*2);
+		blurVShader.setUniform1i("u_radius", shadowRadius-1);
+		batch.setShader(@blurVShader);
+		Shape(Rect(0, 0, CHUNK_SIZE + shadowRadius*2, CHUNK_SIZE + shadowRadius*2)).draw(@batch);
+		batch.renderToTexture(@shadowPass2);
+		batch.clear();
+	}
+	
 	// DRAWING
 	void draw(const Matrix4 &in projmat)
 	{
 		if(state == CHUNK_INITIALIZED)
 		{
+			// Draw tiles
 			Batch @batch = @Batch();
 			batch.setProjectionMatrix(projmat);
 			vbo.draw(@batch, @tileAtlas.getTexture());
+			batch.draw();
+			batch.clear();
+			//updateShadows();
 			
-			Sprite @shadows = @Sprite(TextureRegion(@shadowMap, 0.0f, 0.0f, 1.0f, 1.0f));
+			// Draw shadows
+			/*float f = shadowRadius/(CHUNK_SIZEF + shadowRadius*2);
+			Sprite @shadows = @Sprite(TextureRegion(@shadowPass2, f, f, 1.0-f, 1.0-f));
 			shadows.setPosition(CHUNK_SIZE*TILE_SIZE*chunkX, CHUNK_SIZE*TILE_SIZE*chunkY);
 			shadows.setSize(CHUNK_SIZE*TILE_SIZE, CHUNK_SIZE*TILE_SIZE);
-			shadows.draw(@Shadows);
-			
-			batch.draw();
+			shadows.draw(@Shadows);*/
 		}
 	}
 }

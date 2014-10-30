@@ -88,21 +88,6 @@ class GameScene : Scene
 	// Terrain FBO
 	private Texture @terrainFbo;
 	
-	// TODO:
-	// I really should create a system for managing
-	// manager/global objects such as those below.
-	//
-	// I am thinking along the lines of doing something like
-	// 	cast<Terrain@>(Get("terrain"))
-	//
-	// Alternatively I might want to make them singletons
-	//  Terrain.addTile();
-	//
-	// Maybe have a class Singleton which they inherit from
-	//  
-	// Also, I might want to concider reimplementing a
-	// updating priority queue.
-	
 	void setWorldDir(string worldDir)
 	{
 		// Set world directory
@@ -258,6 +243,10 @@ class GameScene : Scene
 		
 		// Draw terrain background
 		Terrain.draw(TERRAIN_BACKGROUND, @batches[BACKGROUND]);
+		
+		Shadows.setProjectionMatrix(Camera.getProjectionMatrix());
+		Shadows.draw();
+		Shadows.clear();
 		
 		// Draw scene content
 		batches[SCENE].draw();

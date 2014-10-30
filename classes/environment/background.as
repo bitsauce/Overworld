@@ -1,5 +1,3 @@
-array<uint> QUAD_INDICES = { 0,3,1, 1,3,2 };
-
 // TODO: Add background colors again...
 Vector4 rgbvec(uint8 r, uint8 g, uint8 b, uint8 a = 255)
 {
@@ -10,6 +8,9 @@ Vector3 mixColors(const Vector3 &in c1, const Vector3 &in c2, const float a)
 {
 	return c1*a + c2 * (1.0f - a);
 }
+
+// Quad indices
+array<uint> QUAD_INDICES = { 0, 3, 2, 0, 2, 1 };
 
 class Color
 {
@@ -170,7 +171,6 @@ class BackgroundManager
 		vertices[3].set4f(VERTEX_POSITION, 0, Window.getSize().y);
 		vertices[3].set4ub(VERTEX_COLOR, bottomColor.r, bottomColor.g, bottomColor.b, bottomColor.a);
 		
-		//Batch @background = scene::game.getBatch(BACKGROUND);
 		background.addVertices(vertices, QUAD_INDICES);
 		
 		if(!Input.getKeyState(KEY_G))

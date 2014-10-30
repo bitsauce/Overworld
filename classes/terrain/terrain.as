@@ -13,7 +13,7 @@ class TerrainManager : Serializable
 	private array<TerrainChunk@> loadedChunks;
 	private array<TerrainChunk@> chunkLoadQueue;
 	private dictionary chunks;
-	private VertexBuffer @chunkBuffer;
+	private VertexBuffer chunkBuffer;
 	private int chunkLoadSpeed;
 	
 	// Terrain generator
@@ -39,7 +39,7 @@ class TerrainManager : Serializable
 		fmt.set(VERTEX_TEX_COORD, 2);
 		
 		// Create chunk buffer
-		@chunkBuffer = @VertexBuffer(fmt);
+		chunkBuffer = VertexBuffer(fmt);
 		//for(int i = 0; i < 2; ++i)
 		{
 			for(int y = 0; y < CHUNK_SIZE; ++y)
@@ -82,9 +82,9 @@ class TerrainManager : Serializable
 		chunkLoadSpeed = 257;
 	}
 	
-	VertexBuffer @getEmptyChunkBuffer()
+	VertexBuffer getEmptyChunkBuffer()
 	{
-		return @chunkBuffer.copy();
+		return chunkBuffer;
 	}
 	
 	void serialize(StringStream &ss)
@@ -132,102 +132,103 @@ class TerrainManager : Serializable
 		TerrainChunk @chunk = @getChunk(chunkX, chunkY), chunkN, chunkS;
 		if(chunk.getState() == CHUNK_DUMMY) return 0;
 		
+		TileID tile = chunk.getTileAt(tileX, tileY);
 		if(tileY == 0)
 		{
 			@chunkN = @getChunk(chunkX, chunkY-1);
-			if(chunkN.isTileAt(tileX, CHUNK_SIZE-1)) state |= NORTH;
-			if(chunk.isTileAt(tileX, tileY+1)) state |= SOUTH;
+			if(chunkN.getTileAt(tileX, CHUNK_SIZE-1) == tile) state |= NORTH;
+			if(chunk.getTileAt(tileX, tileY+1) == tile) state |= SOUTH;
 		}
 		else if(tileY == CHUNK_SIZE-1)
 		{
 			@chunkS = @getChunk(chunkX, chunkY+1);
-			if(chunkS.isTileAt(tileX, 0)) state |= SOUTH;
-			if(chunk.isTileAt(tileX, tileY-1)) state |= NORTH;
+			if(chunkS.getTileAt(tileX, 0) == tile) state |= SOUTH;
+			if(chunk.getTileAt(tileX, tileY-1) == tile) state |= NORTH;
 		}
 		else
 		{
-			if(chunk.isTileAt(tileX, tileY-1)) state |= NORTH;
-			if(chunk.isTileAt(tileX, tileY+1)) state |= SOUTH;
+			if(chunk.getTileAt(tileX, tileY-1) == tile) state |= NORTH;
+			if(chunk.getTileAt(tileX, tileY+1) == tile) state |= SOUTH;
 		}
 		
 		if(tileX == 0)
 		{
 			TerrainChunk @chunkW = @getChunk(chunkX-1, chunkY);
-			if(chunkW.isTileAt(CHUNK_SIZE-1, tileY)) state |= WEST;
+			if(chunkW.getTileAt(CHUNK_SIZE-1, tileY) == tile) state |= WEST;
 			if(tileY == 0)
 			{
-				if(getChunk(chunkX-1, chunkY-1).isTileAt(CHUNK_SIZE-1, CHUNK_SIZE-1)) state |= NORTH_WEST;
-				if(chunkW.isTileAt(CHUNK_SIZE-1, tileY+1)) state |= SOUTH_WEST;
-				if(chunkN.isTileAt(tileX+1, CHUNK_SIZE-1)) state |= NORTH_EAST;
-				if(chunk.isTileAt(tileX+1, tileY+1)) state |= SOUTH_EAST;
+				if(getChunk(chunkX-1, chunkY-1).getTileAt(CHUNK_SIZE-1, CHUNK_SIZE-1) == tile) state |= NORTH_WEST;
+				if(chunkW.getTileAt(CHUNK_SIZE-1, tileY+1) == tile) state |= SOUTH_WEST;
+				if(chunkN.getTileAt(tileX+1, CHUNK_SIZE-1) == tile) state |= NORTH_EAST;
+				if(chunk.getTileAt(tileX+1, tileY+1) == tile) state |= SOUTH_EAST;
 			}
 			else if(tileY == CHUNK_SIZE-1)
 			{
-				if(getChunk(chunkX-1, chunkY+1).isTileAt(CHUNK_SIZE-1, 0)) state |= SOUTH_WEST;
-				if(chunkW.isTileAt(CHUNK_SIZE-1, tileY-1)) state |= NORTH_WEST;
-				if(chunk.isTileAt(tileX+1, tileY-1)) state |= NORTH_EAST;
-				if(chunkS.isTileAt(tileX+1, 0)) state |= SOUTH_EAST;
+				if(getChunk(chunkX-1, chunkY+1).getTileAt(CHUNK_SIZE-1, 0) == tile) state |= SOUTH_WEST;
+				if(chunkW.getTileAt(CHUNK_SIZE-1, tileY-1) == tile) state |= NORTH_WEST;
+				if(chunk.getTileAt(tileX+1, tileY-1) == tile) state |= NORTH_EAST;
+				if(chunkS.getTileAt(tileX+1, 0) == tile) state |= SOUTH_EAST;
 			}
 			else
 			{
-				if(chunkW.isTileAt(CHUNK_SIZE-1, tileY-1)) state |= NORTH_WEST;
-				if(chunkW.isTileAt(CHUNK_SIZE-1, tileY+1)) state |= SOUTH_WEST;
-				if(chunk.isTileAt(tileX+1, tileY-1)) state |= NORTH_EAST;
-				if(chunk.isTileAt(tileX+1, tileY+1)) state |= SOUTH_EAST;
+				if(chunkW.getTileAt(CHUNK_SIZE-1, tileY-1) == tile) state |= NORTH_WEST;
+				if(chunkW.getTileAt(CHUNK_SIZE-1, tileY+1) == tile) state |= SOUTH_WEST;
+				if(chunk.getTileAt(tileX+1, tileY-1) == tile) state |= NORTH_EAST;
+				if(chunk.getTileAt(tileX+1, tileY+1) == tile) state |= SOUTH_EAST;
 			}
-			if(chunk.isTileAt(tileX+1, tileY)) state |= EAST;
+			if(chunk.getTileAt(tileX+1, tileY) == tile) state |= EAST;
 		}
 		else if(tileX == CHUNK_SIZE-1)
 		{
 			TerrainChunk @chunkE = @getChunk(chunkX+1, chunkY);
-			if(chunkE.isTileAt(0, tileY)) state |= EAST;
+			if(chunkE.getTileAt(0, tileY) == tile) state |= EAST;
 			if(tileY == 0)
 			{
-				if(getChunk(chunkX+1, chunkY-1).isTileAt(0, CHUNK_SIZE-1)) state |= NORTH_EAST;
-				if(chunkE.isTileAt(0, tileY+1)) state |= SOUTH_EAST;
-				if(chunkN.isTileAt(tileX-1, CHUNK_SIZE-1)) state |= NORTH_WEST;
-				if(chunk.isTileAt(tileX-1, tileY+1)) state |= SOUTH_WEST;
+				if(getChunk(chunkX+1, chunkY-1).getTileAt(0, CHUNK_SIZE-1) == tile) state |= NORTH_EAST;
+				if(chunkE.getTileAt(0, tileY+1) == tile) state |= SOUTH_EAST;
+				if(chunkN.getTileAt(tileX-1, CHUNK_SIZE-1) == tile) state |= NORTH_WEST;
+				if(chunk.getTileAt(tileX-1, tileY+1) == tile) state |= SOUTH_WEST;
 			}
 			else if(tileY == CHUNK_SIZE-1)
 			{
-				if(getChunk(chunkX+1, chunkY+1).isTileAt(0, 0)) state |= SOUTH_EAST;
-				if(chunkE.isTileAt(0, tileY-1)) state |= NORTH_EAST;
-				if(chunk.isTileAt(tileX-1, tileY-1)) state |= NORTH_WEST;
-				if(chunkS.isTileAt(tileX-1, 0)) state |= SOUTH_WEST;
+				if(getChunk(chunkX+1, chunkY+1).getTileAt(0, 0) == tile) state |= SOUTH_EAST;
+				if(chunkE.getTileAt(0, tileY-1) == tile) state |= NORTH_EAST;
+				if(chunk.getTileAt(tileX-1, tileY-1) == tile) state |= NORTH_WEST;
+				if(chunkS.getTileAt(tileX-1, 0) == tile) state |= SOUTH_WEST;
 			}
 			else
 			{
-				if(chunkE.isTileAt(0, tileY-1)) state |= NORTH_EAST;
-				if(chunkE.isTileAt(0, tileY+1)) state |= SOUTH_EAST;
-				if(chunk.isTileAt(tileX-1, tileY-1)) state |= NORTH_WEST;
-				if(chunk.isTileAt(tileX-1, tileY+1)) state |= SOUTH_WEST;
+				if(chunkE.getTileAt(0, tileY-1) == tile) state |= NORTH_EAST;
+				if(chunkE.getTileAt(0, tileY+1) == tile) state |= SOUTH_EAST;
+				if(chunk.getTileAt(tileX-1, tileY-1) == tile) state |= NORTH_WEST;
+				if(chunk.getTileAt(tileX-1, tileY+1) == tile) state |= SOUTH_WEST;
 			}
-			if(chunk.isTileAt(tileX-1, tileY)) state |= WEST;
+			if(chunk.getTileAt(tileX-1, tileY) == tile) state |= WEST;
 		}
 		else
 		{
-			if(chunk.isTileAt(tileX-1, tileY)) state |= WEST;
-			if(chunk.isTileAt(tileX+1, tileY)) state |= EAST;
+			if(chunk.getTileAt(tileX-1, tileY) == tile) state |= WEST;
+			if(chunk.getTileAt(tileX+1, tileY) == tile) state |= EAST;
 			if(tileY == 0)
 			{
-				if(chunkN.isTileAt(tileX+1, CHUNK_SIZE-1)) state |= NORTH_EAST;
-				if(chunkN.isTileAt(tileX-1, CHUNK_SIZE-1)) state |= NORTH_WEST;
-				if(chunk.isTileAt(tileX+1, tileY+1)) state |= SOUTH_EAST;
-				if(chunk.isTileAt(tileX-1, tileY+1)) state |= SOUTH_WEST;
+				if(chunkN.getTileAt(tileX+1, CHUNK_SIZE-1) == tile) state |= NORTH_EAST;
+				if(chunkN.getTileAt(tileX-1, CHUNK_SIZE-1) == tile) state |= NORTH_WEST;
+				if(chunk.getTileAt(tileX+1, tileY+1) == tile) state |= SOUTH_EAST;
+				if(chunk.getTileAt(tileX-1, tileY+1) == tile) state |= SOUTH_WEST;
 			}
 			else if(tileY == CHUNK_SIZE-1)
 			{
-				if(chunkS.isTileAt(tileX+1, 0)) state |= SOUTH_EAST;
-				if(chunkS.isTileAt(tileX-1, 0)) state |= SOUTH_WEST;
-				if(chunk.isTileAt(tileX+1, tileY-1)) state |= NORTH_EAST;
-				if(chunk.isTileAt(tileX-1, tileY-1)) state |= NORTH_WEST;
+				if(chunkS.getTileAt(tileX+1, 0) == tile) state |= SOUTH_EAST;
+				if(chunkS.getTileAt(tileX-1, 0) == tile) state |= SOUTH_WEST;
+				if(chunk.getTileAt(tileX+1, tileY-1) == tile) state |= NORTH_EAST;
+				if(chunk.getTileAt(tileX-1, tileY-1) == tile) state |= NORTH_WEST;
 			}
 			else
 			{
-				if(chunk.isTileAt(tileX+1, tileY-1)) state |= NORTH_EAST;
-				if(chunk.isTileAt(tileX-1, tileY-1)) state |= NORTH_WEST;
-				if(chunk.isTileAt(tileX+1, tileY+1)) state |= SOUTH_EAST;
-				if(chunk.isTileAt(tileX-1, tileY+1)) state |= SOUTH_WEST;
+				if(chunk.getTileAt(tileX+1, tileY-1) == tile) state |= NORTH_EAST;
+				if(chunk.getTileAt(tileX-1, tileY-1) == tile) state |= NORTH_WEST;
+				if(chunk.getTileAt(tileX+1, tileY+1) == tile) state |= SOUTH_EAST;
+				if(chunk.getTileAt(tileX-1, tileY+1) == tile) state |= SOUTH_WEST;
 			}
 		}
 		
@@ -278,7 +279,7 @@ class TerrainManager : Serializable
 	}
 	
 	// CHUNKS
-	private TerrainChunk @getChunk(const int chunkX, const int chunkY, const bool generate = false)
+	TerrainChunk @getChunk(const int chunkX, const int chunkY, const bool generate = false)
 	{
 		string key = chunkX+";"+chunkY;
 		if(!chunks.exists(key))
