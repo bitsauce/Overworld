@@ -13,8 +13,7 @@ class TerrainManager : Serializable
 	private array<TerrainChunk@> loadedChunks;
 	private array<TerrainChunk@> chunkLoadQueue;
 	private dictionary chunks;
-	private VertexBuffer chunkBuffer;
-	private int chunkLoadSpeed;
+	private VertexFormat vertexFormat;
 	
 	// Terrain generator
 	TerrainGen generator;
@@ -34,57 +33,13 @@ class TerrainManager : Serializable
 		Console.log("Initializing terrain");
 		
 		// Setup vertex format
-		VertexFormat fmt;
-		fmt.set(VERTEX_POSITION, 2);
-		fmt.set(VERTEX_TEX_COORD, 2);
-		
-		// Create chunk buffer
-		chunkBuffer = VertexBuffer(fmt);
-		//for(int i = 0; i < 2; ++i)
-		{
-			for(int y = 0; y < CHUNK_SIZE; ++y)
-			{
-				for(int x = 0; x < CHUNK_SIZE; ++x)
-				{
-					array<Vertex> vertices = fmt.createVertices(4);
-					
-					vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
-					vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
-					vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
-					vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
-					
-					chunkBuffer.addVertices(vertices, QUAD_INDICES);
-					
-					vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
-					vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
-					vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
-					vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
-					
-					chunkBuffer.addVertices(vertices, QUAD_INDICES);
-					
-					vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
-					vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
-					vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
-					vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
-					
-					chunkBuffer.addVertices(vertices, QUAD_INDICES);
-					
-					vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
-					vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
-					vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
-					vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
-					
-					chunkBuffer.addVertices(vertices, QUAD_INDICES);
-				}
-			}
-		}
-		
-		chunkLoadSpeed = 257;
+		vertexFormat.set(VERTEX_POSITION, 2);
+		vertexFormat.set(VERTEX_TEX_COORD, 2);
 	}
 	
-	VertexBuffer getEmptyChunkBuffer()
+	VertexFormat getVertexFormat() const
 	{
-		return chunkBuffer;
+		return vertexFormat;
 	}
 	
 	void serialize(StringStream &ss)
@@ -352,7 +307,7 @@ class TerrainManager : Serializable
 			{
 				if((@chunk = @getChunk(x, y, true)).getState() != CHUNK_INITIALIZED)
 				{
-					while(!chunk.loadNext());
+					chunk.generate();
 				}
 			}
 		}
@@ -369,32 +324,17 @@ class TerrainManager : Serializable
 		TerrainChunk @chunk;
 		if((@chunk = @getChunk(cx, cy, true)).getState() != CHUNK_INITIALIZED)
 		{
-			Console.log("Insta-loading chunk ["+cx+", "+cy+"]");
-			
-			// Since we're not a big fan of invisible collisions, we
-			// will force a instantanious load of the chunk where
-			// the player currently is
+			Console.log("Insta-generate chunk ["+cx+", "+cy+"]");
 			int idx = chunkLoadQueue.findByRef(@chunk);
-			TerrainChunk @chunk = @chunkLoadQueue[idx];
-			chunkLoadQueue.removeAt(idx);
-			while(!chunk.loadNext());
+			if(idx >= 0) chunkLoadQueue.removeAt(idx);
+			chunk.generate();
 		}
 		
-		if(chunkLoadQueue.isEmpty())
+		if(!chunkLoadQueue.isEmpty())
 		{
-			return;
-			//(@chunk = @getChunk(cx, cy, true))
-		}
-		
-		// Load queued chunk
-		@chunk = @chunkLoadQueue[chunkLoadQueue.size-1];
-		for(int i = 0; i < chunkLoadSpeed; ++i)
-		{
-			if(chunk.loadNext())
-			{
-				chunkLoadQueue.removeLast();
-				break;
-			}
+			// Load queued chunk
+			chunkLoadQueue[chunkLoadQueue.size-1].generate();
+			chunkLoadQueue.removeLast();
 		}
 	}
 	
@@ -405,12 +345,6 @@ class TerrainManager : Serializable
 		int y0 = Math.floor(Camera.position.y/CHUNK_SIZE/TILE_SIZE);
 		int x1 = Math.floor((Camera.position.x+Window.getSize().x)/CHUNK_SIZE/TILE_SIZE);
 		int y1 = Math.floor((Camera.position.y+Window.getSize().y)/CHUNK_SIZE/TILE_SIZE);
-		
-		/*int i = 0;
-		while(Input.getKeyState(KEY_L))
-		{
-			getChunk(x0 + ++i, y0, true);
-		}*/
 		
 		for(int y = y0; y <= y1; y++)
 		{

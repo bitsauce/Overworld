@@ -6,10 +6,9 @@
 void main()
 {
 	// Set some key binds
-	Input.bind(KEY_ESCAPE, @toggleFullscreen);
-	Input.bind(KEY_P, @toggleProfiler);
-	Input.bind(KEY_I, @zoomIn);
-	Input.bind(KEY_O, @zoomOut);
+	Input.bind(KEY_ESCAPE, @ToggleFullscreen);
+	Input.bind(KEY_I, @ZoomIn);
+	Input.bind(KEY_O, @ZoomOut);
 	Input.bind(KEY_C, @DebugCreate);
 	//Input.bind(KEY_BACKSPACE, @back);
 	
@@ -24,12 +23,14 @@ void main()
 	// Go fullscreen
 	//toggleFullscreen();
 	
+	Graphics.enableWireframe();
+	
 	Engine.pushScene(@scene::main);
 }
 
 void update()
 {
-	exit();
+	Exit();
 }
 
 void windowResized(int width, int height)

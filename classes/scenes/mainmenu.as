@@ -22,9 +22,9 @@ class MainMenu : Scene
 		
 		// Create buttons
 		Button @spBtn = @Button("Singleplayer", @ButtonCallback(@showSinglePlayer), null);
-		Button @mpBtn = @Button("Multiplayer", @exit, null);
-		Button @opBtn = @Button("Options", @exit, null);
-		Button @qtBtn = @Button("Quit", @exit, null);
+		Button @mpBtn = @Button("Multiplayer", @Exit, null);
+		Button @opBtn = @Button("Options", @Exit, null);
+		Button @qtBtn = @Button("Quit", @Exit, null);
 		
 		spBtn.anchor = CENTER;
 		mpBtn.anchor = CENTER;

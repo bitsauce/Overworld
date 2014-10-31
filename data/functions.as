@@ -1,11 +1,12 @@
 // TOGGLES
-void toggleFullscreen()
+void ToggleFullscreen()
 {
 	if(!Window.isFullscreen())
 	{
 		// Set fullscreen
 		array<Vector2i> @resolutions = Window.getResolutionList();
-		if(resolutions.size != 0) {
+		if(resolutions.size != 0)
+		{
 			Window.setSize(resolutions[resolutions.size-1]);
 			Window.enableFullscreen();
 		}
@@ -15,27 +16,22 @@ void toggleFullscreen()
 	}
 }
 
-void toggleProfiler()
-{
-	//Engine.toggleProfiler();
-}
-
-void zoomIn()
+void ZoomIn()
 {
 	Camera.zoom += 0.1f;
 }
 
-void zoomOut()
+void ZoomOut()
 {
 	Camera.zoom -= 0.1f;
 }
 
-void exit()
+void Exit()
 {
 	Engine.exit();
 }
 
-void back()
+void Back()
 {
 	Engine.popScene();
 }
@@ -58,11 +54,6 @@ bool TerrainPlotTest(int x, int y)
 	return Terrain.getTileAt(x, y) <= RESERVED_TILE;
 }
 
-Thread @debugThread;
 void DebugCreate()
 {
-	if(@debugThread != null)
-	{
-		debugThread.dump();
-	}
 }

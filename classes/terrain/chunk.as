@@ -1,9 +1,7 @@
 enum ChunkState
 {
 	CHUNK_DUMMY,
-	CHUNK_LOAD_BUFFERS,
-	CHUNK_LOAD_TILES,
-	CHUNK_UPDATE_TILES,
+	CHUNK_GENERATING,
 	CHUNK_INITIALIZED
 }
 
@@ -12,10 +10,6 @@ Shader @blurVShader = @Shader(":/shaders/blur_v.vert", ":/shaders/blur_v.frag");
 
 class TerrainChunk : Serializable
 {
-	// PARTIAL LOADING
-	private ChunkState state;
-	private int loadPos;
-	
 	// CHUNK
 	private int chunkX, chunkY;
 	private grid<TileID> tiles;
@@ -34,6 +28,8 @@ class TerrainChunk : Serializable
 	
 	// MISC
 	bool modified;
+	bool generateBuffers;
+	ChunkState state;
 		
 	TerrainChunk()
 	{
@@ -50,96 +46,66 @@ class TerrainChunk : Serializable
 	void init(int chunkX, int chunkY)
 	{
 		// Set chunk vars
+		this.state = CHUNK_GENERATING;
 		this.chunkX = chunkX;
 		this.chunkY = chunkY;
-		this.state = CHUNK_LOAD_BUFFERS;
-		this.loadPos = 0;
-		this.modified = false; // not modified
+		this.generateBuffers = this.modified = false; // not modified
 		@this.tileAtlas = @game::tiles.getAtlas();
 		this.shadowRadius = 4;
 		@this.shadowMap = @Texture(CHUNK_SIZE + shadowRadius*2, CHUNK_SIZE + shadowRadius*2);
 		@this.shadowPass1 = @Texture(CHUNK_SIZE + shadowRadius*2, CHUNK_SIZE + shadowRadius*2);
 		@this.shadowPass2 = @Texture(CHUNK_SIZE + shadowRadius*2, CHUNK_SIZE + shadowRadius*2);
 		this.shadowPass2.setFiltering(LINEAR);
+		
+		// Create body
+		b2BodyDef def;
+		def.type = b2_staticBody;
+		def.position.set(chunkX * CHUNK_SIZE * TILE_SIZE, chunkY * CHUNK_SIZE * TILE_SIZE);
+		def.allowSleep = true;
+		@body = @b2Body(def);
+		body.setObject(@Terrain);
+		
+		// Resize tile grid
+		fixtures = grid<b2Fixture@>(CHUNK_SIZE, CHUNK_SIZE, null);
+		tiles = grid<TileID>(CHUNK_SIZE, CHUNK_SIZE, EMPTY_TILE);
+		vbo = VertexBuffer(Terrain.getVertexFormat());
 	}
 	
-	bool loadNext()
+	void generate()
 	{
-		switch(state)
+		if(state == CHUNK_GENERATING)
 		{
-		case CHUNK_LOAD_BUFFERS:
-		{
-			// Create body
-			b2BodyDef def;
-			def.type = b2_staticBody;
-			def.position.set(chunkX * CHUNK_SIZE * TILE_SIZE, chunkY * CHUNK_SIZE * TILE_SIZE);
-			def.allowSleep = true;
-			@body = @b2Body(def);
-			body.setObject(@Terrain);
+			// Set all tiles
+			for(uint y = 0; y < CHUNK_SIZE; ++y)
+			{
+				for(uint x = 0; x < CHUNK_SIZE; ++x)
+				{
+					tiles[x, y] = Terrain.generator.getTileAt(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y);
+				}
+			}
 			
-			// Resize tile grid
-			fixtures = grid<b2Fixture@>(CHUNK_SIZE, CHUNK_SIZE, null);
-			tiles = grid<TileID>(CHUNK_SIZE, CHUNK_SIZE, EMPTY_TILE);
+			// Load all vertex data
+			for(uint y = 0; y < CHUNK_SIZE; ++y)
+			{
+				for(uint x = 0; x < CHUNK_SIZE; ++x)
+				{
+					TileID tile = tiles[x, y];
+					if(tile > RESERVED_TILE) // no point in updating air/reserved tiles initially
+					{
+						uint state = Terrain.getTileState(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y);
+						vbo.addVertices(game::tiles[tile].getVertices(x, y, state), game::tiles[tile].getIndices());
+						updateFixture(x, y, state);
+					}
+				}
+			}
 			
 			// Make the chunk buffer static
-			vbo = Terrain.getEmptyChunkBuffer();
-			vbo.setBufferType(DYNAMIC_BUFFER);
+			vbo.setBufferType(STATIC_BUFFER);
 			
-			// Setup shadow map
-			
-			// Go to next load state
-			state = CHUNK_LOAD_TILES;
-			break;
+			// Mark chunk as initialized
+			state = CHUNK_INITIALIZED;
+			Console.log("Chunk ["+chunkX+", "+chunkY+"] generated");
 		}
-		
-		case CHUNK_LOAD_TILES:
-		{
-			int x = loadPos % CHUNK_SIZE;
-			int y = loadPos / CHUNK_SIZE;
-			TileID tile = Terrain.generator.getTileAt(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y);
-			
-			if(x == 0 || y == 0 || x == CHUNK_SIZE-1 || y == CHUNK_SIZE-1)
-				Terrain.setTile(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y, tile);
-			else
-				setTile(x, y, tile);
-				
-			loadPos++;
-			if(loadPos >= CHUNK_SIZE*CHUNK_SIZE)
-			{
-				state = CHUNK_UPDATE_TILES;
-				loadPos = 0;
-			}
-			break;
-		}
-		
-		case CHUNK_UPDATE_TILES:
-		{
-			int x = loadPos % CHUNK_SIZE;
-			int y = loadPos / CHUNK_SIZE;
-			if(tiles[x, y] > RESERVED_TILE) // no point in updating air/reserved tiles initially
-			{
-				updateTile(x, y, Terrain.getTileState(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y), true);
-			}
-			loadPos++;
-			if(loadPos >= CHUNK_SIZE*CHUNK_SIZE)
-			{
-				state = CHUNK_INITIALIZED;
-				loadPos = 0;
-				Console.log("Chunk ["+chunkX+", "+chunkY+"] loaded");
-				return true; // loading done
-			}
-			break;
-		}
-		
-		case CHUNK_INITIALIZED:
-			return true;
-		}
-		return false;
-	}
-	
-	ChunkState getState() const
-	{
-		return state;
 	}
 	
 	void serialize(StringStream &ss)
@@ -188,29 +154,34 @@ class TerrainChunk : Serializable
 	int getX() const { return chunkX; }
 	int getY() const { return chunkY; }
 	
+	ChunkState getState() const
+	{
+		return state;
+	}
+	
 	TileID getTileAt(const int x, const int y) const
 	{
-		return state > CHUNK_LOAD_BUFFERS ? tiles[x, y] : NULL_TILE;
+		return state != CHUNK_DUMMY ? tiles[x, y] : NULL_TILE;
 	}
 	
 	bool isTileAt(const int x, const int y) const
 	{
-		return state > CHUNK_LOAD_BUFFERS && tiles[x, y] != EMPTY_TILE;
+		return state != CHUNK_DUMMY && tiles[x, y] != EMPTY_TILE;
 	}
 	
 	bool isReservedTileAt(const int x, const int y) const
 	{
-		return state > CHUNK_LOAD_BUFFERS && tiles[x, y] > RESERVED_TILE;
+		return state != CHUNK_DUMMY && tiles[x, y] > RESERVED_TILE;
 	}
 	
 	bool setTile(const int x, const int y, const TileID tile)
 	{
 		// Make sure we can add a tile here
-		if(state > CHUNK_LOAD_BUFFERS && tiles[x, y] != tile)
+		if(state == CHUNK_INITIALIZED && tiles[x, y] != tile)
 		{
 			// Set the tile value
 			tiles[x, y] = tile;
-			if(state == CHUNK_INITIALIZED) modified = true; // mark chunk as modified
+			generateBuffers = modified = true; // mark chunk as modified
 			return true; // return true as something was changed
 		}
 		return false; // nothing changed
@@ -218,7 +189,7 @@ class TerrainChunk : Serializable
 	
 	void updateTile(const int x, const int y, const uint tileState, const bool fixture = false)
 	{
-		if(state >= CHUNK_UPDATE_TILES)
+		if(state == CHUNK_INITIALIZED)
 		{
 			// Update shadow map
 			/*float opacity = getOpacity(x, y);
@@ -226,7 +197,7 @@ class TerrainChunk : Serializable
 			shadowMap.updateSection(x + shadowRadius, CHUNK_SIZE - y - 1 + shadowRadius, Pixmap(1, 1, pixel));*/
 			
 			// Get tile
-			TileID tile = tiles[x, y];
+			/*TileID tile = tiles[x, y];
 			int i = (y * CHUNK_SIZE + x) * 16;
 			TextureRegion region;
 			if(tile > RESERVED_TILE)
@@ -289,7 +260,7 @@ class TerrainChunk : Serializable
 				vertices[15].set4f(VERTEX_TEX_COORD, 0.0f, 0.0f);
 				
 				vbo.modifyVertices(i, vertices);
-			}
+			}*/
 			
 			// Update fixtures
 			if(fixture)
@@ -323,7 +294,7 @@ class TerrainChunk : Serializable
 	
 	private bool isFixtureAt(const int x, const int y)
 	{
-		return state > CHUNK_LOAD_BUFFERS ? @fixtures[x, y] != null : false;
+		return state != CHUNK_DUMMY ? @fixtures[x, y] != null : false;
 	}
 	
 	private void updateFixture(const int x, const int y, const uint state)
@@ -384,6 +355,26 @@ class TerrainChunk : Serializable
 	{
 		if(state == CHUNK_INITIALIZED)
 		{
+			if(generateBuffers)
+			{
+				// Load all vertex data
+				vbo = VertexBuffer(Terrain.getVertexFormat());
+				for(uint y = 0; y < CHUNK_SIZE; ++y)
+				{
+					for(uint x = 0; x < CHUNK_SIZE; ++x)
+					{
+						TileID tile = tiles[x, y];
+						if(tile > RESERVED_TILE) // no point in updating air/reserved tiles initially
+						{
+							uint state = Terrain.getTileState(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y);
+							vbo.addVertices(game::tiles[tile].getVertices(x, y, state), game::tiles[tile].getIndices());
+						}
+					}
+				}
+				
+				generateBuffers = false;
+			}
+			
 			// Draw tiles
 			Batch @batch = @Batch();
 			batch.setProjectionMatrix(projmat);
