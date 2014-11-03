@@ -13,6 +13,7 @@ class TerrainManager : Serializable
 	private array<TerrainChunk@> loadedChunks;
 	private array<TerrainChunk@> chunkLoadQueue;
 	private dictionary chunks;
+	private dictionary superChunks;
 	private VertexFormat vertexFormat;
 	
 	// Terrain generator
@@ -24,7 +25,7 @@ class TerrainManager : Serializable
 	TerrainManager()
 	{
 		init();
-		generator.seed = Math.getRandomInt();
+		generator.seed = Random().nextInt();
 	}
 	
 	// SERIALIZATION
@@ -71,7 +72,7 @@ class TerrainManager : Serializable
 	// TILE HELPERS
 	TileID getTileAt(const int x, const int y, const TerrainLayer layer = TERRAIN_SCENE)
 	{
-		return getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).getTileAt(Math.mod(x, CHUNK_SIZE), Math.mod(y, CHUNK_SIZE));
+		return getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).getTileAt(Math.mod(x, CHUNK_SIZE), Math.mod(y, CHUNK_SIZE), layer);
 	}
 	
 	bool isTileAt(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
@@ -87,103 +88,103 @@ class TerrainManager : Serializable
 		TerrainChunk @chunk = @getChunk(chunkX, chunkY), chunkN, chunkS;
 		if(chunk.getState() == CHUNK_DUMMY) return 0;
 		
-		TileID tile = chunk.getTileAt(tileX, tileY);
+		TileID tile = chunk.getTileAt(tileX, tileY, layer);
 		if(tileY == 0)
 		{
 			@chunkN = @getChunk(chunkX, chunkY-1);
-			if(chunkN.getTileAt(tileX, CHUNK_SIZE-1) == tile) state |= NORTH;
-			if(chunk.getTileAt(tileX, tileY+1) == tile) state |= SOUTH;
+			if(chunkN.getTileAt(tileX, CHUNK_SIZE-1, layer) == tile) state |= NORTH;
+			if(chunk.getTileAt(tileX, tileY+1, layer) == tile) state |= SOUTH;
 		}
 		else if(tileY == CHUNK_SIZE-1)
 		{
 			@chunkS = @getChunk(chunkX, chunkY+1);
-			if(chunkS.getTileAt(tileX, 0) == tile) state |= SOUTH;
-			if(chunk.getTileAt(tileX, tileY-1) == tile) state |= NORTH;
+			if(chunkS.getTileAt(tileX, 0, layer) == tile) state |= SOUTH;
+			if(chunk.getTileAt(tileX, tileY-1, layer) == tile) state |= NORTH;
 		}
 		else
 		{
-			if(chunk.getTileAt(tileX, tileY-1) == tile) state |= NORTH;
-			if(chunk.getTileAt(tileX, tileY+1) == tile) state |= SOUTH;
+			if(chunk.getTileAt(tileX, tileY-1, layer) == tile) state |= NORTH;
+			if(chunk.getTileAt(tileX, tileY+1, layer) == tile) state |= SOUTH;
 		}
 		
 		if(tileX == 0)
 		{
 			TerrainChunk @chunkW = @getChunk(chunkX-1, chunkY);
-			if(chunkW.getTileAt(CHUNK_SIZE-1, tileY) == tile) state |= WEST;
+			if(chunkW.getTileAt(CHUNK_SIZE-1, tileY, layer) == tile) state |= WEST;
 			if(tileY == 0)
 			{
-				if(getChunk(chunkX-1, chunkY-1).getTileAt(CHUNK_SIZE-1, CHUNK_SIZE-1) == tile) state |= NORTH_WEST;
-				if(chunkW.getTileAt(CHUNK_SIZE-1, tileY+1) == tile) state |= SOUTH_WEST;
-				if(chunkN.getTileAt(tileX+1, CHUNK_SIZE-1) == tile) state |= NORTH_EAST;
-				if(chunk.getTileAt(tileX+1, tileY+1) == tile) state |= SOUTH_EAST;
+				if(getChunk(chunkX-1, chunkY-1).getTileAt(CHUNK_SIZE-1, CHUNK_SIZE-1, layer) == tile) state |= NORTH_WEST;
+				if(chunkW.getTileAt(CHUNK_SIZE-1, tileY+1, layer) == tile) state |= SOUTH_WEST;
+				if(chunkN.getTileAt(tileX+1, CHUNK_SIZE-1, layer) == tile) state |= NORTH_EAST;
+				if(chunk.getTileAt(tileX+1, tileY+1, layer) == tile) state |= SOUTH_EAST;
 			}
 			else if(tileY == CHUNK_SIZE-1)
 			{
-				if(getChunk(chunkX-1, chunkY+1).getTileAt(CHUNK_SIZE-1, 0) == tile) state |= SOUTH_WEST;
-				if(chunkW.getTileAt(CHUNK_SIZE-1, tileY-1) == tile) state |= NORTH_WEST;
-				if(chunk.getTileAt(tileX+1, tileY-1) == tile) state |= NORTH_EAST;
-				if(chunkS.getTileAt(tileX+1, 0) == tile) state |= SOUTH_EAST;
+				if(getChunk(chunkX-1, chunkY+1).getTileAt(CHUNK_SIZE-1, 0, layer) == tile) state |= SOUTH_WEST;
+				if(chunkW.getTileAt(CHUNK_SIZE-1, tileY-1, layer) == tile) state |= NORTH_WEST;
+				if(chunk.getTileAt(tileX+1, tileY-1, layer) == tile) state |= NORTH_EAST;
+				if(chunkS.getTileAt(tileX+1, 0, layer) == tile) state |= SOUTH_EAST;
 			}
 			else
 			{
-				if(chunkW.getTileAt(CHUNK_SIZE-1, tileY-1) == tile) state |= NORTH_WEST;
-				if(chunkW.getTileAt(CHUNK_SIZE-1, tileY+1) == tile) state |= SOUTH_WEST;
-				if(chunk.getTileAt(tileX+1, tileY-1) == tile) state |= NORTH_EAST;
-				if(chunk.getTileAt(tileX+1, tileY+1) == tile) state |= SOUTH_EAST;
+				if(chunkW.getTileAt(CHUNK_SIZE-1, tileY-1, layer) == tile) state |= NORTH_WEST;
+				if(chunkW.getTileAt(CHUNK_SIZE-1, tileY+1, layer) == tile) state |= SOUTH_WEST;
+				if(chunk.getTileAt(tileX+1, tileY-1, layer) == tile) state |= NORTH_EAST;
+				if(chunk.getTileAt(tileX+1, tileY+1, layer) == tile) state |= SOUTH_EAST;
 			}
-			if(chunk.getTileAt(tileX+1, tileY) == tile) state |= EAST;
+			if(chunk.getTileAt(tileX+1, tileY, layer) == tile) state |= EAST;
 		}
 		else if(tileX == CHUNK_SIZE-1)
 		{
 			TerrainChunk @chunkE = @getChunk(chunkX+1, chunkY);
-			if(chunkE.getTileAt(0, tileY) == tile) state |= EAST;
+			if(chunkE.getTileAt(0, tileY, layer) == tile) state |= EAST;
 			if(tileY == 0)
 			{
-				if(getChunk(chunkX+1, chunkY-1).getTileAt(0, CHUNK_SIZE-1) == tile) state |= NORTH_EAST;
-				if(chunkE.getTileAt(0, tileY+1) == tile) state |= SOUTH_EAST;
-				if(chunkN.getTileAt(tileX-1, CHUNK_SIZE-1) == tile) state |= NORTH_WEST;
-				if(chunk.getTileAt(tileX-1, tileY+1) == tile) state |= SOUTH_WEST;
+				if(getChunk(chunkX+1, chunkY-1).getTileAt(0, CHUNK_SIZE-1, layer) == tile) state |= NORTH_EAST;
+				if(chunkE.getTileAt(0, tileY+1, layer) == tile) state |= SOUTH_EAST;
+				if(chunkN.getTileAt(tileX-1, CHUNK_SIZE-1, layer) == tile) state |= NORTH_WEST;
+				if(chunk.getTileAt(tileX-1, tileY+1, layer) == tile) state |= SOUTH_WEST;
 			}
 			else if(tileY == CHUNK_SIZE-1)
 			{
-				if(getChunk(chunkX+1, chunkY+1).getTileAt(0, 0) == tile) state |= SOUTH_EAST;
-				if(chunkE.getTileAt(0, tileY-1) == tile) state |= NORTH_EAST;
-				if(chunk.getTileAt(tileX-1, tileY-1) == tile) state |= NORTH_WEST;
-				if(chunkS.getTileAt(tileX-1, 0) == tile) state |= SOUTH_WEST;
+				if(getChunk(chunkX+1, chunkY+1).getTileAt(0, 0, layer) == tile) state |= SOUTH_EAST;
+				if(chunkE.getTileAt(0, tileY-1, layer) == tile) state |= NORTH_EAST;
+				if(chunk.getTileAt(tileX-1, tileY-1, layer) == tile) state |= NORTH_WEST;
+				if(chunkS.getTileAt(tileX-1, 0, layer) == tile) state |= SOUTH_WEST;
 			}
 			else
 			{
-				if(chunkE.getTileAt(0, tileY-1) == tile) state |= NORTH_EAST;
-				if(chunkE.getTileAt(0, tileY+1) == tile) state |= SOUTH_EAST;
-				if(chunk.getTileAt(tileX-1, tileY-1) == tile) state |= NORTH_WEST;
-				if(chunk.getTileAt(tileX-1, tileY+1) == tile) state |= SOUTH_WEST;
+				if(chunkE.getTileAt(0, tileY-1, layer) == tile) state |= NORTH_EAST;
+				if(chunkE.getTileAt(0, tileY+1, layer) == tile) state |= SOUTH_EAST;
+				if(chunk.getTileAt(tileX-1, tileY-1, layer) == tile) state |= NORTH_WEST;
+				if(chunk.getTileAt(tileX-1, tileY+1, layer) == tile) state |= SOUTH_WEST;
 			}
-			if(chunk.getTileAt(tileX-1, tileY) == tile) state |= WEST;
+			if(chunk.getTileAt(tileX-1, tileY, layer) == tile) state |= WEST;
 		}
 		else
 		{
-			if(chunk.getTileAt(tileX-1, tileY) == tile) state |= WEST;
-			if(chunk.getTileAt(tileX+1, tileY) == tile) state |= EAST;
+			if(chunk.getTileAt(tileX-1, tileY, layer) == tile) state |= WEST;
+			if(chunk.getTileAt(tileX+1, tileY, layer) == tile) state |= EAST;
 			if(tileY == 0)
 			{
-				if(chunkN.getTileAt(tileX+1, CHUNK_SIZE-1) == tile) state |= NORTH_EAST;
-				if(chunkN.getTileAt(tileX-1, CHUNK_SIZE-1) == tile) state |= NORTH_WEST;
-				if(chunk.getTileAt(tileX+1, tileY+1) == tile) state |= SOUTH_EAST;
-				if(chunk.getTileAt(tileX-1, tileY+1) == tile) state |= SOUTH_WEST;
+				if(chunkN.getTileAt(tileX+1, CHUNK_SIZE-1, layer) == tile) state |= NORTH_EAST;
+				if(chunkN.getTileAt(tileX-1, CHUNK_SIZE-1, layer) == tile) state |= NORTH_WEST;
+				if(chunk.getTileAt(tileX+1, tileY+1, layer) == tile) state |= SOUTH_EAST;
+				if(chunk.getTileAt(tileX-1, tileY+1, layer) == tile) state |= SOUTH_WEST;
 			}
 			else if(tileY == CHUNK_SIZE-1)
 			{
-				if(chunkS.getTileAt(tileX+1, 0) == tile) state |= SOUTH_EAST;
-				if(chunkS.getTileAt(tileX-1, 0) == tile) state |= SOUTH_WEST;
-				if(chunk.getTileAt(tileX+1, tileY-1) == tile) state |= NORTH_EAST;
-				if(chunk.getTileAt(tileX-1, tileY-1) == tile) state |= NORTH_WEST;
+				if(chunkS.getTileAt(tileX+1, 0, layer) == tile) state |= SOUTH_EAST;
+				if(chunkS.getTileAt(tileX-1, 0, layer) == tile) state |= SOUTH_WEST;
+				if(chunk.getTileAt(tileX+1, tileY-1, layer) == tile) state |= NORTH_EAST;
+				if(chunk.getTileAt(tileX-1, tileY-1, layer) == tile) state |= NORTH_WEST;
 			}
 			else
 			{
-				if(chunk.getTileAt(tileX+1, tileY-1) == tile) state |= NORTH_EAST;
-				if(chunk.getTileAt(tileX-1, tileY-1) == tile) state |= NORTH_WEST;
-				if(chunk.getTileAt(tileX+1, tileY+1) == tile) state |= SOUTH_EAST;
-				if(chunk.getTileAt(tileX-1, tileY+1) == tile) state |= SOUTH_WEST;
+				if(chunk.getTileAt(tileX+1, tileY-1, layer) == tile) state |= NORTH_EAST;
+				if(chunk.getTileAt(tileX-1, tileY-1, layer) == tile) state |= NORTH_WEST;
+				if(chunk.getTileAt(tileX+1, tileY+1, layer) == tile) state |= SOUTH_EAST;
+				if(chunk.getTileAt(tileX-1, tileY+1, layer) == tile) state |= SOUTH_WEST;
 			}
 		}
 		
@@ -191,9 +192,9 @@ class TerrainManager : Serializable
 	}
 	
 	// TILE MODIFICATION
-	bool setTile(const int x, const int y, TileID tile)
+	bool setTile(const int x, const int y, TileID tile, const TerrainLayer layer = TERRAIN_SCENE)
 	{
-		if(getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).setTile(Math.mod(x, CHUNK_SIZE), Math.mod(y, CHUNK_SIZE), tile))
+		if(getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).setTile(Math.mod(x, CHUNK_SIZE), Math.mod(y, CHUNK_SIZE), tile, layer))
 		{	
 			// Update neighbouring tiles
 			getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(Math.mod(x,   CHUNK_SIZE), Math.mod(y,   CHUNK_SIZE), getTileState(x,   y), true);
@@ -214,7 +215,7 @@ class TerrainManager : Serializable
 	
 	bool removeTile(const int x, const int y, TerrainLayer layer = TERRAIN_SCENE)
 	{
-		if(getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).setTile(Math.mod(x, CHUNK_SIZE), Math.mod(y, CHUNK_SIZE), EMPTY_TILE))
+		if(getChunk(Math.floor(x / CHUNK_SIZEF), Math.floor(y / CHUNK_SIZEF)).setTile(Math.mod(x, CHUNK_SIZE), Math.mod(y, CHUNK_SIZE), EMPTY_TILE, layer))
 		{
 			// Update neighbouring tiles
 			getChunk(Math.floor(x     / CHUNK_SIZEF), Math.floor(y     / CHUNK_SIZEF)).updateTile(Math.mod(x,   CHUNK_SIZE), Math.mod(y,   CHUNK_SIZE), getTileState(x,   y), true);
@@ -253,45 +254,6 @@ class TerrainManager : Serializable
 		}
 		return cast<TerrainChunk@>(chunks[key]);
 	}
-	
-	/*private TerrainChunk @generateChunk(const int chunkX, const int chunkY)
-	{
-		string key = chunkX+";"+chunkY;
-		string chunkFile = scene::game.getWorldDir() + "/chunks/"+key+".obj";
-		TerrainChunk@ chunk;
-		if(FileSystem.fileExists(chunkFile))
-		{
-			// Load chunk from file
-			@chunk = cast<TerrainChunk@>(Scripts.deserialize(chunkFile));
-			chunk.setTerrain(@this);
-			@chunks[key] = @chunk;
-		}
-		else
-		{
-			// Generate chunk
-			@chunk = @TerrainChunk(@this, chunkX, chunkY);
-			@chunks[key] = @chunk;
-			generator.generate(@chunk, chunkX, chunkY);
-		}
-		
-		updateChunk(chunkX, chunkY);
-		return @chunk;
-	}
-	
-	private void updateChunk(const int chunkX, const int chunkY)
-	{
-		TerrainChunk @chunk = getChunk(chunkX,   chunkY);
-		if(!chunk.dummy)
-		{
-			for(int y = 0; y < CHUNK_SIZE; y++)
-			{
-				for(int x = 0; x < CHUNK_SIZE; x++)
-				{
-					chunk.updateTile(x, y, getTileState(chunkX *CHUNK_SIZE + x, chunkY *CHUNK_SIZE + y), true);
-				}
-			}
-		}
-	}*/
 	
 	void loadVisibleChunks()
 	{

@@ -10,7 +10,7 @@ class Bush : Furniture
 	
 	private void init()
 	{
-		@sprite = @Sprite(TextureRegion(@game::textures[BERRY_BUSH_TEXTURE], 0.0f, 0.5f, 1.0f, 1.0f));
+		@sprite = @Sprite(TextureRegion(@Textures[BERRY_BUSH_TEXTURE], 0.0f, 0.5f, 1.0f, 1.0f));
 	}
 	
 	void serialize(StringStream &ss)
@@ -32,10 +32,10 @@ class Bush : Furniture
 		if(berryTimer <= 0.0f)
 		{
 			// Set sprite region to bush without berries
-			sprite.setRegion(TextureRegion(@game::textures[BERRY_BUSH_TEXTURE], 0.0f, 0.0f, 1.0f, 0.5f));
+			sprite.setRegion(TextureRegion(@Textures[BERRY_BUSH_TEXTURE], 0.0f, 0.0f, 1.0f, 0.5f));
 			
 			// Give player berries
-			player.inventory.addItem(@game::items[BERRIES], 5);
+			player.inventory.addItem(@Items[BERRIES], 5);
 			
 			berryTimer = 5.0f; // Respawn in 5 seconds
 		}
@@ -45,7 +45,7 @@ class Bush : Furniture
 	{
 		berryTimer -= Graphics.dt;
 		if(berryTimer <= 0.0f) {
-			sprite.setRegion(TextureRegion(@game::textures[BERRY_BUSH_TEXTURE], 0.0f, 0.5f, 1.0f, 1.0f));
+			sprite.setRegion(TextureRegion(@Textures[BERRY_BUSH_TEXTURE], 0.0f, 0.5f, 1.0f, 1.0f));
 		}
 	}
 	

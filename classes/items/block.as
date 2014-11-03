@@ -5,7 +5,7 @@ class BlockItem : Item
 	BlockItem(ItemID id)
 	{
 		super(id, 255);
-		tile = game::tiles.getByItem(id);
+		tile = Tiles.getByItem(id);
 	}
 	
 	void use(Player @player)

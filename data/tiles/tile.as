@@ -22,7 +22,7 @@ class Tile
 	
 	void createItemDrop(int x, int y)
 	{
-		ItemDrop itemDrop(@game::items[item]);
+		ItemDrop itemDrop(@Items[item]);
 		itemDrop.body.setPosition(Vector2(x, y) * TILE_SIZE + itemDrop.size/2.0f);
 	}
 	
@@ -61,7 +61,7 @@ class Tile
 		uint8 q4 = (((state >> 6) & 0x7) | ((state << 2) & 0x7)) + 0x18;
 		
 		TextureRegion region;
-		TextureAtlas @atlas = @game::tiles.getAtlas();
+		TextureAtlas @atlas = @Tiles.getAtlas();
 		region = atlas.get(id, q1/32.0f, 0.0f, (q1+1)/32.0f, 1.0f);
 		vertices[0].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv1.y);
 		vertices[1].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv1.y);

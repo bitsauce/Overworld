@@ -351,7 +351,7 @@ class Inventory
 			
 			if(match)
 			{
-				addItem(@game::items[recipies[i].result]);
+				addItem(@Items[recipies[i].result]);
 				for(int y = 0; y < 3; y++) {
 					for(int x = 0; x < 3; x++) {
 						craftingSlots[x, y].clear();

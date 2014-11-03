@@ -36,7 +36,7 @@ class Pickaxe : Item
 				if(time >= power)
 				{
 					Terrain.removeTile(pos.x, pos.y, layer);
-					game::tiles[tile].createItemDrop(pos.x, pos.y);
+					Tiles[tile].createItemDrop(pos.x, pos.y);
 				}
 			}else{
 				time = 0.0f;

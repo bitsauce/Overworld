@@ -50,7 +50,7 @@ class ItemDrop : GameObject, Serializable
 		ss.read(id);
 		int amount;
 		ss.read(amount);
-		init(@game::items[id], amount);
+		init(@Items[id], amount);
 		Vector2 pos;
 		ss.read(pos);
 		body.setPosition(pos);

@@ -200,7 +200,7 @@ class Humanoid : GameObject
 		if(event.string == "step")
 		{
 			// Play footstep sound
-			AudioSource @stepSound = @walkDirtSounds[Math.getRandomInt(0, 3)];
+			AudioSource @stepSound = @walkDirtSounds[Random().nextInt(3)];
 			stepSound.play();
 			stepSound.position = body.getPosition();
 		}

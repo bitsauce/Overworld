@@ -124,7 +124,7 @@ class GameScene : Scene
 		player.body.setPosition(Vector2(0, -8.0f*TILE_SIZE));
 		
 		// Give default loadout
-		player.inventory.addItem(@game::items[PICKAXE_IRON]);
+		player.inventory.addItem(@Items[PICKAXE_IRON]);
 		
 		addPlayer(@player);
 	}

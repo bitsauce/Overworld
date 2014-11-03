@@ -95,13 +95,13 @@ class Button : UiObject
 		if(animTime > 0.0f)
 		{
 			buttonSprite.setColor(Vector4(1.0f, 1.0f, 1.0f, animTime));
-			buttonSprite.setRegion(TextureRegion(@game::textures[MENU_BUTTON_TEXTURE], 0.0f, 0.0f, 1.0f, 0.5f));
+			buttonSprite.setRegion(TextureRegion(@Textures[MENU_BUTTON_TEXTURE], 0.0f, 0.0f, 1.0f, 0.5f));
 			buttonSprite.draw(@batch);
 		}
 		
 		// Draw default sprite
 		buttonSprite.setColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
-		buttonSprite.setRegion(TextureRegion(@game::textures[MENU_BUTTON_TEXTURE], 0.0f, 0.5f, 1.0f, 1.0f));
+		buttonSprite.setRegion(TextureRegion(@Textures[MENU_BUTTON_TEXTURE], 0.0f, 0.5f, 1.0f, 1.0f));
 		buttonSprite.draw(@batch);
 		
 		// Draw text

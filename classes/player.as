@@ -77,7 +77,7 @@ class Player : Humanoid, Serializable
 			for(int x = 0; x < INV_WIDTH; x++)
 			{
 				int j = (x + y*INV_WIDTH) * 3;
-				inventory.slots[x, y].set(@game::items[ItemID(parseInt(itemString.substr(j, 3)))], parseInt(amountString.substr(j, 3)));
+				inventory.slots[x, y].set(@Items[ItemID(parseInt(itemString.substr(j, 3)))], parseInt(amountString.substr(j, 3)));
 			}
 		}
 	}

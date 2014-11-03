@@ -16,14 +16,14 @@ void main()
 	Box2D.gravity = Vector2(0.0f, 40.0f);
 	Box2D.scale = TILE_SIZE;
 	
-	game::textures.init();
-	game::tiles.init();
-	game::items.init();
+	Textures.init();
+	Tiles.init();
+	Items.init();
 	
 	// Go fullscreen
 	//toggleFullscreen();
 	
-	Graphics.enableWireframe();
+	//Graphics.enableWireframe();
 	
 	Engine.pushScene(@scene::main);
 }

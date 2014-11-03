@@ -12,7 +12,7 @@ class TerrainChunk : Serializable
 {
 	// CHUNK
 	private int chunkX, chunkY;
-	private grid<TileID> tiles;
+	private array<grid<TileID>> tiles(TERRAIN_LAYERS_MAX);
 	
 	// PHYSICS
 	private b2Body @body;
@@ -24,12 +24,11 @@ class TerrainChunk : Serializable
 	private Texture @shadowPass1;
 	private Texture @shadowPass2;
 	private int shadowRadius;
-	private TextureAtlas @tileAtlas;
 	
 	// MISC
-	bool modified;
-	bool generateBuffers;
-	ChunkState state;
+	/*private*/ bool modified;
+	private bool generateBuffers;
+	private ChunkState state;
 		
 	TerrainChunk()
 	{
@@ -50,7 +49,6 @@ class TerrainChunk : Serializable
 		this.chunkX = chunkX;
 		this.chunkY = chunkY;
 		this.generateBuffers = this.modified = false; // not modified
-		@this.tileAtlas = @game::tiles.getAtlas();
 		this.shadowRadius = 4;
 		@this.shadowMap = @Texture(CHUNK_SIZE + shadowRadius*2, CHUNK_SIZE + shadowRadius*2);
 		@this.shadowPass1 = @Texture(CHUNK_SIZE + shadowRadius*2, CHUNK_SIZE + shadowRadius*2);
@@ -67,7 +65,10 @@ class TerrainChunk : Serializable
 		
 		// Resize tile grid
 		fixtures = grid<b2Fixture@>(CHUNK_SIZE, CHUNK_SIZE, null);
-		tiles = grid<TileID>(CHUNK_SIZE, CHUNK_SIZE, EMPTY_TILE);
+		for(int i = 0; i < TERRAIN_LAYERS_MAX; ++i)
+		{
+			tiles[i] = grid<TileID>(CHUNK_SIZE, CHUNK_SIZE, EMPTY_TILE);
+		}
 		vbo = VertexBuffer(Terrain.getVertexFormat());
 	}
 	
@@ -80,21 +81,29 @@ class TerrainChunk : Serializable
 			{
 				for(uint x = 0; x < CHUNK_SIZE; ++x)
 				{
-					tiles[x, y] = Terrain.generator.getTileAt(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y);
+					for(int i = TERRAIN_LAYERS_MAX-1; i >= 0; --i)
+					{
+						tiles[i][x, y] = Terrain.generator.getTileAt(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y, TerrainLayer(i));
+					}
 				}
 			}
-			
+		
 			// Load all vertex data
 			for(uint y = 0; y < CHUNK_SIZE; ++y)
 			{
 				for(uint x = 0; x < CHUNK_SIZE; ++x)
 				{
-					TileID tile = tiles[x, y];
-					if(tile > RESERVED_TILE) // no point in updating air/reserved tiles initially
+					for(int i = TERRAIN_LAYERS_MAX-1; i >= 0; --i)
 					{
-						uint state = Terrain.getTileState(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y);
-						vbo.addVertices(game::tiles[tile].getVertices(x, y, state), game::tiles[tile].getIndices());
-						updateFixture(x, y, state);
+						TileID tile = tiles[i][x, y];
+						if(tile > RESERVED_TILE) // no point in updating air/reserved tiles
+						{
+							uint state = Terrain.getTileState(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y, TerrainLayer(i));
+							vbo.addVertices(Tiles[tile].getVertices(x, y, state), Tiles[tile].getIndices());
+							updateFixture(x, y, state);
+							//if(tileIsOpaque)
+								break;
+						}
 					}
 				}
 			}
@@ -121,9 +130,12 @@ class TerrainChunk : Serializable
 		{
 			for(int x = 0; x < CHUNK_SIZE; x++)
 			{
-				TileID tile = getTileAt(x, y);
-				if(tile <= RESERVED_TILE) tile = EMPTY_TILE;
-				ss.write(int(tile));
+				for(int i = TERRAIN_LAYERS_MAX-1; i >= 0; --i)
+				{
+					TileID tile = getTileAt(x, y, TerrainLayer(i));
+					if(tile <= RESERVED_TILE) tile = EMPTY_TILE;
+					ss.write(int(tile));
+				}
 			}
 		}
 	}
@@ -144,9 +156,12 @@ class TerrainChunk : Serializable
 		{
 			for(int x = 0; x < CHUNK_SIZE; x++)
 			{
-				int tile;
-				ss.read(tile);
-				setTile(x, y, TileID(tile));
+				for(int i = TERRAIN_LAYERS_MAX-1; i >= 0; --i)
+				{
+					int tile;
+					ss.read(tile);
+					setTile(x, y, TileID(tile), TerrainLayer(i));
+				}
 			}
 		}
 	}
@@ -159,28 +174,28 @@ class TerrainChunk : Serializable
 		return state;
 	}
 	
-	TileID getTileAt(const int x, const int y) const
+	TileID getTileAt(const int x, const int y, TerrainLayer layer) const
 	{
-		return state != CHUNK_DUMMY ? tiles[x, y] : NULL_TILE;
+		return state != CHUNK_DUMMY ? tiles[layer][x, y] : NULL_TILE;
 	}
 	
-	bool isTileAt(const int x, const int y) const
+	bool isTileAt(const int x, const int y, TerrainLayer layer) const
 	{
-		return state != CHUNK_DUMMY && tiles[x, y] != EMPTY_TILE;
+		return state != CHUNK_DUMMY && tiles[layer][x, y] != EMPTY_TILE;
 	}
 	
-	bool isReservedTileAt(const int x, const int y) const
+	bool isReservedTileAt(const int x, const int y, TerrainLayer layer) const
 	{
-		return state != CHUNK_DUMMY && tiles[x, y] > RESERVED_TILE;
+		return state != CHUNK_DUMMY && tiles[layer][x, y] > RESERVED_TILE;
 	}
 	
-	bool setTile(const int x, const int y, const TileID tile)
+	bool setTile(const int x, const int y, const TileID tile, TerrainLayer layer)
 	{
 		// Make sure we can add a tile here
-		if(state == CHUNK_INITIALIZED && tiles[x, y] != tile)
+		if(state == CHUNK_INITIALIZED && tiles[layer][x, y] != tile)
 		{
 			// Set the tile value
-			tiles[x, y] = tile;
+			tiles[layer][x, y] = tile;
 			generateBuffers = modified = true; // mark chunk as modified
 			return true; // return true as something was changed
 		}
@@ -274,7 +289,10 @@ class TerrainChunk : Serializable
 	float getOpacity(const int x, const int y)
 	{
 		float opacity = 0.0f;
-		opacity += game::tiles[getTileAt(x, y)].getOpacity();
+		for(int i = TERRAIN_LAYERS_MAX-1; i >= 0; --i)
+		{
+			opacity += Tiles[getTileAt(x, y, TerrainLayer(i))].getOpacity();
+		}
 		return opacity;
 	}
 	
@@ -282,7 +300,7 @@ class TerrainChunk : Serializable
 	private void createFixture(const int x, const int y)
 	{
 		b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f, TILE_SIZE*2, TILE_SIZE*2), 0.0f);
-		game::tiles[getTileAt(x, y)].setupFixture(@fixture);
+		Tiles[getTileAt(x, y, TERRAIN_SCENE)].setupFixture(@fixture);
 		@fixtures[x, y] = @fixture;
 	}
 	
@@ -300,7 +318,7 @@ class TerrainChunk : Serializable
 	private void updateFixture(const int x, const int y, const uint state)
 	{
 		// Find out if this tile should contain a fixture
-		bool shouldContainFixture = isReservedTileAt(x, y) && (state & NESW != NESW);
+		bool shouldContainFixture = isReservedTileAt(x, y, TERRAIN_SCENE) && (state & NESW != NESW);
 		
 		// Create or remove fixture
 		if(shouldContainFixture && !isFixtureAt(x, y))
@@ -363,11 +381,15 @@ class TerrainChunk : Serializable
 				{
 					for(uint x = 0; x < CHUNK_SIZE; ++x)
 					{
-						TileID tile = tiles[x, y];
-						if(tile > RESERVED_TILE) // no point in updating air/reserved tiles initially
+						for(int i = TERRAIN_LAYERS_MAX-1; i >= 0; --i)
 						{
-							uint state = Terrain.getTileState(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y);
-							vbo.addVertices(game::tiles[tile].getVertices(x, y, state), game::tiles[tile].getIndices());
+							TileID tile = tiles[i][x, y];
+							if(tile > RESERVED_TILE) // no point in updating air/reserved tiles initially
+							{
+								uint state = Terrain.getTileState(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y, TerrainLayer(i));
+								vbo.addVertices(Tiles[tile].getVertices(x, y, state), Tiles[tile].getIndices());
+								break;
+							}
 						}
 					}
 				}
@@ -378,7 +400,7 @@ class TerrainChunk : Serializable
 			// Draw tiles
 			Batch @batch = @Batch();
 			batch.setProjectionMatrix(projmat);
-			vbo.draw(@batch, @tileAtlas.getTexture());
+			vbo.draw(@batch, @Tiles.getAtlas().getTexture());
 			batch.draw();
 			batch.clear();
 			//updateShadows();

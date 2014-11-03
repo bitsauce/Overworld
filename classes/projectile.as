@@ -19,7 +19,7 @@ class Projectile : GameObject, Serializable
 	{
 		// Load spirte
 		size = Vector2(20, 6);
-		@sprite = @Sprite(@game::textures[STICK_TEXTURE]);
+		@sprite = @Sprite(@Textures[STICK_TEXTURE]);
 		// Create body def
 		b2BodyDef def;
 		def.type = b2_dynamicBody;

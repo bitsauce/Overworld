@@ -1,9 +1,3 @@
-// TODO: Add background colors again...
-Vector4 rgbvec(uint8 r, uint8 g, uint8 b, uint8 a = 255)
-{
-	return Vector4(r/255.0f, g/255.0f, b/255.0f, a/255.0f);
-}
-
 Vector3 mixColors(const Vector3 &in c1, const Vector3 &in c2, const float a)
 {
 	return c1*a + c2 * (1.0f - a);
@@ -19,10 +13,10 @@ class Color
 		colorVec.set(r/255.0f, g/255.0f, b/255.0f, a/255.0f);
 	}
 	
-	uint8 get_r() const { return colorVec.r*255; }
-	uint8 get_g() const { return colorVec.g*255; }
-	uint8 get_b() const { return colorVec.b*255; }
-	uint8 get_a() const { return colorVec.a*255; }
+	uint8 get_r() const { return colorVec.x*255; }
+	uint8 get_g() const { return colorVec.y*255; }
+	uint8 get_b() const { return colorVec.z*255; }
+	uint8 get_a() const { return colorVec.w*255; }
 	
 	Color &opAssign(const Color &in other)
 	{
@@ -32,19 +26,19 @@ class Color
 	
 	Color &opAssign(const Vector3 &in other)
 	{
-		colorVec.rgb = other;
+		colorVec.xyz = other;
 		return this;
 	}
 	
 	Vector3 opImplConv() const
 	{
-		return colorVec.rgb;
+		return colorVec.xyz;
 	}
 	
 	Color blend(const Color &in dst) const
 	{
 		Color res;
-		res.colorVec.rgb = colorVec.rgb * colorVec.a + dst.colorVec.rgb * (1.0f - colorVec.a);
+		res.colorVec.xyz = colorVec.xyz * colorVec.w + dst.colorVec.xyz * (1.0f - colorVec.w);
 		return res;
 	}
 	
