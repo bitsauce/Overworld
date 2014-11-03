@@ -27,7 +27,7 @@ class TerrainChunk : Serializable
 	
 	// MISC
 	/*private*/ bool modified;
-	private bool generateBuffers;
+	private bool dirty;
 	private ChunkState state;
 		
 	TerrainChunk()
@@ -48,7 +48,7 @@ class TerrainChunk : Serializable
 		this.state = CHUNK_GENERATING;
 		this.chunkX = chunkX;
 		this.chunkY = chunkY;
-		this.generateBuffers = this.modified = false; // not modified
+		this.dirty = this.modified = false; // not modified
 		this.shadowRadius = 4;
 		@this.shadowMap = @Texture(CHUNK_SIZE + shadowRadius*2, CHUNK_SIZE + shadowRadius*2);
 		@this.shadowPass1 = @Texture(CHUNK_SIZE + shadowRadius*2, CHUNK_SIZE + shadowRadius*2);
@@ -110,6 +110,16 @@ class TerrainChunk : Serializable
 			
 			// Make the chunk buffer static
 			vbo.setBufferType(STATIC_BUFFER);
+			
+			// Re-generate neightbouring chunks
+			Terrain.getChunk(chunkX+1, chunkY).dirty = true;
+			Terrain.getChunk(chunkX+1, chunkY+1).dirty = true;
+			Terrain.getChunk(chunkX,   chunkY+1).dirty = true;
+			Terrain.getChunk(chunkX-1, chunkY+1).dirty = true;
+			Terrain.getChunk(chunkX-1, chunkY).dirty = true;
+			Terrain.getChunk(chunkX-1, chunkY-1).dirty = true;
+			Terrain.getChunk(chunkX,   chunkY-1).dirty = true;
+			Terrain.getChunk(chunkX+1, chunkY-1).dirty = true;
 			
 			// Mark chunk as initialized
 			state = CHUNK_INITIALIZED;
@@ -196,7 +206,7 @@ class TerrainChunk : Serializable
 		{
 			// Set the tile value
 			tiles[layer][x, y] = tile;
-			generateBuffers = modified = true; // mark chunk as modified
+			dirty = modified = true; // mark chunk as modified
 			return true; // return true as something was changed
 		}
 		return false; // nothing changed
@@ -373,7 +383,7 @@ class TerrainChunk : Serializable
 	{
 		if(state == CHUNK_INITIALIZED)
 		{
-			if(generateBuffers)
+			if(dirty)
 			{
 				// Load all vertex data
 				vbo = VertexBuffer(Terrain.getVertexFormat());
@@ -394,7 +404,9 @@ class TerrainChunk : Serializable
 					}
 				}
 				
-				generateBuffers = false;
+				vbo.setBufferType(STATIC_BUFFER);
+				
+				dirty = false;
 			}
 			
 			// Draw tiles

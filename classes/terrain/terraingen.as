@@ -57,7 +57,9 @@ class TerrainGen
 	int seed;
 	Simplex2D noise;
 	Random rand;
-	dictionary structures;
+	
+	array<dictionary> structureTiles(TERRAIN_LAYERS_MAX);
+	array<string> generatedSuperChunks;
 	
 	TerrainGen()
 	{
@@ -70,24 +72,20 @@ class TerrainGen
 	{
 		TileID tile = getGroundAt(x, y, layer);
 		
+		// TODO: Move this check somewhere else
 		int superChunkX = Math.floor(x/SUPER_CHUNK_TILE_SIZEF), superChunkY = Math.floor(y/SUPER_CHUNK_TILE_SIZEF);
 		string key = superChunkX+";"+superChunkY;
-		if(!structures.exists(key))
+		if(generatedSuperChunks.find(key) < 0)
 		{
-			@structures[key] = @getStructures(superChunkX, superChunkY);
+			loadStructures(superChunkX, superChunkY);
+			generatedSuperChunks.insertLast(key);
 		}
 		
-		array<Structure@> @structs = cast<array<Structure@>@>(structures[key]);
-		for(int i = 0; i < structs.size; ++i)
+		// Apply structures
+		TileID structTile = TileID(structureTiles[layer][x+";"+y]);
+		if(structTile != NULL_TILE)
 		{
-			Structure @struct = @structs[i];
-			int structX = x-struct.x+struct.originX, structY = y-struct.y+struct.originY;
-			if(structX >= 0 && structX < struct.width && structY >= 0 && structY < struct.height)
-			{
-				TileID structTile = struct.getTileAt(structX, structY, layer);
-				if(structTile != NULL_TILE)
-					tile = structTile;
-			}
+			tile = structTile;
 		}
 		
 		return tile;
@@ -115,10 +113,10 @@ class TerrainGen
 		return EMPTY_TILE;
 	}
 	
-	array<Structure@> @getStructures(const int superChunkX, const int superChunkY)
+	void loadStructures(const int superChunkX, const int superChunkY)
 	{
 		Console.log("Placing structures in super chunk ["+superChunkX+", "+superChunkY+"]");
-		array<Structure@> structs;
+		array<Structure@> structures;
 		for(int x = 5; x < SUPER_CHUNK_TILE_SIZE-5; ++x)
 		{
 			int tileX = SUPER_CHUNK_TILE_SIZE * superChunkX + x;
@@ -127,10 +125,28 @@ class TerrainGen
 				Tree tree;
 				tree.x = tileX;
 				tree.y = getGroundHeight(tileX);
-				structs.insertLast(tree);
+				structures.insertLast(tree);
 			}
 		}
-		return structs;
+		
+		// Place structures
+		for(int i = 0; i < structures.size; ++i)
+		{
+			Structure @struct = @structures[i];
+			for(int y = 0; y < struct.height; ++y)
+			{
+				for(int x = 0; x < struct.width; ++x)
+				{
+					int structX = struct.x+x-struct.originX, structY = struct.y+y-struct.originY;
+					for(int i = 0; i < TERRAIN_LAYERS_MAX; ++i)
+					{
+						TileID structTile = struct.getTileAt(x, y, TerrainLayer(i));
+						if(structTile != NULL_TILE)
+							structureTiles[TerrainLayer(i)][structX+";"+structY] = structTile;
+					}
+				}
+			}
+		}
 	}
 	
 	int getGroundHeight(int x)
