@@ -100,7 +100,7 @@ class TerrainGen
 				float h = noise.valueAt(x, y + 710239) * 7;
 
 				// Ground
-				if((Math.clamp((80 - y)/100.0f, 0.0f, 1.0f) + (noise.valueAt(x, y) * 0.5f + 0.5f)) * step(20, y + h) > 0.5f)
+				if((Math.clamp((100 - y)/100.0f, 0.0f, 1.0f) + (noise.valueAt(x, y) * 0.5f + 0.5f)) * step(0, y + h) > 0.5f)
 				{
 					return GRASS_TILE;
 				}
@@ -117,7 +117,7 @@ class TerrainGen
 	{
 		Console.log("Placing structures in super chunk ["+superChunkX+", "+superChunkY+"]");
 		array<Structure@> structures;
-		for(int x = 5; x < SUPER_CHUNK_TILE_SIZE-5; ++x)
+		for(int x = 0; x < SUPER_CHUNK_TILE_SIZE; ++x)
 		{
 			int tileX = SUPER_CHUNK_TILE_SIZE * superChunkX + x;
 			if(rand.getDouble(x + seed) < 0.05/*TREE_CHANCE*/)
