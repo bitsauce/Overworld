@@ -23,6 +23,8 @@ void main()
 	// Go fullscreen
 	//toggleFullscreen();
 	
+	Window.setSize(Vector2i(1280, 720));
+	
 	//Graphics.enableWireframe();
 	
 	Engine.pushScene(@scene::main);

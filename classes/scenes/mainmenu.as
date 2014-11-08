@@ -41,7 +41,7 @@ class MainMenu : Scene
 		uiObjects.insertLast(@opBtn);
 		uiObjects.insertLast(@qtBtn);
 		
-		Camera.lookAt(Vector2(0, -200.0f));
+		Camera.lookAt(Vector2(0, -300.0f));
 		Terrain.loadVisibleChunks();
 		
 		for(int y = 0; y < TITLE_TILES.height(); ++y)
@@ -50,7 +50,7 @@ class MainMenu : Scene
 			{
 				if(TITLE_TILES[x, y] == 1)
 				{
-					Terrain.setTile(x - 18, y - 28, LEAF_TILE);
+					Terrain.setTile(x - 18, y - 38, LEAF_TILE);
 				}
 			}
 		}

@@ -55,7 +55,10 @@ class BackgroundManager
 	Color topColor(255, 255, 255, 255);
 	Color bottomColor(90, 170, 255, 255);
 	Sprite @sun = @Sprite(@Texture(":/sprites/sky/sun.png"));
-	Sprite @moon = @Sprite(@Texture(":/sprites/sky/moon.png"));
+	Sprite @moon = @Sprite(@Texture(":/sprites/sky/moon.png"));
+	
+	Sprite @hill1 = @Sprite(@Texture(":/sprites/backgrounds/hills_layer_1.png"));
+	Sprite @hill2 = @Sprite(@Texture(":/sprites/backgrounds/hill_2.png"));
 	float wind = 0.04f;
 	float cloudTime = 0.0f;
 	Shader @simplexNoise = @Shader(":/shaders/simplex3d.vert", ":/shaders/simplex3d.frag");
@@ -219,6 +222,16 @@ class BackgroundManager
 			// Clear fbo buffer
 			fbo.clear();
 		}
+		
+		// Draw background elements
+		hill1.setSize(Window.getSize().x, Window.getSize().y);
+		hill1.setPosition(Window.getSize().x-Math.mod(Camera.position.x * 0.25f, Window.getSize().x+hill1.getWidth()), Window.getSize().y-hill1.getHeight());
+		//hill1.draw(@background);
+		hill1.setPosition(Window.getSize().x-Math.mod(Camera.position.x * 0.25f, Window.getSize().x+hill1.getWidth())+hill1.getWidth(), Window.getSize().y-hill1.getHeight());
+		//hill1.draw(@background);
+		/*hill2.setSize(Window.getSize().x, Window.getSize().y);
+		hill2.setPosition(Window.getSize().x-Math.mod((Camera.position.x+5139) * 0.3f, Window.getSize().x+hill2.getWidth()), Window.getSize().y-hill2.getHeight());
+		hill2.draw(@background);*/
 		
 		// Draw clouds
 		simplexNoise.setUniform1f("u_time", cloudTime);
