@@ -22,6 +22,8 @@ class Humanoid : GameObject
 	spAnimationState @animation;
 	spAnimation @currentAnim;
 	
+	Sprite @test;
+	
 	// Health
 	int maxHealth = 100;
 	int health = 100;
@@ -38,6 +40,7 @@ class Humanoid : GameObject
 		// Load skeleton
 		@skeleton = @spSkeleton(":/sprites/characters/anim/skeleton.json", ":/sprites/characters/anim/skeleton.atlas", 1.0f);
 		skeleton.texture.setFiltering(LINEAR);
+		@test = @Sprite(Texture(":/sprites/pickaxes/iron_pickaxe.png"));
 		
 		// Set default values for movement
 		maxRunSpeed = 256.0f;
@@ -215,9 +218,8 @@ class Humanoid : GameObject
 		// 4) Draw the new texture to this region
 	}
 	
-	void setLeftHand(Texture @texture)
+	void equipLeftHand(Texture @texture)
 	{
-		updateSprite("lhand", @texture);
 	}
 	
 	// MOVEMENT
@@ -243,8 +245,24 @@ class Humanoid : GameObject
 	// DRAWING
 	void draw()
 	{
+		
 		// Draw skeleton
 		skeleton.draw(@scene::game.getBatch(SCENE));
+		
+		// Test draw hand item
+		float f = skeleton.findBone("rarm").worldRotation;
+		if(!skeleton.flipX)
+		{
+			f *= -1;
+			test.setPosition(skeleton.position + skeleton.findBone("rarm").worldPosition - Vector2(31, 44) + Vector2(Math.cos(f*0.0174532925f), Math.sin(f*0.0174532925f))*10);
+		}
+		else
+		{
+			test.setPosition(skeleton.position + skeleton.findBone("rarm").worldPosition - Vector2(31, 44) - Vector2(Math.cos(f*0.0174532925f), Math.sin(f*0.0174532925f))*10);
+		}
+		test.setOrigin(Vector2(31, 44));
+		test.setRotation(f);
+		test.draw(@scene::game.getBatch(SCENE));
 		
 		// Draw debug health bar
 		float p = (health/float(maxHealth));
