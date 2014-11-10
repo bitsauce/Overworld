@@ -1,4 +1,4 @@
-// Tile size
+// TERRAIN CONSTANTS
 const int TILE_SIZE = 16;
 const float TILE_SIZEF = TILE_SIZE;
 
@@ -88,6 +88,10 @@ grid<int> TILE_PERM_INDICES =
 	{ 10,  9, 17,  5 }, //
 	{ 10,  9,  6,  5 }  // all
 };
+
+// INVENTORY CONSTANTS
+const int INV_WIDTH = 9;
+const int INV_HEIGHT = 3;
 
 // Drawing layers
 enum Layer

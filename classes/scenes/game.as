@@ -125,6 +125,7 @@ class GameScene : Scene
 		
 		// Give default loadout
 		player.inventory.addItem(@Items[PICKAXE_IRON]);
+		player.inventory.addItem(@Items[AXE_IRON]);
 		
 		addPlayer(@player);
 	}

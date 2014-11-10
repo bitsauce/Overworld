@@ -13,6 +13,7 @@ enum TileID
 	
 	// BACKGROUND_TILES BEGIN
 	WOOD_TILE,
+	STONE_WALL,
 	// BACKGROUND_TILES END
 	
 	BACKGROUND_TILES,
@@ -34,6 +35,7 @@ array<Texture@> TILE_TEXTURES = {
 	@Texture(":/sprites/tiles/stone_tile.png"),
 	@Texture(":/sprites/tiles/empty_tile.png"), // SCENE_TILES
 	@Texture(":/sprites/tiles/wood_tile.png"),
+	@Texture(":/sprites/tiles/stone_tile.png"),
 	@Texture(":/sprites/tiles/empty_tile.png"), // BACKGROUND_TILES
 	@Texture(":/sprites/tiles/leaf_tile.png"),
 	@Texture(":/sprites/tiles/empty_tile.png"), // FOREGROUND_TILES
@@ -48,6 +50,7 @@ array<ItemID> TILE_ITEMS = {
 	STONE_BLOCK,
 	NULL_ITEM, // SCENE_TILES
 	WOOD_BLOCK,
+	STONE_BLOCK,
 	NULL_ITEM, // BACKGROUND_TILES
 	LEAF_BLOCK,
 	NULL_ITEM, // FOREGROUND_TILES
@@ -61,6 +64,7 @@ array<float> TILE_OPACITIES = {
 	1.0f,
 	1.0f,
 	0.0f, // SCENE_TILES
+	0.0f,
 	0.0f,
 	0.0f, // BACKGROUND_TILES
 	0.0f,

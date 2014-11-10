@@ -97,7 +97,7 @@ class TerrainGen
 		{
 			case TERRAIN_SCENE:
 			{
-				float h = noise.valueAt(x, y + 710239) * 7;
+				float h = noise.valueAt(x*0.1f, y + 710239) * 7;
 
 				// Ground
 				if((Math.clamp((100 - y)/100.0f, 0.0f, 1.0f) + (noise.valueAt(x, y) * 0.5f + 0.5f)) * step(0, y + h) > 0.5f)
@@ -105,10 +105,14 @@ class TerrainGen
 					return GRASS_TILE;
 				}
 			}
+			break;
 			
 			case TERRAIN_BACKGROUND:
 			{
+				if(y > 20)
+					return STONE_WALL;
 			}
+			break;
 		}
 		return EMPTY_TILE;
 	}

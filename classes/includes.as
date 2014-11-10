@@ -2,7 +2,7 @@
 #include "projectile.as"
 #include "player.as"
 #include "inventory.as"
-#include "recipies.as"
+#include "recipes.as"
 #include "camera.as"
 #include "debug.as"
 #include "humanoid.as"
@@ -29,6 +29,7 @@
 #include "mobs/zombie.as"
 
 // Items
+#include "items/axe.as"
 #include "items/itemdrop.as"
 #include "items/arrow.as"
 #include "items/block.as"

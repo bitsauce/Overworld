@@ -225,9 +225,9 @@ class BackgroundManager
 		
 		// Draw background elements
 		hill1.setSize(Window.getSize().x, Window.getSize().y);
-		hill1.setPosition(Window.getSize().x-Math.mod(Camera.position.x * 0.25f, Window.getSize().x+hill1.getWidth()), Window.getSize().y-hill1.getHeight());
+		hill1.setPosition(Math.mod(-Camera.position.x * 0.25f, Window.getSize().x*2) - Window.getSize().x, Window.getSize().y-hill1.getHeight());
 		hill1.draw(@background);
-		hill1.setPosition(Window.getSize().x-Math.mod(Camera.position.x * 0.25f, Window.getSize().x+hill1.getWidth())+hill1.getWidth(), Window.getSize().y-hill1.getHeight());
+		hill1.setPosition(Math.mod(-Camera.position.x * 0.25f + Window.getSize().x, Window.getSize().x*2) - Window.getSize().x, Window.getSize().y-hill1.getHeight());
 		hill1.draw(@background);
 		/*hill2.setSize(Window.getSize().x, Window.getSize().y);
 		hill2.setPosition(Window.getSize().x-Math.mod((Camera.position.x+5139) * 0.3f, Window.getSize().x+hill2.getWidth()), Window.getSize().y-hill2.getHeight());

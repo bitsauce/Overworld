@@ -1,9 +1,9 @@
-class Recipie
+class Recipe
 {
-	grid<ItemID> @recipie;
+	grid<ItemID> @recipe;
 	ItemID result;
 	
-	Recipie(ItemID x0y0, ItemID x1y0, ItemID x2y0,
+	Recipe(ItemID x0y0, ItemID x1y0, ItemID x2y0,
 			ItemID x0y1, ItemID x1y1, ItemID x2y1,
 			ItemID x0y2, ItemID x1y2, ItemID x2y2,
 			ItemID result)
@@ -13,7 +13,7 @@ class Recipie
 			{ x0y1, x1y1, x2y1 },
 			{ x0y2, x1y2, x2y2 }
 		};
-		@this.recipie = @arr;
+		@this.recipe = @arr;
 		this.result = result;
 	}
 }

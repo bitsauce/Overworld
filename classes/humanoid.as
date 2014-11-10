@@ -22,7 +22,7 @@ class Humanoid : GameObject
 	spAnimationState @animation;
 	spAnimation @currentAnim;
 	
-	Sprite @test;
+	Item @handItem;
 	
 	// Health
 	int maxHealth = 100;
@@ -40,7 +40,6 @@ class Humanoid : GameObject
 		// Load skeleton
 		@skeleton = @spSkeleton(":/sprites/characters/anim/skeleton.json", ":/sprites/characters/anim/skeleton.atlas", 1.0f);
 		skeleton.texture.setFiltering(LINEAR);
-		@test = @Sprite(Texture(":/sprites/pickaxes/iron_pickaxe.png"));
 		
 		// Set default values for movement
 		maxRunSpeed = 256.0f;
@@ -218,8 +217,9 @@ class Humanoid : GameObject
 		// 4) Draw the new texture to this region
 	}
 	
-	void equipLeftHand(Texture @texture)
+	void equipLeftHand(Sprite @item)
 	{
+		//@handItem = @item;
 	}
 	
 	// MOVEMENT
@@ -250,19 +250,22 @@ class Humanoid : GameObject
 		skeleton.draw(@scene::game.getBatch(SCENE));
 		
 		// Test draw hand item
-		float f = skeleton.findBone("rarm").worldRotation;
-		if(!skeleton.flipX)
+		if(@handItem != null)
 		{
-			f *= -1;
-			test.setPosition(skeleton.position + skeleton.findBone("rarm").worldPosition - Vector2(31, 44) + Vector2(Math.cos(f*0.0174532925f), Math.sin(f*0.0174532925f))*10);
+			float f = skeleton.findBone("rarm").worldRotation;
+			if(!skeleton.flipX)
+			{
+				f *= -1;
+				handItem.icon.setPosition(skeleton.position + skeleton.findBone("rarm").worldPosition - Vector2(0, 16) + Vector2(Math.cos(f*0.0174532925f), Math.sin(f*0.0174532925f))*10);
+			}
+			else
+			{
+				handItem.icon.setPosition(skeleton.position + skeleton.findBone("rarm").worldPosition - Vector2(0, 16) - Vector2(Math.cos(f*0.0174532925f), Math.sin(f*0.0174532925f))*10);
+			}
+			handItem.icon.setOrigin(Vector2(0, 16));
+			handItem.icon.setRotation(f-45);
+			handItem.icon.draw(@scene::game.getBatch(SCENE));
 		}
-		else
-		{
-			test.setPosition(skeleton.position + skeleton.findBone("rarm").worldPosition - Vector2(31, 44) - Vector2(Math.cos(f*0.0174532925f), Math.sin(f*0.0174532925f))*10);
-		}
-		test.setOrigin(Vector2(31, 44));
-		test.setRotation(f);
-		test.draw(@scene::game.getBatch(SCENE));
 		
 		// Draw debug health bar
 		float p = (health/float(maxHealth));

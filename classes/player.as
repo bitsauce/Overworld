@@ -162,6 +162,8 @@ class Player : Humanoid, Serializable
 		
 		//
 		inventory.update();
+		
+		@handItem = @inventory.getSelectedItem();
 	}
 	
 	void draw()

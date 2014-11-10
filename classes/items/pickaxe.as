@@ -38,15 +38,12 @@ class Pickaxe : Item
 					Terrain.removeTile(pos.x, pos.y, layer);
 					Tiles[tile].createItemDrop(pos.x, pos.y);
 				}
-			}else{
+			}
+			else
+			{
 				time = 0.0f;
 			}
 			prevPos = pos;	
 		}
 	}
-	
-	void breakBackground()
-	{
-	}
-	
 }
