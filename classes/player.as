@@ -131,13 +131,19 @@ class Player : Humanoid, Serializable
 		// Use selected item
 		if(Input.getKeyState(KEY_LMB))
 		{
-			Item @item = inventory.getSelectedItem();
-			if(@item != null && (!item.singleShot || !lmbPressed)) {
-				item.use(@this);
+			if(!inventory.isHovered())
+			{
+				Item @item = inventory.getSelectedItem();
+				if(@item != null && (!item.singleShot || !lmbPressed))
+				{
+					item.use(@this);
+				}
 			}
 			
 			lmbPressed = true;
-		}else{
+		}
+		else
+		{
 			lmbPressed = false;
 		}
 		

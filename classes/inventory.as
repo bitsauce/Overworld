@@ -1,4 +1,4 @@
-class Inventory// : ClickListener
+class Inventory : MouseListener
 {
 	// OWNER
 	Player @player;
@@ -27,7 +27,8 @@ class Inventory// : ClickListener
 	
 	Inventory(Player @player)
 	{
-		//Input.addClickListener(@this);
+		Input.addMouseListener(@this);
+		
 		@this.player = @player;
 		
 		recipes.insertLast(@Recipe(
@@ -45,6 +46,21 @@ class Inventory// : ClickListener
 				SHORTSWORD_WOODEN
 			)
 		);
+	}
+	
+	void mouseClick(MouseButton){}
+	
+	void mouseScroll(int dt)
+	{
+		selectedSlot -= dt;
+		if(selectedSlot < 0)
+		{
+			selectedSlot = INV_WIDTH-1;
+		}
+		else if(selectedSlot >= INV_WIDTH)
+		{
+			selectedSlot = 0;
+		}
 	}
 	
 	Item @getSelectedItem()
@@ -134,16 +150,17 @@ class Inventory// : ClickListener
 		if(Input.getKeyState(KEY_7)) selectedSlot = 6;
 		if(Input.getKeyState(KEY_8)) selectedSlot = 7;
 		if(Input.getKeyState(KEY_9)) selectedSlot = 8;
-		if(Input.getKeyState(KEY_TAB)) showBag = true;
-		else showBag = false;
+		showBag = Input.getKeyState(KEY_TAB);
 			
 		// Throw items
 		if(Input.getKeyState(KEY_Q))
 		{
 			Item @item = @getSelectedItem();
-			if(item != null) {
-				removeItem(@item, 1, selectedSlot, 0);
-				createItemDrop(@item, 1);
+			if(item != null)
+			{
+				int amt = slots[selectedSlot, 0].amount;
+				removeItem(@item, amt, selectedSlot, 0);
+				createItemDrop(@item, amt, true);
 			}
 		}
 		
@@ -159,7 +176,14 @@ class Inventory// : ClickListener
 						// Check if slot was clicked
 						if(Rect(5 + 34*x, 5 + 34*y, 32, 32).contains(Input.position))
 						{
-							leftClickSlot(@slots[x, y]);
+							if(y == 0 && !showBag)
+							{
+								selectedSlot = x;
+							}
+							else
+							{
+								leftClickSlot(@slots[x, y]);
+							}
 							escape = true;
 						}
 					}
@@ -230,6 +254,15 @@ class Inventory// : ClickListener
 		{
 			rmbPressed = false;
 		}
+		
+		Debug.setVariable("Hovered", isHovered() ? "true" : "false");
+	}
+	
+	bool isHovered() const
+	{
+		return !showBag ? Rect(5, 5, 34*(INV_WIDTH-1) + 32, 32).contains(Input.position) :
+						(Rect(5, 5, 34*(INV_WIDTH-1) + 32, 34*(INV_HEIGHT-1) + 32).contains(Input.position) ||
+						Rect(5, Window.getSize().y/2.0f, 34*3, 34*3).contains(Input.position));
 	}
 	
 	void leftClickSlot(ItemSlot @slot)
@@ -314,12 +347,16 @@ class Inventory// : ClickListener
 		}
 	}
 	
-	void createItemDrop(Item @item, int amount)
+	void createItemDrop(Item @item, int amount, bool usePlayerDir = false)
 	{
 		ItemDrop drop(@item, amount);
 		drop.body.setPosition(player.body.getPosition());
-		Vector2 dt = Input.position + Camera.position - player.body.getPosition();
-		if(dt.x >= 0.0f)
+		
+		bool tossRight = (Input.position + Camera.position - player.body.getPosition()).x >= 0.0f;
+		if(usePlayerDir) 
+			tossRight = !player.skeleton.flipX;
+			
+		if(tossRight)
 		{
 			drop.body.applyImpulse(Vector2(1.0f, -1.0f)*5000.0f, drop.body.getCenter());
 		}

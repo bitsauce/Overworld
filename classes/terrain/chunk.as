@@ -8,11 +8,24 @@ enum ChunkState
 Shader @blurHShader = @Shader(":/shaders/blur_h.vert", ":/shaders/blur_h.frag");
 Shader @blurVShader = @Shader(":/shaders/blur_v.vert", ":/shaders/blur_v.frag");
 
+class TerrainTile
+{
+	int opCmp(const TerrainTile &in other)
+	{
+		return tile - other.tile;
+	}
+	
+	TileID tile;
+	uint state;
+	int x, y;
+}
+
 class TerrainChunk : Serializable
 {
 	// CHUNK
 	private int chunkX, chunkY;
 	private array<grid<TileID>> tiles(TERRAIN_LAYERS_MAX);
+	private array<uint> tileOffsets(MAX_TILES);
 	
 	// PHYSICS
 	private b2Body @body;
@@ -69,7 +82,6 @@ class TerrainChunk : Serializable
 		{
 			tiles[i] = grid<TileID>(CHUNK_SIZE, CHUNK_SIZE, EMPTY_TILE);
 		}
-		vbo = VertexBuffer(Terrain.getVertexFormat());
 	}
 	
 	void generate()
@@ -88,28 +100,8 @@ class TerrainChunk : Serializable
 				}
 			}
 		
-			// Load all vertex data
-			for(uint y = 0; y < CHUNK_SIZE; ++y)
-			{
-				for(uint x = 0; x < CHUNK_SIZE; ++x)
-				{
-					for(int i = TERRAIN_LAYERS_MAX-1; i >= 0; --i)
-					{
-						TileID tile = tiles[i][x, y];
-						if(tile > RESERVED_TILE) // no point in updating air/reserved tiles
-						{
-							uint state = Terrain.getTileState(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y, TerrainLayer(i));
-							vbo.addVertices(Tiles[tile].getVertices(x, y, state), Tiles[tile].getIndices());
-							updateFixture(x, y, state);
-							//if(tileIsOpaque)
-								break;
-						}
-					}
-				}
-			}
-			
-			// Make the chunk buffer static
-			vbo.setBufferType(STATIC_BUFFER);
+			// Create vertex buffer
+			generateVBO();
 			
 			// Re-generate neightbouring chunks
 			Terrain.getChunk(chunkX+1, chunkY).dirty = true;
@@ -125,6 +117,50 @@ class TerrainChunk : Serializable
 			state = CHUNK_INITIALIZED;
 			Console.log("Chunk ["+chunkX+", "+chunkY+"] generated");
 		}
+	}
+	
+	void generateVBO()
+	{
+		// Create new vbo
+		vbo = VertexBuffer(Terrain.getVertexFormat());
+		
+		// Load all vertex data
+		array<TerrainTile> sortedTiles;
+		for(uint y = 0; y < CHUNK_SIZE; ++y)
+		{
+			for(uint x = 0; x < CHUNK_SIZE; ++x)
+			{
+				for(int i = TERRAIN_LAYERS_MAX-1; i >= 0; --i)
+				{
+					TileID tile = tiles[i][x, y];
+					if(tile > RESERVED_TILE) // no point in updating air/reserved tiles
+					{
+						uint state = Terrain.getTileState(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y, TerrainLayer(i));
+						
+						TerrainTile t;
+						t.tile = tile;
+						t.state = state;
+						t.x = x;
+						t.y = y;
+						sortedTiles.insertLast(t);
+						
+						updateFixture(x, y, state);
+						//if(tileIsOpaque)
+							break;
+					}
+				}
+			}
+		}
+		sortedTiles.sortAsc();
+		
+		for(int i = 0; i < sortedTiles.size; ++i)
+		{
+			TerrainTile @tile = @sortedTiles[i];
+			vbo.addVertices(Tiles[tile.tile].getVertices(tile.x, tile.y, tile.state), Tiles[tile.tile].getIndices());
+		}
+			
+		// Make the chunk buffer static
+		vbo.setBufferType(STATIC_BUFFER);
 	}
 	
 	void serialize(StringStream &ss)
@@ -385,27 +421,7 @@ class TerrainChunk : Serializable
 		{
 			if(dirty)
 			{
-				// Load all vertex data
-				vbo = VertexBuffer(Terrain.getVertexFormat());
-				for(uint y = 0; y < CHUNK_SIZE; ++y)
-				{
-					for(uint x = 0; x < CHUNK_SIZE; ++x)
-					{
-						for(int i = TERRAIN_LAYERS_MAX-1; i >= 0; --i)
-						{
-							TileID tile = tiles[i][x, y];
-							if(tile > RESERVED_TILE) // no point in updating air/reserved tiles initially
-							{
-								uint state = Terrain.getTileState(chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y, TerrainLayer(i));
-								vbo.addVertices(Tiles[tile].getVertices(x, y, state), Tiles[tile].getIndices());
-								break;
-							}
-						}
-					}
-				}
-				
-				vbo.setBufferType(STATIC_BUFFER);
-				
+				generateVBO();
 				dirty = false;
 			}
 			
@@ -413,6 +429,18 @@ class TerrainChunk : Serializable
 			Batch @batch = @Batch();
 			batch.setProjectionMatrix(projmat);
 			vbo.draw(@batch, @Tiles.getAtlas().getTexture());
+			
+			if(Input.getKeyState(KEY_Z))
+			{
+				Shape @line1 = @Shape(Rect(0, 0, CHUNK_SIZE_PX, 1));
+				line1.setFillColor(Vector4(0,0,0,1));
+				line1.draw(@batch);
+				
+				Shape @line2 = @Shape(Rect(0, 1, 1, CHUNK_SIZE_PX));
+				line2.setFillColor(Vector4(0,0,0,1));
+				line2.draw(@batch);
+			}
+			
 			batch.draw();
 			batch.clear();
 			//updateShadows();

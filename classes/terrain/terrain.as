@@ -1,7 +1,7 @@
 TerrainLayer getLayerByTile(TileID tile)
 {
-	if(tile < SCENE_TILES) return TERRAIN_SCENE;
 	if(tile < BACKGROUND_TILES) return TERRAIN_BACKGROUND;
+	if(tile < SCENE_TILES) return TERRAIN_SCENE;
 	return TERRAIN_FOREGROUND;
 }
 
