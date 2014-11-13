@@ -1,6 +1,7 @@
 #include "globals.as"
 #include "constants.as"
 #include "functions.as"
+#include "recipes.as"
 
 // Texture data
 #include "textures/textureids.as"

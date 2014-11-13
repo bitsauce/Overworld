@@ -17,6 +17,7 @@ SpawnManager Spawner;
 ItemManager Items;
 TextureManager Textures;
 TileManager Tiles;
+RecipeManager Recipes;
 
 // Fonts
 namespace font

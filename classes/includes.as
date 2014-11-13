@@ -2,7 +2,6 @@
 #include "projectile.as"
 #include "player.as"
 #include "inventory.as"
-#include "recipes.as"
 #include "camera.as"
 #include "debug.as"
 #include "humanoid.as"

@@ -21,31 +21,13 @@ class Inventory : MouseListener
 	
 	// CRAFTING
 	grid<ItemSlot> craftingSlots(3, 3);
-	
-	// RECIPIES
-	array<Recipe@> recipes;
+	ItemSlot resultSlot;
 	
 	Inventory(Player @player)
 	{
 		Input.addMouseListener(@this);
 		
 		@this.player = @player;
-		
-		recipes.insertLast(@Recipe(
-				NULL_ITEM, WOOD_BLOCK, NULL_ITEM,
-				NULL_ITEM, WOOD_BLOCK, NULL_ITEM,
-				NULL_ITEM, NULL_ITEM, NULL_ITEM,
-				STICK
-			)
-		);
-		
-		recipes.insertLast(@Recipe(
-				NULL_ITEM, WOOD_BLOCK, NULL_ITEM,
-				NULL_ITEM, WOOD_BLOCK, NULL_ITEM,
-				NULL_ITEM, STICK, NULL_ITEM,
-				SHORTSWORD_WOODEN
-			)
-		);
 	}
 	
 	void mouseClick(MouseButton){}
@@ -203,6 +185,19 @@ class Inventory : MouseListener
 					}
 				}
 				
+				if(Rect(5 + 34*4, Window.getSize().y/2.0f + 34, 32, 32).contains(Input.position))
+				{
+					for(uint y = 0; y < 3; ++y)
+					{
+						for(uint x = 0; x < 3; ++x)
+						{
+							craftingSlots[x, y].remove(resultSlot.amount);
+						}
+					}
+					leftClickSlot(@resultSlot);
+					escape = true;
+				}
+				
 				if(!heldSlot.isEmpty() && !escape)
 				{
 					createItemDrop(heldSlot.item, heldSlot.amount);
@@ -262,7 +257,8 @@ class Inventory : MouseListener
 	{
 		return !showBag ? Rect(5, 5, 34*(INV_WIDTH-1) + 32, 32).contains(Input.position) :
 						(Rect(5, 5, 34*(INV_WIDTH-1) + 32, 34*(INV_HEIGHT-1) + 32).contains(Input.position) ||
-						Rect(5, Window.getSize().y/2.0f, 34*3, 34*3).contains(Input.position));
+						Rect(5, Window.getSize().y/2.0f, 34*3, 34*3).contains(Input.position) ||
+						Rect(5 + 34*4, Window.getSize().y/2.0f + 34, 32, 32).contains(Input.position));
 	}
 	
 	void leftClickSlot(ItemSlot @slot)
@@ -316,34 +312,40 @@ class Inventory : MouseListener
 	
 	void updateCrafing()
 	{
-		bool match = false;
-		for(int i = 0; i < recipes.size && !match; ++i)
+		resultSlot.clear();
+		for(int i = 0; i < Recipes.size; ++i)
 		{
-			do
+			Recipe @recipe = Recipes[i];
+			uint recipeWidth = recipe.pattern.width();
+			uint recipeHeight = recipe.pattern.height();
+			uint amount;
+			
+			bool match = false;
+			for(int y = 0; y < 3 && y + recipeHeight - 1 < 3 && !match; ++y)
 			{
-				// Assume there is a match and prove otherwise
-				match = true;
-				for(int y = 0; y < 3 && match; ++y)
+				for(int x = 0; x < 3 && x + recipeWidth - 1 < 3 && !match; ++x)
 				{
-					for(int x = 0; x < 3 && match; ++x)
+					match = true; // Assume there is a match and prove otherwise
+					amount =  0xFFFFFFFF;
+					for(int j = 0; j < recipeHeight && match; ++j)
 					{
-						ItemID id = craftingSlots[x, y].isEmpty() ? NULL_ITEM : craftingSlots[x, y].item.getID();
-						if(id != recipes[i].recipe[x, y])
+						for(int i = 0; i < recipeWidth && match; ++i)
 						{
-							match = false;
-						}
-					}
-				}
-				if(match)
-				{
-					addItem(@Items[recipes[i].result]);
-					for(int y = 0; y < 3; y++) {
-						for(int x = 0; x < 3; x++) {
-							craftingSlots[x, y].remove(1);
+							ItemID id = craftingSlots[x+i, y+j].isEmpty() ? NULL_ITEM : craftingSlots[x+i, y+j].item.getID();
+							amount = Math.min(craftingSlots[x+i, y+j].amount, amount);
+							if(id != recipe.pattern[i, j])
+							{
+								match = false;
+							}
 						}
 					}
 				}
-			} while(match);
+			}
+			if(match)
+			{
+				resultSlot.set(@Items[recipe.result], recipe.amount * amount);
+				break;
+			}
 		}
 	}
 	
@@ -429,6 +431,8 @@ class Inventory : MouseListener
 					drawSlot(position, craftingSlots[x, y]);
 				}
 			}
+			
+			drawSlot(Vector2(5 + 34*4, Window.getSize().y/2.0f + 34), resultSlot);
 		}
 		
 		if(@hoveredItemSlot != null && @hoveredItemSlot.item != null)

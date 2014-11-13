@@ -19,6 +19,7 @@ void main()
 	Textures.init();
 	Tiles.init();
 	Items.init();
+	Recipes.init();
 	
 	// Go fullscreen
 	//toggleFullscreen();
