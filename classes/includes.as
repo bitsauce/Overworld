@@ -29,6 +29,7 @@
 
 // Items
 #include "items/axe.as"
+#include "items/placeableitem.as"
 #include "items/itemdrop.as"
 #include "items/arrow.as"
 #include "items/block.as"

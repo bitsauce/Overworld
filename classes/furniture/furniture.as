@@ -1,6 +1,6 @@
 class Furniture : GameObject, Serializable
 {
-	private Sprite @sprite;
+	Sprite @sprite;
 	private int x, y; // Tile position
 	private int width, height; // Tile size
 	private Shader @outlineShader = @Shader(":/shaders/outline.vert", ":/shaders/outline.frag");

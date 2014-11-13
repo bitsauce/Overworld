@@ -17,6 +17,8 @@ class ItemManager
 		add(AXE_IRON, @Axe(AXE_IRON));
 		add(PICKAXE_IRON, @Pickaxe(PICKAXE_IRON));
 		add(SHORTSWORD_WOODEN, @ArrowItem(SHORTSWORD_WOODEN));
+		add(CRAFTING_BENCH, @PlaceableItem(CRAFTING_BENCH));
+		
 		add(WOODEN_BOW, @Bow(WOODEN_BOW));
 		add(STICK, @ArrowItem(STICK));
 		add(BERRIES, @HealingPotion(BERRIES));

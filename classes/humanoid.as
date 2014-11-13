@@ -265,6 +265,7 @@ class Humanoid : GameObject
 			handItem.icon.setOrigin(Vector2(0, 16));
 			handItem.icon.setRotation(f-45);
 			handItem.icon.draw(@scene::game.getBatch(SCENE));
+			handItem.icon.setRotation(0);
 		}
 		
 		// Draw debug health bar

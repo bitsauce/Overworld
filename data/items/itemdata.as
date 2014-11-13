@@ -12,6 +12,8 @@ enum ItemID
 	
 	AXE_IRON,
 	
+	CRAFTING_BENCH,
+	
 	SHORTSWORD_WOODEN,
 	
 	WOODEN_BOW,
@@ -38,6 +40,8 @@ grid<string> ITEM_STRINGS = {
 	
 	{ "Iron Axe", "A iron axe for chopping wood" },
 	
+	{ "Crafting Bench", "A bench for crafting" },
+	
 	{ "Wooden Shortsword", "A crappy sword" },
 	{ "Wooden Bow", "A wooden bow" },
 	
@@ -48,14 +52,16 @@ grid<string> ITEM_STRINGS = {
 array<Sprite@> ITEM_ICONS = {
 	null,
 	
-	@Sprite(TextureRegion(@Texture(":/sprites/tiles/grass_tile.png"), 0.0f, 0.0f, 1.0f, 2.0f/3.0f)),
-	@Sprite(TextureRegion(@Texture(":/sprites/tiles/stone_tile.png"), 0.0f, 0.0f, 1.0f, 2.0f/3.0f)),
-	@Sprite(TextureRegion(@Texture(":/sprites/tiles/wood_tile.png"), 0.0f, 0.0f, 1.0f, 2.0f/3.0f)),
-	@Sprite(TextureRegion(@Texture(":/sprites/tiles/leaf_tile.png"), 0.0f, 0.0f, 1.0f, 2.0f/3.0f)),
+	@Sprite(TextureRegion(@Texture(":/sprites/tiles/grass_tile.png"), 0.25f, 0.25f, 0.75f, 0.75f * 2.0f/3.0f)),
+	@Sprite(TextureRegion(@Texture(":/sprites/tiles/stone_tile.png"), 0.25f, 0.25f, 0.75f, 0.75f * 2.0f/3.0f)),
+	@Sprite(TextureRegion(@Texture(":/sprites/tiles/wood_tile.png"), 0.25f, 0.25f, 0.75f, 0.75f * 2.0f/3.0f)),
+	@Sprite(TextureRegion(@Texture(":/sprites/tiles/leaf_tile.png"), 0.25f, 0.25f, 0.75f, 0.75f * 2.0f/3.0f)),
 	
 	@Sprite(@Texture(":/sprites/pickaxes/pickaxe_iron_icon.png")),
 	
 	@Sprite(@Texture(":/sprites/axes/iron_axe_item.png")),
+	
+	@Sprite(@Texture(":/sprites/plants/berry_bush.png")),
 	
 	@Sprite(@Texture(":/sprites/weapons/shortsword_wooden_item.png")),
 	@Sprite(@Texture(":/sprites/weapons/wooden_bow_icon.png")),

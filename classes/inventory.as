@@ -313,38 +313,51 @@ class Inventory : MouseListener
 	void updateCrafing()
 	{
 		resultSlot.clear();
+		uint craftWidth = 0;
+		uint craftHeight = 0;
+		for(int y = 0; y < 3; ++y)
+		{
+			for(int x = 0; x < 3; ++x)
+			{
+				if(!craftingSlots[x, y].isEmpty()) craftWidth = Math.max(craftWidth, x+1);
+				if(!craftingSlots[x, y].isEmpty()) craftHeight = Math.max(craftHeight, y+1);
+			}
+		}
+		
 		for(int i = 0; i < Recipes.size; ++i)
 		{
 			Recipe @recipe = Recipes[i];
 			uint recipeWidth = recipe.pattern.width();
 			uint recipeHeight = recipe.pattern.height();
-			uint amount;
-			
-			bool match = false;
-			for(int y = 0; y < 3 && y + recipeHeight - 1 < 3 && !match; ++y)
+			if(recipeWidth == craftWidth && recipeHeight == craftHeight)
 			{
-				for(int x = 0; x < 3 && x + recipeWidth - 1 < 3 && !match; ++x)
+				uint amount;
+				bool match = false;
+				for(int y = 0; y < 3 && y + recipeHeight - 1 < 3 && !match; ++y)
 				{
-					match = true; // Assume there is a match and prove otherwise
-					amount =  0xFFFFFFFF;
-					for(int j = 0; j < recipeHeight && match; ++j)
+					for(int x = 0; x < 3 && x + recipeWidth - 1 < 3 && !match; ++x)
 					{
-						for(int i = 0; i < recipeWidth && match; ++i)
+						match = true; // Assume there is a match and prove otherwise
+						amount =  0xFFFFFFFF;
+						for(int j = 0; j < recipeHeight && match; ++j)
 						{
-							ItemID id = craftingSlots[x+i, y+j].isEmpty() ? NULL_ITEM : craftingSlots[x+i, y+j].item.getID();
-							amount = Math.min(craftingSlots[x+i, y+j].amount, amount);
-							if(id != recipe.pattern[i, j])
+							for(int i = 0; i < recipeWidth && match; ++i)
 							{
-								match = false;
+								ItemID id = craftingSlots[x+i, y+j].isEmpty() ? NULL_ITEM : craftingSlots[x+i, y+j].item.getID();
+								amount = Math.min(craftingSlots[x+i, y+j].amount, amount);
+								if(id != recipe.pattern[i, j])
+								{
+									match = false;
+								}
 							}
 						}
 					}
+				}
+				if(match)
+				{
+					resultSlot.set(@Items[recipe.result], recipe.amount * amount);
+					break;
 				}
-			}
-			if(match)
-			{
-				resultSlot.set(@Items[recipe.result], recipe.amount * amount);
-				break;
 			}
 		}
 	}
