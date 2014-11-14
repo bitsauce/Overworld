@@ -95,8 +95,8 @@ class Zombie : Humanoid, Serializable
 		}
 		
 		// Jump if necessary
-		if(ray.test(getFeetPosition()/TILE_SIZE, (getFeetPosition() + Vector2(24.0f, 0.0f))/TILE_SIZE) ||
-			ray.test(getFeetPosition()/TILE_SIZE, (getFeetPosition() - Vector2(24.0f, 0.0f))/TILE_SIZE))
+		if(ray.test(getFeetPosition()/TILE_PX, (getFeetPosition() + Vector2(24.0f, 0.0f))/TILE_PX) ||
+			ray.test(getFeetPosition()/TILE_PX, (getFeetPosition() - Vector2(24.0f, 0.0f))/TILE_PX))
 		{
 			jump();
 		}

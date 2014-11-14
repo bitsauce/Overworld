@@ -161,7 +161,7 @@ class Player : Humanoid, Serializable
 		// Update camera
 		Camera.lookAt(position);
 		Debug.setVariable("Camera", Camera.position.x + ", " + Camera.position.y);
-		Debug.setVariable("Chunk", Math.floor(body.getPosition().x/CHUNK_SIZE/TILE_SIZE)+", "+Math.floor(body.getPosition().y/CHUNK_SIZE/TILE_SIZE));
+		Debug.setVariable("Chunk", Math.floor(body.getPosition().x/CHUNK_SIZE/TILE_PX)+", "+Math.floor(body.getPosition().y/CHUNK_SIZE/TILE_PX));
 		
 		// Update audio listener
 		Audio.position = position;
