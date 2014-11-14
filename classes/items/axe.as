@@ -17,7 +17,7 @@ class Axe : Item
 	{
 		Vector2 dt = Input.position + Camera.position - player.body.getPosition();
 		Vector2i pos;
-		if(ray.test(player.body.getPosition()/TILE_SIZE, (Input.position + Camera.position)/TILE_SIZE, pos))
+		if(ray.test(player.body.getPosition()/TILE_PX, (Input.position + Camera.position)/TILE_PX, pos))
 		{
 			TileID tile = Terrain.getTileAt(pos.x, pos.y, TERRAIN_BACKGROUND);
 			if(prevPos == pos && tile == WOOD_TILE)

@@ -14,7 +14,7 @@ void main()
 	
 	// Set b2d world scale
 	Box2D.gravity = Vector2(0.0f, 40.0f);
-	Box2D.scale = TILE_SIZE;
+	Box2D.scale = TILE_PX;
 	
 	Textures.init();
 	Tiles.init();
@@ -25,8 +25,6 @@ void main()
 	//toggleFullscreen();
 	
 	Window.setSize(Vector2i(1280, 720));
-	
-	//Graphics.enableWireframe();
 	
 	Engine.pushScene(@scene::main);
 }

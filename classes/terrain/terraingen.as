@@ -73,7 +73,7 @@ class TerrainGen
 		TileID tile = getGroundAt(x, y, layer);
 		
 		// TODO: Move this check somewhere else
-		int superChunkX = Math.floor(x/SUPER_CHUNK_TILE_SIZEF), superChunkY = Math.floor(y/SUPER_CHUNK_TILE_SIZEF);
+		int superChunkX = Math.floor(x/SUPER_CHUNK_TILE_PXF), superChunkY = Math.floor(y/SUPER_CHUNK_TILE_PXF);
 		string key = superChunkX+";"+superChunkY;
 		if(generatedSuperChunks.find(key) < 0)
 		{
@@ -121,9 +121,9 @@ class TerrainGen
 	{
 		Console.log("Placing structures in super chunk ["+superChunkX+", "+superChunkY+"]");
 		array<Structure@> structures;
-		for(int x = 0; x < SUPER_CHUNK_TILE_SIZE; ++x)
+		for(int x = 0; x < SUPER_CHUNK_TILE_PX; ++x)
 		{
-			int tileX = SUPER_CHUNK_TILE_SIZE * superChunkX + x;
+			int tileX = SUPER_CHUNK_TILE_PX * superChunkX + x;
 			if(rand.getDouble(x + seed) < 0.05/*TREE_CHANCE*/)
 			{
 				Tree tree;

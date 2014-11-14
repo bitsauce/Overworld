@@ -71,7 +71,7 @@ class TerrainChunk : Serializable
 		// Create body
 		b2BodyDef def;
 		def.type = b2_staticBody;
-		def.position.set(chunkX * CHUNK_SIZE * TILE_SIZE, chunkY * CHUNK_SIZE * TILE_SIZE);
+		def.position.set(chunkX * CHUNK_SIZE * TILE_PX, chunkY * CHUNK_SIZE * TILE_PX);
 		def.allowSleep = true;
 		@body = @b2Body(def);
 		body.setObject(@Terrain);
@@ -345,7 +345,8 @@ class TerrainChunk : Serializable
 	// PHYSICS
 	private void createFixture(const int x, const int y)
 	{
-		b2Fixture @fixture = @body.createFixture(Rect(x * TILE_SIZE - TILE_SIZE * 0.5f, y * TILE_SIZE - TILE_SIZE * 0.5f, TILE_SIZE*2, TILE_SIZE*2), 0.0f);
+		//b2Fixture @fixture = @body.createFixture(Rect(x * TILE_PX - TILE_PX * 0.5f, y * TILE_PX - TILE_PX * 0.5f, TILE_PX*2, TILE_PX*2), 0.0f);
+		b2Fixture @fixture = @body.createFixture(Rect(x * TILE_PX, y * TILE_PX - 3, TILE_PX, TILE_PX + 3), 0.0f);
 		Tiles[getTileAt(x, y, TERRAIN_SCENE)].setupFixture(@fixture);
 		@fixtures[x, y] = @fixture;
 	}
@@ -448,8 +449,8 @@ class TerrainChunk : Serializable
 			// Draw shadows
 			/*float f = shadowRadius/(CHUNK_SIZEF + shadowRadius*2);
 			Sprite @shadows = @Sprite(TextureRegion(@shadowPass2, f, f, 1.0-f, 1.0-f));
-			shadows.setPosition(CHUNK_SIZE*TILE_SIZE*chunkX, CHUNK_SIZE*TILE_SIZE*chunkY);
-			shadows.setSize(CHUNK_SIZE*TILE_SIZE, CHUNK_SIZE*TILE_SIZE);
+			shadows.setPosition(CHUNK_SIZE*TILE_PX*chunkX, CHUNK_SIZE*TILE_PX*chunkY);
+			shadows.setSize(CHUNK_SIZE*TILE_PX, CHUNK_SIZE*TILE_PX);
 			shadows.draw(@Shadows);*/
 		}
 	}

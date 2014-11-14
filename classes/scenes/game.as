@@ -121,7 +121,7 @@ class GameScene : Scene
 		
 		Player player();
 		
-		player.body.setPosition(Vector2(0, Terrain.generator.getGroundHeight(0)*TILE_SIZE));
+		player.body.setPosition(Vector2(0, Terrain.generator.getGroundHeight(0)*TILE_PX));
 		
 		// Give default loadout
 		player.inventory.addItem(@Items[PICKAXE_IRON]);
@@ -232,6 +232,10 @@ class GameScene : Scene
 		
 		if(Input.getKeyState(KEY_Z)) {
 			Debug.draw();
+			if(Input.getKeyState(KEY_W))
+				Graphics.enableWireframe();
+			else
+				Graphics.disableWireframe();
 		}
 		
 		// Draw game object into batches
@@ -265,8 +269,8 @@ class GameScene : Scene
 		// Draw terrain shadows
 		/*if(!Input.getKeyState(KEY_8))
 		{
-			Sprite @shadows = @Sprite(TextureRegion(@terrain.getShadowMap(), camera.position.x/(TILE_SIZE*terrain.getWidth()), (camera.position.y+Window.getSize().y)/(TILE_SIZE*terrain.getHeight()),
-													(camera.position.x+Window.getSize().x)/(TILE_SIZE*terrain.getWidth()), camera.position.y/(TILE_SIZE*terrain.getHeight())));
+			Sprite @shadows = @Sprite(TextureRegion(@terrain.getShadowMap(), camera.position.x/(TILE_PX*terrain.getWidth()), (camera.position.y+Window.getSize().y)/(TILE_PX*terrain.getHeight()),
+													(camera.position.x+Window.getSize().x)/(TILE_PX*terrain.getWidth()), camera.position.y/(TILE_PX*terrain.getHeight())));
 			shadows.setSize(Vector2(Window.getSize()));
 			shadows.draw(@batches[FOREGROUND]);
 		}*/

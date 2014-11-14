@@ -29,23 +29,23 @@ class TileManager
 			Sprite @sprite3 = @Sprite(TextureRegion(null, 0.0f, 0.0f, 1.0f, 1.0f));
 			Sprite @sprite4 = @Sprite(TextureRegion(null, 0.0f, 0.0f, 1.0f, 1.0f));
 			
-			sprite1.setSize(8, 8);
-			sprite2.setSize(8, 8);
-			sprite3.setSize(8, 8);
-			sprite4.setSize(8, 8);
-			
 			// Render all permutations
 			for(int j = 0; j < 32; j++)
 			{
+				sprite1.setSize(TILE_SIZES[0, (j/8)*4 + 0], TILE_SIZES[1, (j/8)*4 + 0]);
+				sprite2.setSize(TILE_SIZES[0, (j/8)*4 + 1], TILE_SIZES[1, (j/8)*4 + 1]);
+				sprite3.setSize(TILE_SIZES[0, (j/8)*4 + 2], TILE_SIZES[1, (j/8)*4 + 2]);
+				sprite4.setSize(TILE_SIZES[0, (j/8)*4 + 3], TILE_SIZES[1, (j/8)*4 + 3]);
+				
 				sprite1.setRegion(TextureRegion(tile.getTexture(), TILE_TEXTURE_COORDS[0, TILE_PERM_INDICES[0, j]], TILE_TEXTURE_COORDS[1, TILE_PERM_INDICES[0, j]], TILE_TEXTURE_COORDS[2, TILE_PERM_INDICES[0, j]], TILE_TEXTURE_COORDS[3, TILE_PERM_INDICES[0, j]]));
 				sprite2.setRegion(TextureRegion(tile.getTexture(), TILE_TEXTURE_COORDS[0, TILE_PERM_INDICES[1, j]], TILE_TEXTURE_COORDS[1, TILE_PERM_INDICES[1, j]], TILE_TEXTURE_COORDS[2, TILE_PERM_INDICES[1, j]], TILE_TEXTURE_COORDS[3, TILE_PERM_INDICES[1, j]]));
 				sprite3.setRegion(TextureRegion(tile.getTexture(), TILE_TEXTURE_COORDS[0, TILE_PERM_INDICES[2, j]], TILE_TEXTURE_COORDS[1, TILE_PERM_INDICES[2, j]], TILE_TEXTURE_COORDS[2, TILE_PERM_INDICES[2, j]], TILE_TEXTURE_COORDS[3, TILE_PERM_INDICES[2, j]]));
 				sprite4.setRegion(TextureRegion(tile.getTexture(), TILE_TEXTURE_COORDS[0, TILE_PERM_INDICES[3, j]], TILE_TEXTURE_COORDS[1, TILE_PERM_INDICES[3, j]], TILE_TEXTURE_COORDS[2, TILE_PERM_INDICES[3, j]], TILE_TEXTURE_COORDS[3, TILE_PERM_INDICES[3, j]]));
 
-				sprite1.setPosition(16*j, 0);
-				sprite2.setPosition(16*j+8, 0);
-				sprite3.setPosition(16*j, 8);
-				sprite4.setPosition(16*j+8, 8);
+				sprite1.setPosition(QUADRANT_PX*j, 						    0);
+				sprite2.setPosition(QUADRANT_PX*j + TILE_SIZES[0, (j/8)*4], 0);
+				sprite3.setPosition(QUADRANT_PX*j,						    TILE_SIZES[1, (j/8)*4]);
+				sprite4.setPosition(QUADRANT_PX*j + TILE_SIZES[0, (j/8)*4], TILE_SIZES[1, (j/8)*4]);
 				
 				sprite1.draw(@fbo);
 				sprite2.draw(@fbo);
@@ -53,7 +53,7 @@ class TileManager
 				sprite4.draw(@fbo);
 			}
 			
-			Texture @texture = @Texture(32*TILE_SIZE, TILE_SIZE);
+			Texture @texture = @Texture(32*QUADRANT_PX, QUADRANT_PX);
 			fbo.renderToTexture(@texture);
 			textures.insertLast(@texture);
 		}

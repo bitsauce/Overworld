@@ -23,7 +23,7 @@ class Tile
 	void createItemDrop(int x, int y)
 	{
 		ItemDrop itemDrop(@Items[item]);
-		itemDrop.body.setPosition(Vector2(x, y) * TILE_SIZE + itemDrop.size/2.0f);
+		itemDrop.body.setPosition(Vector2(x, y) * TILE_PX + itemDrop.size/2.0f);
 	}
 	
 	void setupFixture(b2Fixture @fixture)
@@ -35,25 +35,25 @@ class Tile
 	{
 		array<Vertex> vertices = Terrain.getVertexFormat().createVertices(16);
 				
-		vertices[0].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
-		vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
-		vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
-		vertices[3].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
+		vertices[0].set4f(VERTEX_POSITION, (x+0.5f) * TILE_PX,              y * TILE_PX - BORDER_PX);
+		vertices[1].set4f(VERTEX_POSITION, (x+1.0f) * TILE_PX + BORDER_PX,  y * TILE_PX - BORDER_PX);
+		vertices[2].set4f(VERTEX_POSITION, (x+1.0f) * TILE_PX + BORDER_PX, (y+0.5f) * TILE_PX);
+		vertices[3].set4f(VERTEX_POSITION, (x+0.5f) * TILE_PX,             (y+0.5f) * TILE_PX);
 		
-		vertices[4].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
-		vertices[5].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
-		vertices[6].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
-		vertices[7].set4f(VERTEX_POSITION, x     * TILE_SIZE + TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
+		vertices[4].set4f(VERTEX_POSITION, (x+0.5f) * TILE_PX,             (y+0.5f) * TILE_PX);
+		vertices[5].set4f(VERTEX_POSITION, (x+1.0f) * TILE_PX + BORDER_PX, (y+0.5f) * TILE_PX);
+		vertices[6].set4f(VERTEX_POSITION, (x+1.0f) * TILE_PX + BORDER_PX, (y+1.0f) * TILE_PX + BORDER_PX);
+		vertices[7].set4f(VERTEX_POSITION, (x+0.5f) * TILE_PX,             (y+1.0f) * TILE_PX + BORDER_PX);
 		
-		vertices[8].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
-		vertices[9].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE + TILE_SIZE * 0.5f);
-		vertices[10].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
-		vertices[11].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE + TILE_SIZE * 0.5f);
+		vertices[8].set4f(VERTEX_POSITION,   x * TILE_PX - BORDER_PX, (y+0.5f) * TILE_PX);
+		vertices[9].set4f(VERTEX_POSITION,  (x+0.5f) * TILE_PX,       (y+0.5f) * TILE_PX);
+		vertices[10].set4f(VERTEX_POSITION, (x+0.5f) * TILE_PX,       (y+1.0f) * TILE_PX + BORDER_PX);
+		vertices[11].set4f(VERTEX_POSITION,  x * TILE_PX - BORDER_PX, (y+1.0f) * TILE_PX + BORDER_PX);
 		
-		vertices[12].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
-		vertices[13].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, y     * TILE_SIZE - TILE_SIZE * 0.5f);
-		vertices[14].set4f(VERTEX_POSITION, (x+1) * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
-		vertices[15].set4f(VERTEX_POSITION, x     * TILE_SIZE - TILE_SIZE * 0.5f, (y+1) * TILE_SIZE - TILE_SIZE * 0.5f);
+		vertices[12].set4f(VERTEX_POSITION, x * TILE_PX - BORDER_PX,  y * TILE_PX - BORDER_PX);
+		vertices[13].set4f(VERTEX_POSITION, (x+0.5f) * TILE_PX,       y * TILE_PX - BORDER_PX);
+		vertices[14].set4f(VERTEX_POSITION, (x+0.5f) * TILE_PX,      (y+0.5f) * TILE_PX);
+		vertices[15].set4f(VERTEX_POSITION, x * TILE_PX - BORDER_PX, (y+0.5f) * TILE_PX);
 		
 		uint8 q1 = ((state >> 0) & 0x7) + 0x0;
 		uint8 q2 = ((state >> 2) & 0x7) + 0x8;

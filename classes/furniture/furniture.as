@@ -72,7 +72,7 @@ class Furniture : GameObject, Serializable
 		
 		// Update sprite position
 		this.x = x; this.y = y;
-		sprite.setPosition(Vector2(x*TILE_SIZE, y*TILE_SIZE));
+		sprite.setPosition(Vector2(x*TILE_PX, y*TILE_PX));
 		
 		return true;
 	}

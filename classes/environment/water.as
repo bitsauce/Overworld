@@ -44,10 +44,10 @@ class WaterTile
 		// Trapezoid
 		Water @water = @scene::game.getWater();
 		float h = water.isWaterAt(x+1, y) ? water.getWaterAt(x+1, y).height : height;
-		vertices[0].position.set(x * TILE_SIZE, (y+1-height) * TILE_SIZE);
-		vertices[1].position.set((x+1) * TILE_SIZE, (y+1-h) * TILE_SIZE);
-		vertices[2].position.set((x+1) * TILE_SIZE, (y+1) * TILE_SIZE);
-		vertices[3].position.set(x * TILE_SIZE, (y+1) * TILE_SIZE);
+		vertices[0].position.set(x * TILE_PX, (y+1-height) * TILE_PX);
+		vertices[1].position.set((x+1) * TILE_PX, (y+1-h) * TILE_PX);
+		vertices[2].position.set((x+1) * TILE_PX, (y+1) * TILE_PX);
+		vertices[3].position.set(x * TILE_PX, (y+1) * TILE_PX);
 		
 		batch.addVertices(vertices, QUAD_INDICES);
 	}
@@ -90,7 +90,7 @@ class WaterParticle : GameObject
 		Terrain @terrain;
 		if(contact.bodyB.getObject(@terrain))
 		{
-			scene::game.getWater().addWater(body.getPosition().x/TILE_SIZE, body.getPosition().y/TILE_SIZE, size);
+			scene::game.getWater().addWater(body.getPosition().x/TILE_PX, body.getPosition().y/TILE_PX, size);
 			remove();
 		}
 	}
@@ -167,7 +167,7 @@ class Water
 					continue;
 				}else
 				{
-					addParticle(Vector2(water.x*TILE_SIZE - 1.0f, (water.y+0.5f)*TILE_SIZE), w);
+					addParticle(Vector2(water.x*TILE_PX - 1.0f, (water.y+0.5f)*TILE_PX), w);
 				}
 			}
 			
@@ -182,7 +182,7 @@ class Water
 					continue;
 				}else
 				{
-					addParticle(Vector2((water.x+1)*TILE_SIZE + 1.0f, (water.y+0.5f)*TILE_SIZE), w);
+					addParticle(Vector2((water.x+1)*TILE_PX + 1.0f, (water.y+0.5f)*TILE_PX), w);
 				}
 			}
 		}

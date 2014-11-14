@@ -257,10 +257,10 @@ class TerrainManager : Serializable
 	
 	void loadVisibleChunks()
 	{
-		int x0 = Math.floor(Camera.position.x/CHUNK_SIZE/TILE_SIZE);
-		int y0 = Math.floor(Camera.position.y/CHUNK_SIZE/TILE_SIZE);
-		int x1 = Math.floor((Camera.position.x+Window.getSize().x)/CHUNK_SIZE/TILE_SIZE);
-		int y1 = Math.floor((Camera.position.y+Window.getSize().y)/CHUNK_SIZE/TILE_SIZE);
+		int x0 = Math.floor(Camera.position.x/CHUNK_SIZE/TILE_PX);
+		int y0 = Math.floor(Camera.position.y/CHUNK_SIZE/TILE_PX);
+		int x1 = Math.floor((Camera.position.x+Window.getSize().x)/CHUNK_SIZE/TILE_PX);
+		int y1 = Math.floor((Camera.position.y+Window.getSize().y)/CHUNK_SIZE/TILE_PX);
 		
 		TerrainChunk @chunk;
 		for(int y = y0; y <= y1; y++)
@@ -281,8 +281,8 @@ class TerrainManager : Serializable
 	{
 		Debug.setVariable("Chunks", "" + chunks.getSize());
 		
-		int cx = Math.floor(Camera.getCenter().x/CHUNK_SIZEF/TILE_SIZEF);
-		int cy = Math.floor(Camera.getCenter().y/CHUNK_SIZEF/TILE_SIZEF);
+		int cx = Math.floor(Camera.getCenter().x/CHUNK_SIZEF/TILE_PXF);
+		int cy = Math.floor(Camera.getCenter().y/CHUNK_SIZEF/TILE_PXF);
 		TerrainChunk @chunk;
 		if((@chunk = @getChunk(cx, cy, true)).getState() != CHUNK_INITIALIZED)
 		{
@@ -303,17 +303,17 @@ class TerrainManager : Serializable
 	// DRAWING
 	void draw(const TerrainLayer layer, Batch @batch)
 	{
-		int x0 = Math.floor(Camera.position.x/CHUNK_SIZE/TILE_SIZE);
-		int y0 = Math.floor(Camera.position.y/CHUNK_SIZE/TILE_SIZE);
-		int x1 = Math.floor((Camera.position.x+Window.getSize().x)/CHUNK_SIZE/TILE_SIZE);
-		int y1 = Math.floor((Camera.position.y+Window.getSize().y)/CHUNK_SIZE/TILE_SIZE);
+		int x0 = Math.floor(Camera.position.x/CHUNK_SIZE/TILE_PX);
+		int y0 = Math.floor(Camera.position.y/CHUNK_SIZE/TILE_PX);
+		int x1 = Math.floor((Camera.position.x+Window.getSize().x)/CHUNK_SIZE/TILE_PX);
+		int y1 = Math.floor((Camera.position.y+Window.getSize().y)/CHUNK_SIZE/TILE_PX);
 		
 		for(int y = y0; y <= y1; y++)
 		{
 			for(int x = x0; x <= x1; x++)
 			{
 				Matrix4 projmat = Camera.getProjectionMatrix();
-				projmat.translate(x * CHUNK_SIZE * TILE_SIZE, y * CHUNK_SIZE * TILE_SIZE, 0.0f);
+				projmat.translate(x * CHUNK_SIZE * TILE_PX, y * CHUNK_SIZE * TILE_PX, 0.0f);
 				getChunk(x, y, true).draw(projmat);
 			}
 		}
