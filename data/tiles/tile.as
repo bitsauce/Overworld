@@ -34,7 +34,7 @@ class Tile
 	array<Vertex> getVertices(const int x, const int y, const uint state) const
 	{
 		array<Vertex> vertices = Terrain.getVertexFormat().createVertices(16);
-				
+		
 		vertices[0].set4f(VERTEX_POSITION, (x+0.5f) * TILE_PX,              y * TILE_PX - BORDER_PX);
 		vertices[1].set4f(VERTEX_POSITION, (x+1.0f) * TILE_PX + BORDER_PX,  y * TILE_PX - BORDER_PX);
 		vertices[2].set4f(VERTEX_POSITION, (x+1.0f) * TILE_PX + BORDER_PX, (y+0.5f) * TILE_PX);

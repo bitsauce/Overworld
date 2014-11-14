@@ -450,15 +450,9 @@ class TerrainChunk : Serializable
 			// Draw shadows
 			float f = shadowRadius/(CHUNK_SIZEF + shadowRadius*2);
 			Sprite @shadows = @Sprite(TextureRegion(@shadowPass2, f, f, 1.0-f, 1.0-f));
-<<<<<<< HEAD
-			shadows.setPosition(CHUNK_SIZE*TILE_SIZE*chunkX, CHUNK_SIZE*TILE_SIZE*chunkY);
-			shadows.setSize(CHUNK_SIZE*TILE_SIZE, CHUNK_SIZE*TILE_SIZE);
-			shadows.draw(@Shadows);
-=======
 			shadows.setPosition(CHUNK_SIZE*TILE_PX*chunkX, CHUNK_SIZE*TILE_PX*chunkY);
 			shadows.setSize(CHUNK_SIZE*TILE_PX, CHUNK_SIZE*TILE_PX);
-			shadows.draw(@Shadows);*/
->>>>>>> origin/master
+			shadows.draw(@Shadows);
 		}
 	}
 }

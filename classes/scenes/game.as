@@ -250,7 +250,8 @@ class GameScene : Scene
 		Terrain.draw(TERRAIN_BACKGROUND, @batches[BACKGROUND]);
 		
 		Shadows.setProjectionMatrix(Camera.getProjectionMatrix());
-		Shadows.draw();
+		if(!(Input.getKeyState(KEY_Z) && Input.getKeyState(KEY_X)))
+			Shadows.draw();
 		Shadows.clear();
 		
 		// Draw scene content
