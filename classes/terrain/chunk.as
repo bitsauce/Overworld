@@ -161,6 +161,8 @@ class TerrainChunk : Serializable
 			
 		// Make the chunk buffer static
 		vbo.setBufferType(STATIC_BUFFER);
+		
+		updateShadows();
 	}
 	
 	void serialize(StringStream &ss)
@@ -443,14 +445,13 @@ class TerrainChunk : Serializable
 			
 			batch.draw();
 			batch.clear();
-			//updateShadows();
 			
 			// Draw shadows
-			/*float f = shadowRadius/(CHUNK_SIZEF + shadowRadius*2);
+			float f = shadowRadius/(CHUNK_SIZEF + shadowRadius*2);
 			Sprite @shadows = @Sprite(TextureRegion(@shadowPass2, f, f, 1.0-f, 1.0-f));
 			shadows.setPosition(CHUNK_SIZE*TILE_SIZE*chunkX, CHUNK_SIZE*TILE_SIZE*chunkY);
 			shadows.setSize(CHUNK_SIZE*TILE_SIZE, CHUNK_SIZE*TILE_SIZE);
-			shadows.draw(@Shadows);*/
+			shadows.draw(@Shadows);
 		}
 	}
 }

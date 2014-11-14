@@ -315,6 +315,8 @@ class Inventory : MouseListener
 		resultSlot.clear();
 		uint craftWidth = 0;
 		uint craftHeight = 0;
+		//uint craftX = 0;
+		//uint craftY = 0;
 		for(int y = 0; y < 3; ++y)
 		{
 			for(int x = 0; x < 3; ++x)
@@ -352,7 +354,7 @@ class Inventory : MouseListener
 							}
 						}
 					}
-				}
+				}				
 				if(match)
 				{
 					resultSlot.set(@Items[recipe.result], recipe.amount * amount);
