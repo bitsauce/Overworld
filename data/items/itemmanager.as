@@ -1,6 +1,6 @@
 class ItemManager
 {
-	private array<Item@> items(MAX_ITEMS);
+	private array<ItemData@> items(ITEM_COUNT);
 	private bool initialized = false;
 	
 	void init()
@@ -9,38 +9,21 @@ class ItemManager
 		if(initialized)
 			return;
 		
-		// Add items
-		add(GRASS_BLOCK, @BlockItem(GRASS_BLOCK));
-		add(STONE_BLOCK, @BlockItem(STONE_BLOCK));
-		add(WOOD_BLOCK, @BlockItem(WOOD_BLOCK));
-		add(LEAF_BLOCK, @BlockItem(LEAF_BLOCK));
-		add(AXE_IRON, @Axe(AXE_IRON));
-		add(PICKAXE_IRON, @Pickaxe(PICKAXE_IRON));
-		add(SHORTSWORD_WOODEN, @ArrowItem(SHORTSWORD_WOODEN));
-		add(CRAFTING_BENCH, @PlaceableItem(CRAFTING_BENCH));
-		
-		add(WOODEN_BOW, @Bow(WOODEN_BOW));
-		add(STICK, @ArrowItem(STICK));
-		add(BERRIES, @HealingPotion(BERRIES));
+		// Add all item data
+		for(int i = 0; i < ITEM_DATA.size; ++i)
+		{
+			ItemData @data = @ITEM_DATA[i];
+			@items[data.getID()] = @data;
+		}
 		
 		// Mark as initialized
 		initialized = true;
 	}
 	
-	void add(ItemID id, Item @item)
-	{
-		// Make sure the manager is not initialized
-		if(initialized)
-			return;
-		
-		// Set item
-		@items[id] = @item;
-	}
-	
-	Item @opIndex(int idx)
+	ItemData @opIndex(int idx)
 	{
 		// Validate index and manager state
-		if(!initialized || idx < 0 || idx >= MAX_ITEMS)
+		if(!initialized || idx < 0 || idx >= ITEM_COUNT)
 			return null;
 		return @items[idx];
 	}

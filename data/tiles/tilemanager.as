@@ -36,6 +36,11 @@ class TileManager
 		
 		// Set tile
 		@tiles[id] = @Tile(id);
+		
+		// TODO: This is a temporary hack
+		BlockItem @item = cast<BlockItem@>(Items[TILE_ITEMS[id]]);
+		if(@item != null)
+			item.tile = id;
 	}
 	
 	Tile @opIndex(int idx)

@@ -1,9 +1,8 @@
-class ArrowItem : Item
+class ArrowItem : ItemData
 {
-	ArrowItem(ItemID id)
+	ArrowItem(ItemID id, const string &in name, const string &in desc, Sprite @icon, const int maxStack)
 	{
-		super(id, 255);
-		singleShot = true;
+		super(id, name, desc, @icon, maxStack, true);
 	}
 	
 	void use(Player @player)

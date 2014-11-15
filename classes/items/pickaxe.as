@@ -5,17 +5,16 @@ bool PickaxePlotTest(int x, int y)
 			Terrain.getTileAt(x, y, TERRAIN_FOREGROUND) <= RESERVED_TILE;
 }
 
-class Pickaxe : Item
+class PickaxeItem : ItemData
 {
 	private Vector2i prevPos;
 	float time = 0.0f;
 	int power = 0;
 	RayCast ray;
 	
-	Pickaxe(ItemID id)
+	PickaxeItem(ItemID id, const string &in name, const string &in desc, Sprite @icon)
 	{
-		super(id, 1);
-		
+		super(id, name, desc, @icon, 1, false);
 		@ray.plotTest = @PickaxePlotTest;
 		ray.range = ITEM_PICKUP_RADIUS;
 	}

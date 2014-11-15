@@ -1,14 +1,13 @@
-class Axe : Item
+class AxeItem : ItemData
 {
 	private Vector2i prevPos;
 	RayCast ray;
 	float time = 0.0f;
 	int power = 0;
 	
-	Axe(ItemID id)
+	AxeItem(ItemID id, const string &in name, const string &in desc, Sprite @icon)
 	{
-		super(id, 1);
-		
+		super(id, name, desc, @icon, 1, false);
 		@ray.plotTest = @PickaxePlotTest;
 		ray.range = ITEM_PICKUP_RADIUS;
 	}

@@ -22,7 +22,7 @@ class Humanoid : GameObject
 	spAnimationState @animation;
 	spAnimation @currentAnim;
 	
-	Item @handItem;
+	ItemData @handItem;
 	
 	// Health
 	int maxHealth = 100;

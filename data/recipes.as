@@ -8,15 +8,15 @@ class RecipeManager
 		initialized = true;
 		
 		add(grid<ItemID> = { 
-				{ WOOD_BLOCK },
-				{ WOOD_BLOCK }
-			}, STICK, 8);
+				{ ITEM_WOOD_BLOCK },
+				{ ITEM_WOOD_BLOCK }
+			}, ITEM_STICK, 8);
 			
 		add(grid<ItemID> = { 
-				{ WOOD_BLOCK, WOOD_BLOCK, WOOD_BLOCK },
-				{ WOOD_BLOCK, WOOD_BLOCK, WOOD_BLOCK },
-				{ WOOD_BLOCK, WOOD_BLOCK, WOOD_BLOCK }
-			}, CRAFTING_BENCH, 1);
+				{ ITEM_WOOD_BLOCK, ITEM_WOOD_BLOCK, ITEM_WOOD_BLOCK },
+				{ ITEM_WOOD_BLOCK, ITEM_WOOD_BLOCK, ITEM_WOOD_BLOCK },
+				{ ITEM_WOOD_BLOCK, ITEM_WOOD_BLOCK, ITEM_WOOD_BLOCK }
+			}, ITEM_CRAFTING_BENCH, 1);
 	}
 	
 	private void add(grid<ItemID> @pattern, ItemID result, uint amount)

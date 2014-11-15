@@ -1,15 +1,16 @@
-class BlockItem : Item
+class BlockItem : ItemData
 {
 	TileID tile;
 	
-	BlockItem(ItemID id)
+	BlockItem(ItemID id, const string &in name, const string &in desc, Sprite @icon, const int maxStack)
 	{
-		super(id, 255);
+		super(id, name, desc, @icon, maxStack, false);
 		tile = Tiles.getByItem(id);
 	}
 	
 	void use(Player @player)
 	{
+		Console.log("t: "+tile);
 		Vector2 dt = Input.position + Camera.position - player.body.getPosition();
 		if(dt.length() <= ITEM_PICKUP_RADIUS)
 		{

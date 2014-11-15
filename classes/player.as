@@ -133,7 +133,7 @@ class Player : Humanoid, Serializable
 		{
 			if(!inventory.isHovered())
 			{
-				Item @item = inventory.getSelectedItem();
+				ItemData @item = inventory.getSelectedItem();
 				if(@item != null && (!item.singleShot || !lmbPressed))
 				{
 					item.use(@this);

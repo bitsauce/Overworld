@@ -124,8 +124,8 @@ class GameScene : Scene
 		player.body.setPosition(Vector2(0, Terrain.generator.getGroundHeight(0)*TILE_PX));
 		
 		// Give default loadout
-		player.inventory.addItem(@Items[PICKAXE_IRON]);
-		player.inventory.addItem(@Items[AXE_IRON]);
+		player.inventory.addItem(@Items[ITEM_PICKAXE_IRON]);
+		player.inventory.addItem(@Items[ITEM_AXE_IRON]);
 		
 		addPlayer(@player);
 	}

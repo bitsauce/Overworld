@@ -7,17 +7,17 @@ class ItemDrop : GameObject, Serializable
 	b2Body @body;
 	b2Fixture @fix;
 	
-	Item @data;
+	ItemData @data;
 	int amount;
 	
 	float cooldown = 2.0f;
 	bool jumping = false;
 	
-	ItemDrop(Item @data, int amount = 1)
+	ItemDrop(ItemData @data, int amount = 1)
 	{
 		init(@data, amount);
 	}
-	private void init(Item @data, int amount)
+	private void init(ItemData @data, int amount)
 	{
 		@this.data = @data;
 		this.amount = amount;

@@ -35,7 +35,7 @@ class Bush : Furniture
 			sprite.setRegion(TextureRegion(@Textures[BERRY_BUSH_TEXTURE], 0.0f, 0.0f, 1.0f, 0.5f));
 			
 			// Give player berries
-			player.inventory.addItem(@Items[BERRIES], 5);
+			player.inventory.addItem(@Items[ITEM_BERRIES], 5);
 			
 			berryTimer = 5.0f; // Respawn in 5 seconds
 		}

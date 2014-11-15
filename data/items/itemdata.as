@@ -1,76 +1,105 @@
-// Item ids
+// HOW TO ADD NEW ITEMS:
+// 1) Add an id for the item in ItemID (naming: ITEM_ITEM_NAME_HERE)
+// 2) Add an entry for the item in the ITEM_DATA array
+//    This has the format:
+//    ItemData(id, name, description, icon, maxStack, singleShot [default = false])
+//    singleShot = only activate once per click
+//
+// HOW TO IMPLEMENT CUSTOM ITEM BEHAVIOUR:
+// If you want to implement custom item behaviour, you'll need
+// to create a new class which inherits ItemData.
+// In this class you'll implement custom behaviour by
+// overriding the function: 'void use(Player @player)',
+// which will be called each time the player tries
+// to activate the item.
+
+// ITEM IDS
 enum ItemID
 {
-	NULL_ITEM,
+	ITEM_NULL,
 	
-	GRASS_BLOCK,
-	STONE_BLOCK,
-	WOOD_BLOCK,
-	LEAF_BLOCK,
+	ITEM_GRASS_BLOCK,
+	ITEM_STONE_BLOCK,
+	ITEM_WOOD_BLOCK,
+	ITEM_LEAF_BLOCK,
 	
-	PICKAXE_IRON,
+	ITEM_PICKAXE_IRON,
 	
-	AXE_IRON,
+	ITEM_AXE_IRON,
 	
-	CRAFTING_BENCH,
+	ITEM_CRAFTING_BENCH,
 	
-	SHORTSWORD_WOODEN,
+	ITEM_SHORTSWORD_WOODEN,
 	
-	WOODEN_BOW,
+	ITEM_WOODEN_BOW,
 	
-	STICK,
-	BERRIES,
+	ITEM_STICK,
+	ITEM_BERRIES,
 	
-	MAX_ITEMS
+	ITEM_COUNT
 }
 
-/*array<TileData> =
+// ITEM DATA
+array<ItemData@> ITEM_DATA =
 {
-	TileData(GRASS_BLOCK, "Grass block", "A block of grass")
-}*/
-
-// While i prefer this way of handling item data,
-// it has the unfortunate downside of requiring 
-// manual maintenance of the script writer each
-// time an item is added to ItemID.
-grid<string> ITEM_STRINGS = {
-	{ "NULL", "" },
+	// BLOCK ITEMS
+	BlockItem(ITEM_GRASS_BLOCK, "Grass block", "A block of grass", @Sprite(TextureRegion(@Texture(":/sprites/tiles/grass_tile.png"), TILE_U1, TILE_V1, TILE_U3, TILE_V3)), 255),
+	BlockItem(ITEM_STONE_BLOCK, "Stone block", "A block of stone", @Sprite(TextureRegion(@Texture(":/sprites/tiles/stone_tile.png"), TILE_U1, TILE_V1, TILE_U3, TILE_V3)), 255),
+	BlockItem(ITEM_WOOD_BLOCK, "Wood block", "A block of wood", @Sprite(TextureRegion(@Texture(":/sprites/tiles/wood_tile.png"), TILE_U1, TILE_V1, TILE_U3, TILE_V3)), 255),
+	BlockItem(ITEM_LEAF_BLOCK, "Leaf block", "A block of leaves", @Sprite(TextureRegion(@Texture(":/sprites/tiles/leaf_tile.png"), TILE_U1, TILE_V1, TILE_U3, TILE_V3)), 255),
 	
-	{ "Grass block", "A block of grass" },
-	{ "Stone block", "A block of stone" },
-	{ "Wood block", "A block of wood" },
-	{ "Leaf block", "A block of leaves" },
+	// PICKAXES
+	PickaxeItem(ITEM_PICKAXE_IRON, "Iron pickaxe", "An iron pickaxe", @Sprite(@Texture(":/sprites/pickaxes/pickaxe_iron_icon.png"))),
 	
-	{ "Iron Pickaxe", "A iron pickaxe" },
+	// AXES
+	AxeItem(ITEM_AXE_IRON, "Iron axe", "An iron axe", @Sprite(@Texture(":/sprites/axes/iron_axe_item.png"))),
 	
-	{ "Iron Axe", "A iron axe for chopping wood" },
+	// FURNITURE
+	PlaceableItem(ITEM_CRAFTING_BENCH, "Crafting bench", "A bench for crafting things", @Sprite(TextureRegion(@Texture(":/sprites/tiles/grass_tile.png"), TILE_U1, TILE_V1, TILE_U3, TILE_V3)), 1),
 	
-	{ "Crafting Bench", "A bench for crafting" },
+	// SWORDS
+	ArrowItem(ITEM_SHORTSWORD_WOODEN, "Wooden shortsword", "A wooden sword", @Sprite(@Texture(":/sprites/weapons/shortsword_wooden_item.png")), 1),
 	
-	{ "Wooden Shortsword", "A crappy sword" },
-	{ "Wooden Bow", "A wooden bow" },
+	// BOWS
+	BowItem(ITEM_WOODEN_BOW, "Wooden bow", "A wooden bow for shooting things", @Sprite(@Texture(":/sprites/weapons/wooden_bow_icon.png"))),
 	
-	{ "Stick", "A stick" },
-	{ "Berries", "Yummy!" }
+	// ARROWS
+	ArrowItem(ITEM_STICK, "Stick", "Catch!", @Sprite(@Texture(":/sprites/items/stick.png")), 1),
+	
+	// FOOD ITEMS
+	HealingItem(ITEM_BERRIES, "Berries", "Yummy!", @Sprite(@Texture(":/sprites/items/berries.png")), 1)
 };
 
-array<Sprite@> ITEM_ICONS = {
-	null,
+// ITEM DATA CLASS
+class ItemData
+{
+	private ItemID id;
+	string name;
+	string desc;
+	int maxStack;
+	Sprite @icon;
+	bool singleShot;
 	
-	@Sprite(TextureRegion(@Texture(":/sprites/tiles/grass_tile.png"), 0.25f, 0.25f, 0.75f, 0.75f * 2.0f/3.0f)),
-	@Sprite(TextureRegion(@Texture(":/sprites/tiles/stone_tile.png"), 0.25f, 0.25f, 0.75f, 0.75f * 2.0f/3.0f)),
-	@Sprite(TextureRegion(@Texture(":/sprites/tiles/wood_tile.png"), 0.25f, 0.25f, 0.75f, 0.75f * 2.0f/3.0f)),
-	@Sprite(TextureRegion(@Texture(":/sprites/tiles/leaf_tile.png"), 0.25f, 0.25f, 0.75f, 0.75f * 2.0f/3.0f)),
+	ItemData()
+	{
+		this.id = ITEM_NULL;
+	}
 	
-	@Sprite(@Texture(":/sprites/pickaxes/pickaxe_iron_icon.png")),
+	ItemData(ItemID id, const string &in name, const string &in desc, Sprite @icon, const int maxStack, const bool singleShot = false)
+	{
+		this.id = id;
+		this.name = name;
+		this.desc = desc;
+		@this.icon = @icon;
+		this.icon.setSize(Vector2(16));
+		this.maxStack = maxStack;
+		this.singleShot = singleShot;
+	}
 	
-	@Sprite(@Texture(":/sprites/axes/iron_axe_item.png")),
+	ItemID getID() const
+	{
+		return id;
+	}
 	
-	@Sprite(@Texture(":/sprites/plants/berry_bush.png")),
-	
-	@Sprite(@Texture(":/sprites/weapons/shortsword_wooden_item.png")),
-	@Sprite(@Texture(":/sprites/weapons/wooden_bow_icon.png")),
-	
-	@Sprite(@Texture(":/sprites/items/stick.png")),
-	@Sprite(@Texture(":/sprites/items/berries.png"))
-};
+	void use(Player @player) { /* Virtual function */ }
+}

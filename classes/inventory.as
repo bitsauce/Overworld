@@ -45,12 +45,12 @@ class Inventory : MouseListener
 		}
 	}
 	
-	Item @getSelectedItem()
+	ItemData @getSelectedItem()
 	{
 		return @slots[selectedSlot, 0].item;
 	}
 	
-	int addItem(Item @data, int amount = 1)
+	int addItem(ItemData @data, int amount = 1)
 	{
 		// Search for slots containing the same type of item
 		for(int y = 0; y < INV_HEIGHT; y++)
@@ -99,7 +99,7 @@ class Inventory : MouseListener
 		return amount; 
 	}
 	
-	bool removeItem(Item @data, int amount = 1, int slotX = -1, int slotY = -1)
+	bool removeItem(ItemData @data, int amount = 1, int slotX = -1, int slotY = -1)
 	{
 		ItemSlot @slot;
 		if(slotX <= 0 || slotY <= 0) {
@@ -137,7 +137,7 @@ class Inventory : MouseListener
 		// Throw items
 		if(Input.getKeyState(KEY_Q))
 		{
-			Item @item = @getSelectedItem();
+			ItemData @item = @getSelectedItem();
 			if(item != null)
 			{
 				int amt = slots[selectedSlot, 0].amount;
@@ -345,7 +345,7 @@ class Inventory : MouseListener
 						{
 							for(int i = 0; i < recipeWidth && match; ++i)
 							{
-								ItemID id = craftingSlots[x+i, y+j].isEmpty() ? NULL_ITEM : craftingSlots[x+i, y+j].item.getID();
+								ItemID id = craftingSlots[x+i, y+j].isEmpty() ? ITEM_NULL : craftingSlots[x+i, y+j].item.getID();
 								amount = Math.min(craftingSlots[x+i, y+j].amount, amount);
 								if(id != recipe.pattern[i, j])
 								{
@@ -364,7 +364,7 @@ class Inventory : MouseListener
 		}
 	}
 	
-	void createItemDrop(Item @item, int amount, bool usePlayerDir = false)
+	void createItemDrop(ItemData @item, int amount, bool usePlayerDir = false)
 	{
 		ItemDrop drop(@item, amount);
 		drop.body.setPosition(player.body.getPosition());
@@ -471,10 +471,10 @@ class Inventory : MouseListener
 
 class ItemSlot
 {
-	Item @item;
+	ItemData @item;
 	int amount;
 		
-	void set(Item @item, int amount)
+	void set(ItemData @item, int amount)
 	{
 		@this.item = @item;
 		this.amount = amount;
@@ -517,7 +517,7 @@ class ItemSlot
 		return @item == null;
 	}
 	
-	bool contains(Item @item)
+	bool contains(ItemData @item)
 	{
 		return @this.item == @item;
 	}

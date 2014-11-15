@@ -109,8 +109,6 @@ class MainMenu : Scene
 			Debug.draw();
 		}
 		
-		Sprite(Tiles.getAtlas().get(GRASS_TILE)).draw(@batch);
-		
 		// Draw batch
 		batch.draw();
 	}

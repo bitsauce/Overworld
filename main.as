@@ -17,8 +17,8 @@ void main()
 	Box2D.scale = TILE_PX;
 	
 	Textures.init();
-	Tiles.init();
 	Items.init();
+	Tiles.init();
 	Recipes.init();
 	
 	// Go fullscreen

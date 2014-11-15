@@ -1,9 +1,8 @@
-class Bow : Item
+class BowItem : ItemData
 {
-	Bow(ItemID id)
+	BowItem(ItemID id, const string &in name, const string &in desc, Sprite @icon)
 	{
-		super(id, 255);
-		singleShot = true;
+		super(id, name, desc, @icon, 1, false);
 	}
 	
 	void use(Player @player)

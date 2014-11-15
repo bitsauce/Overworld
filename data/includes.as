@@ -13,6 +13,5 @@
 #include "tiles/tilemanager.as"
 
 // Item data
-#include "items/item.as"
 #include "items/itemdata.as"
 #include "items/itemmanager.as"

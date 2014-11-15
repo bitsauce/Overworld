@@ -1,8 +1,8 @@
-class PlaceableItem : Item
+class PlaceableItem : ItemData
 {
-	PlaceableItem(ItemID id)
+	PlaceableItem(ItemID id, const string &in name, const string &in desc, Sprite @icon, const int maxStack)
 	{
-		super(id, 255);
+		super(id, name, desc, @icon, maxStack, true);
 		singleShot = true;
 	}
 	
