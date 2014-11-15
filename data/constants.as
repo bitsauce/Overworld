@@ -54,59 +54,37 @@ grid<int> TILE_SIZES =
 const float TILE_U0 = 0.000f;
 const float TILE_V0 = 0.000f;
 const float TILE_U1 = BORDER_PXF/FULL_TILE_PXF;
-const float TILE_V1 = BORDER_PXF/(FULL_TILE_PXF + 2*BORDER_PXF);
+const float TILE_V1 = BORDER_PXF/FULL_TILE_PXF;
 const float TILE_U2 = 0.500f;
-const float TILE_V2 = (FULL_TILE_PXF*0.500f)/(FULL_TILE_PXF + 2*BORDER_PXF);
+const float TILE_V2 = 0.500f;
 const float TILE_U3 = (TILE_PXF + BORDER_PXF)/FULL_TILE_PXF;
-const float TILE_V3 = (TILE_PXF + BORDER_PXF)/(FULL_TILE_PXF + 2*BORDER_PXF);
+const float TILE_V3 = (TILE_PXF + BORDER_PXF)/FULL_TILE_PXF;
 const float TILE_U4 = 1.000f;
-const float TILE_V4 = FULL_TILE_PXF/(FULL_TILE_PXF + 2*BORDER_PXF);
-const float TILE_V5 = (FULL_TILE_PXF + BORDER_PXF)/(FULL_TILE_PXF + 2*BORDER_PXF);
-const float TILE_V6 = 1.000f;
+const float TILE_V4 = 1.000f;
 grid<float> TILE_TEXTURE_COORDS =
 {
-	// 1st row
-	{ TILE_U0, TILE_V3, TILE_U1, TILE_V4 }, // 0
-	{ TILE_U1, TILE_V3, TILE_U2, TILE_V4 }, // 1
-	{ TILE_U2, TILE_V3, TILE_U3, TILE_V4 }, // 2
-	{ TILE_U3, TILE_V3, TILE_U4, TILE_V4 }, // 3
-	
-	// 2nd row
-	{ TILE_U0, TILE_V2, TILE_U1, TILE_V3 }, // 4
-	{ TILE_U1, TILE_V2, TILE_U2, TILE_V3 }, // 5
-	{ TILE_U2, TILE_V2, TILE_U3, TILE_V3 }, // 6
-	{ TILE_U3, TILE_V2, TILE_U4, TILE_V3 }, // 7
-	
-	// 3rd row
-	{ TILE_U0, TILE_V1, TILE_U1, TILE_V2 }, // 8
-	{ TILE_U1, TILE_V1, TILE_U2, TILE_V2 }, // 9
-	{ TILE_U2, TILE_V1, TILE_U3, TILE_V2 }, // 10
-	{ TILE_U3, TILE_V1, TILE_U4, TILE_V2 }, // 11
-	
-	// 4th row
-	{ TILE_U0, TILE_V0, TILE_U1, TILE_V1 }, // 12
-	{ TILE_U1, TILE_V0, TILE_U2, TILE_V1 }, // 13
-	{ TILE_U2, TILE_V0, TILE_U3, TILE_V1 }, // 14
-	{ TILE_U3, TILE_V0, TILE_U4, TILE_V1 }, // 15
-
-	// inner corners
-	{ TILE_U0, TILE_V5, TILE_U1, TILE_V6 },   // 16 top-left inner-corner
-	{ TILE_U1, TILE_V5, TILE_U1*2, TILE_V6 }, // 17 top-right inner-corner
-	{ TILE_U0, TILE_V4, TILE_U1, TILE_V5 },   // 18 bottom-left inner-corner
-	{ TILE_U1, TILE_V4, TILE_U1*2, TILE_V5 }  // 19 bottom-right inner-corner
+	{ TILE_U0, TILE_V0, TILE_U1, TILE_V1 }, // 0
+	{ TILE_U1, TILE_V0, TILE_U3, TILE_V1 }, // 1
+	{ TILE_U3, TILE_V0, TILE_U4, TILE_V1 }, // 2
+	{ TILE_U3, TILE_V1, TILE_U4, TILE_V3 }, // 3
+	{ TILE_U3, TILE_V3, TILE_U4, TILE_V4 }, // 4
+	{ TILE_U1, TILE_V3, TILE_U3, TILE_V4 }, // 5
+	{ TILE_U0, TILE_V3, TILE_U1, TILE_V4 }, // 6
+	{ TILE_U0, TILE_V1, TILE_U1, TILE_V3 }, // 7
+	{ TILE_U1, TILE_V1, TILE_U3, TILE_V3 }  // 8
 };
 
 grid<int> TILE_PERM_INDICES =
 {
 	// Top-right quadrant
-	{  2,  3, 6,  7 }, // none
-	{ 10, 11, 6,  7 }, // top
-	{  2,  9, 6,  7 }, // top-right
-	{ 10,  9, 6,  7 }, // top & top-right
-	{  2,  1, 6,  5 }, // right
-	{ 10,  3, 6,  5 }, //
-	{  2,  9, 6,  5 }, //
-	{ 10,  9, 6,  5 }, // all
+	{  2,  3,  6,  7 }, // none
+	{ 10, 11,  6,  7 }, // top
+	{  2,  9,  6,  7 }, // top-right
+	{ 10,  9,  6,  7 }, // top & top-right
+	{  2,  1,  6,  5 }, // right
+	{ 10,  3,  6,  5 }, //
+	{  2,  9,  6,  5 }, //
+	{ 10,  9,  6,  5 }, // all
 	
 	// Bottom-right quadrant
 	{ 10, 11, 14, 15 }, // none
@@ -119,14 +97,14 @@ grid<int> TILE_PERM_INDICES =
 	{ 10,  9,  6,  5 }, // all
 	
 	// Bottom-left quadrant
-	{  8, 9, 12, 13 }, // none
-	{  8, 9,  4,  5 }, // bottom
-	{  8, 9,  6, 13 }, // bottom-left
-	{  8, 9,  6,  5 }, // bottom & bottom-left
-	{ 10, 9, 14, 13 }, // left
-	{ 10, 9, 12,  5 }, // 
-	{ 10, 9, 12, 13 }, //
-	{ 10, 9,  6,  5 }, // all
+	{  8,  9, 12, 13 }, // none
+	{  8,  9,  4,  5 }, // bottom
+	{  8,  9,  6, 13 }, // bottom-left
+	{  8,  9,  6,  5 }, // bottom & bottom-left
+	{ 10,  9, 14, 13 }, // left
+	{ 10,  9, 12,  5 }, // 
+	{ 10,  9, 12, 13 }, //
+	{ 10,  9,  6,  5 }, // all
 	
 	// Top-left quadrant
 	{  0,  1,  4,  5 }, // none

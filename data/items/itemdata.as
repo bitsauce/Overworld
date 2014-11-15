@@ -24,6 +24,11 @@ enum ItemID
 	MAX_ITEMS
 }
 
+/*array<TileData> =
+{
+	TileData(GRASS_BLOCK, "Grass block", "A block of grass")
+}*/
+
 // While i prefer this way of handling item data,
 // it has the unfortunate downside of requiring 
 // manual maintenance of the script writer each
