@@ -58,62 +58,6 @@ class Tile
 			vertices[i*4+2].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv0.y);
 			vertices[i*4+3].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv0.y);
 		}
-		
-		// Centeral part
-		/*vertices[0].set4f(VERTEX_POSITION,  x    * TILE_PX,  y    * TILE_PX);
-		vertices[1].set4f(VERTEX_POSITION, (x+1) * TILE_PX,  y    * TILE_PX);
-		vertices[2].set4f(VERTEX_POSITION, (x+1) * TILE_PX, (y+1) * TILE_PX);
-		vertices[3].set4f(VERTEX_POSITION,  x    * TILE_PX, (y+1) * TILE_PX);
-		
-		TextureAtlas @atlas = @Tiles.getAtlas();
-		TextureRegion region = atlas.get(id, BORDER_PXF/FULL_TILE_PXF, BORDER_PXF/FULL_TILE_PXF, 1.0f - (BORDER_PXF/FULL_TILE_PXF), 1.0f - (BORDER_PXF/FULL_TILE_PXF));
-		vertices[0].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv1.y);
-		vertices[1].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv1.y);
-		vertices[2].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv0.y);
-		vertices[3].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv0.y);*/
-		
-		/*for(int i = 0; i < 13; ++i)
-		{
-			if(TILE_DRAW_SECTION[i, state])
-			{
-				vertices[0].set4f(VERTEX_POSITION, x * TILE_PX + TILE_DRAW_POSITION[i, ],              y * TILE_PX - BORDER_PX);
-				vertices[1].set4f(VERTEX_POSITION, x * TILE_PX + TILE_DRAW_POSITION[i, ],  y * TILE_PX - BORDER_PX);
-				vertices[2].set4f(VERTEX_POSITION, x * TILE_PX + BORDER_PX, (y+0.5f) * TILE_PX);
-				vertices[3].set4f(VERTEX_POSITION, x * TILE_PX,             (y+0.5f) * TILE_PX);
-			}
-		}
-		
-		uint8 q1 = ((state >> 0) & 0x7) + 0x0;
-		uint8 q2 = ((state >> 2) & 0x7) + 0x8;
-		uint8 q3 = ((state >> 4) & 0x7) + 0x10;
-		uint8 q4 = (((state >> 6) & 0x7) | ((state << 2) & 0x7)) + 0x18;
-		
-		TextureRegion region;
-		TextureAtlas @atlas = @Tiles.getAtlas();
-		region = atlas.get(id, q1/32.0f, 0.0f, (q1+1)/32.0f, 1.0f);
-		vertices[0].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv1.y);
-		vertices[1].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv1.y);
-		vertices[2].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv0.y);
-		vertices[3].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv0.y);
-		
-		region = atlas.get(id, q2/32.0f, 0.0f, (q2+1)/32.0f, 1.0f);
-		vertices[4].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv1.y);
-		vertices[5].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv1.y);
-		vertices[6].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv0.y);
-		vertices[7].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv0.y);
-		
-		region = atlas.get(id, q3/32.0f, 0.0f, (q3+1)/32.0f, 1.0f);
-		vertices[8].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv1.y);
-		vertices[9].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv1.y);
-		vertices[10].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv0.y);
-		vertices[11].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv0.y);
-		
-		region = atlas.get(id, q4/32.0f, 0.0f, (q4+1)/32.0f, 1.0f);
-		vertices[12].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv1.y);
-		vertices[13].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv1.y);
-		vertices[14].set4f(VERTEX_TEX_COORD, region.uv1.x, region.uv0.y);
-		vertices[15].set4f(VERTEX_TEX_COORD, region.uv0.x, region.uv0.y);*/
-
 		return vertices;
 	}
 	

@@ -10,7 +10,9 @@ void ToggleFullscreen()
 			Window.setSize(resolutions[resolutions.size-1]);
 			Window.enableFullscreen();
 		}
-	}else{
+	}
+	else
+	{
 		Window.disableFullscreen();
 		Window.setSize(Vector2i(800, 600));
 	}

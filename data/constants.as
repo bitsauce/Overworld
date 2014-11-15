@@ -21,35 +21,7 @@ const float SUPER_CHUNK_SIZEF = SUPER_CHUNK_SIZE;
 const int SUPER_CHUNK_TILE_PX = SUPER_CHUNK_SIZE*CHUNK_SIZE;
 const int SUPER_CHUNK_TILE_PXF = SUPER_CHUNK_SIZEF*CHUNK_SIZEF;
 const int SUPER_CHUNK_PX = SUPER_CHUNK_SIZE*CHUNK_SIZE*TILE_PX;
-const int SUPER_CHUNK_PXF = SUPER_CHUNK_SIZEF*CHUNK_SIZEF*TILE_PXF;
-
-// Tile proportions
-grid<int> TILE_SIZES =
-{
-	// Q1
-	{ TILE_PX/2, BORDER_PX },
-	{ BORDER_PX, BORDER_PX },
-	{ TILE_PX/2, TILE_PX/2 },
-	{ BORDER_PX, TILE_PX/2 },
-	
-	// Q2
-	{ TILE_PX/2, TILE_PX/2 },
-	{ BORDER_PX, TILE_PX/2 },
-	{ TILE_PX/2, BORDER_PX },
-	{ BORDER_PX, BORDER_PX },
-	
-	// Q3
-	{ BORDER_PX, TILE_PX/2 },
-	{ TILE_PX/2, TILE_PX/2 },
-	{ BORDER_PX, BORDER_PX },
-	{ TILE_PX/2, BORDER_PX },
-	
-	// Q4
-	{ BORDER_PX, BORDER_PX },
-	{ TILE_PX/2, BORDER_PX },
-	{ BORDER_PX, TILE_PX/2 },
-	{ TILE_PX/2, TILE_PX/2 }
-};
+const int SUPER_CHUNK_PXF = SUPER_CHUNK_SIZEF*CHUNK_SIZEF*TILE_PXF;
 // Tile texture coordinates
 const float TILE_U0 = 0.000f;
 const float TILE_V0 = 0.000f;
@@ -73,92 +45,6 @@ grid<float> TILE_TEXTURE_COORDS =
 	{ TILE_U0, TILE_V1, TILE_U1, TILE_V3 }, // 7
 	{ TILE_U1, TILE_V1, TILE_U3, TILE_V3 }  // 8
 };
-
-grid<int> TILE_PERM_INDICES =
-{
-	// Top-right quadrant
-	{  2,  3,  6,  7 }, // none
-	{ 10, 11,  6,  7 }, // top
-	{  2,  9,  6,  7 }, // top-right
-	{ 10,  9,  6,  7 }, // top & top-right
-	{  2,  1,  6,  5 }, // right
-	{ 10,  3,  6,  5 }, //
-	{  2,  9,  6,  5 }, //
-	{ 10,  9,  6,  5 }, // all
-	
-	// Bottom-right quadrant
-	{ 10, 11, 14, 15 }, // none
-	{ 10,  9, 14, 13 }, // right
-	{ 10, 11, 14,  5 }, //
-	{ 10,  9, 14,  5 }, //
-	{ 10, 11,  6,  7 }, //
-	{ 10,  9,  6, 15 }, // 
-	{ 10, 11,  6,  5 }, //
-	{ 10,  9,  6,  5 }, // all
-	
-	// Bottom-left quadrant
-	{  8,  9, 12, 13 }, // none
-	{  8,  9,  4,  5 }, // bottom
-	{  8,  9,  6, 13 }, // bottom-left
-	{  8,  9,  6,  5 }, // bottom & bottom-left
-	{ 10,  9, 14, 13 }, // left
-	{ 10,  9, 12,  5 }, // 
-	{ 10,  9, 12, 13 }, //
-	{ 10,  9,  6,  5 }, // all
-	
-	// Top-left quadrant
-	{  0,  1,  4,  5 }, // none
-	{  2,  1,  6,  5 }, // 
-	{ 10,  1,  4,  5 }, //
-	{ 10,  1,  6,  5 }, // left & top-left
-	{  8,  9,  4,  5 }, // top
-	{  0,  9,  6,  5 }, //
-	{ 10,  9,  4,  5 }, //
-	{ 10,  9,  6,  5 }  // all
-};
-
-/*grid<int> TILE_PERM_INDICES =
-{
-	// Top-right quadrant
-	{  2,  3, 6,  7 }, // none
-	{ 10, 11, 6,  7 }, // top
-	{ 19,  9, 6, 16 }, // top-right
-	{ 10,  9, 6, 16 }, // top & top-right
-	{  2,  1, 6,  5 }, // right
-	{ 10, 18, 6,  5 }, //
-	{ 19,  9, 6,  5 }, //
-	{ 10,  9, 6,  5 }, // all
-	
-	// Bottom-right quadrant
-	{ 10, 11, 14, 15 }, // none
-	{ 10,  9, 14, 13 }, // right
-	{ 10, 18, 17,  5 }, //
-	{ 10,  9, 17,  5 }, //
-	{ 10, 11,  6,  7 }, //
-	{ 10,  9,  6, 16 }, // 
-	{ 10, 18,  6,  5 }, //
-	{ 10,  9,  6,  5 }, // all
-	
-	// Bottom-left quadrant
-	{  8, 9, 12, 13 }, // none
-	{  8, 9,  4,  5 }, // bottom
-	{ 19, 9,  6, 16 }, // bottom-left
-	{ 19, 9,  6,  5 }, // bottom & bottom-left
-	{ 10, 9, 14, 13 }, // left
-	{ 10, 9, 17,  5 }, // 
-	{ 10, 9, 16, 13 }, //
-	{ 10, 9,  6,  5 }, // all
-	
-	// Top-left quadrant
-	{  0,  1,  4,  5 }, // none
-	{  2,  1,  6,  5 }, // 
-	{ 10, 18, 17,  5 }, //
-	{ 10, 18,  6,  5 }, // left & top-left
-	{  8,  9,  4,  5 }, // top
-	{ 19,  9,  6,  5 }, //
-	{ 10,  9, 17,  5 }, //
-	{ 10,  9,  6,  5 }  // all
-};*/
 
 // INVENTORY CONSTANTS
 const int INV_WIDTH = 9;

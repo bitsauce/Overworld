@@ -80,11 +80,6 @@ class ItemData
 	Sprite @icon;
 	bool singleShot;
 	
-	ItemData()
-	{
-		this.id = ITEM_NULL;
-	}
-	
 	ItemData(ItemID id, const string &in name, const string &in desc, Sprite @icon, const int maxStack, const bool singleShot = false)
 	{
 		this.id = id;
