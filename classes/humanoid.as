@@ -247,7 +247,7 @@ class Humanoid : GameObject
 	{
 		
 		// Draw skeleton
-		skeleton.draw(@scene::game.getBatch(SCENE));
+		skeleton.draw(@Layers[LAYER_SCENE]);
 		
 		// Test draw hand item
 		if(@handItem != null)
@@ -264,7 +264,7 @@ class Humanoid : GameObject
 			}
 			handItem.icon.setOrigin(Vector2(0, 16));
 			handItem.icon.setRotation(f-45);
-			handItem.icon.draw(@scene::game.getBatch(SCENE));
+			handItem.icon.draw(@Layers[LAYER_SCENE]);
 			handItem.icon.setRotation(0);
 		}
 		
@@ -272,6 +272,6 @@ class Humanoid : GameObject
 		float p = (health/float(maxHealth));
 		Shape healthBar(Rect(body.getPosition().x-size.x/2.0f, body.getPosition().y-size.y/2.0f-24, size.x*p, 4));
 		healthBar.setFillColor(Vector4(1.0f*(1-p), 1.0f*p, 0.0f, 1.0f));
-		healthBar.draw(@scene::game.getBatch(SCENE));
+		healthBar.draw(@Layers[LAYER_SCENE]);
 	}
 }

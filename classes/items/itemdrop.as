@@ -79,7 +79,7 @@ class ItemDrop : GameObject, Serializable
 		}
 		
 		float dist;
-		Player @player = @scene::game.getClosestPlayer(body.getCenter(), dist);
+		Player @player = World.getClosestPlayer(body.getCenter(), dist);
 		if(dist <= ITEM_PICKUP_RADIUS)
 		{
 			Vector2 impulse = (player.body.getCenter() - body.getCenter()).normalized() * ITEM_SPEED;
@@ -91,6 +91,6 @@ class ItemDrop : GameObject, Serializable
 	{
 		Sprite @sprite = @data.icon;
 		sprite.setPosition(body.getPosition() - size/2.0f);
-		sprite.draw(@scene::game.getBatch(SCENE));
+		sprite.draw(@Layers[LAYER_SCENE]);
 	}
 }

@@ -36,7 +36,7 @@ class RecipeManager
 	Recipe @opIndex(uint idx)
 	{
 		// Validate index and manager state
-		if(!initialized || idx < 0 || idx >= recipes.size)
+		if(!initialized || idx >= recipes.size)
 			return null;
 		return @recipes[idx];
 	}

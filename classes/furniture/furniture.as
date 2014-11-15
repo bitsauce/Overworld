@@ -15,7 +15,7 @@ class Furniture : GameObject, Serializable
 		outlineShader.setUniform1f("step", 0.1f);
 		outlineShader.setUniform3f("color", 0.0f, 0.0f, 0.0f);
 		
-		scene::game.addFurniture(@this);
+		World.addFurniture(@this);
 	}
 	
 	void remove()
@@ -28,7 +28,7 @@ class Furniture : GameObject, Serializable
 		}
 		
 		// Remove from list
-		scene::game.removeFurniture(@this);
+		World.removeFurniture(@this);
 		GameObject::remove();
 	}
 	

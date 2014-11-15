@@ -2,6 +2,7 @@
 #include "constants.as"
 #include "functions.as"
 #include "recipes.as"
+#include "layers.as"
 
 // Texture data
 #include "textures/textureids.as"

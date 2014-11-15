@@ -2,12 +2,12 @@ class GameObject
 {
 	GameObject()
 	{
-		scene::game.addGameObject(@this);
+		World.addGameObject(@this);
 	}
 	
 	void remove()
 	{
-		scene::game.removeGameObject(@this);
+		World.removeGameObject(@this);
 	}
 	
 	void draw() {}

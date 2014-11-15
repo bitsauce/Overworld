@@ -18,7 +18,8 @@ ItemManager Items;
 TextureManager Textures;
 TileManager Tiles;
 RecipeManager Recipes;
-//WorldManager World;
+WorldManager World;
+LayerManager Layers;
 
 // Fonts
 namespace font

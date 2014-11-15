@@ -48,45 +48,28 @@ class WorldSelectMenu : Scene
 		button.userData.retrieve(worldPath);
 		
 		// Load game
-		loadGame(worldPath);
+		World.load(worldPath);
 	}
 	
 	void update()
 	{
-		TimeOfDay.update();
-		Background.update();
-		Terrain.update();
-		
 		// Update all ui objects
-		for(int i = 0; i < uiObjects.size; ++i) {
+		for(uint i = 0; i < uiObjects.size; ++i)
+		{
 			uiObjects[i].update();
 		}
+		
+		::update();
 	}
 	
 	void draw()
 	{
-		// Clear batch
-		batch.clear();
-		
-		// Draw background first
-		Background.draw(@batch);
-		
-		batch.draw();
-		batch.clear();
-		
-		// Draw terrain
-		Terrain.draw(TERRAIN_BACKGROUND, @batch);
-		
-		Shadows.setProjectionMatrix(Camera.getProjectionMatrix());
-		Shadows.draw();
-		Shadows.clear();
-		
 		// Draw all ui objects
-		for(int i = 0; i < uiObjects.size; ++i) {
-			uiObjects[i].draw(@batch);
+		for(uint i = 0; i < uiObjects.size; ++i)
+		{
+			uiObjects[i].draw(@Layers[LAYER_GUI]);
 		}
 		
-		// Draw batch
-		batch.draw();
+		::draw();
 	}
 }

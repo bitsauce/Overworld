@@ -7,8 +7,6 @@ grid<int> TITLE_TILES = {
 
 class MainMenu : Scene
 {
-	// Draw batch
-	private Batch @batch = @Batch();
 	// Ui objects
 	private array<UiObject@> uiObjects;
 	// Constructor
@@ -70,46 +68,23 @@ class MainMenu : Scene
 	
 	void update()
 	{
-		TimeOfDay.update();
-		Background.update();
-		Terrain.update();
-		
 		// Update all ui objects
-		for(int i = 0; i < uiObjects.size; ++i)
+		for(uint i = 0; i < uiObjects.size; ++i)
 		{
 			uiObjects[i].update();
 		}
+		
+		::update();
 	}
 	
 	void draw()
 	{
-		// Clear batch
-		batch.clear();
-		
-		// Draw background first
-		Background.draw(@batch);
-		
-		batch.draw();
-		batch.clear();
-		
-		// Draw terrain
-		Terrain.draw(TERRAIN_BACKGROUND, @batch);
-		
-		Shadows.setProjectionMatrix(Camera.getProjectionMatrix());
-		Shadows.draw();
-		Shadows.clear();
-		
 		// Draw all ui objects
-		for(int i = 0; i < uiObjects.size; ++i)
+		for(uint i = 0; i < uiObjects.size; ++i)
 		{
-			uiObjects[i].draw(@batch);
+			uiObjects[i].draw(@Layers[LAYER_GUI]);
 		}
 		
-		if(Input.getKeyState(KEY_Z)) {
-			Debug.draw();
-		}
-		
-		// Draw batch
-		batch.draw();
+		::draw();
 	}
 }

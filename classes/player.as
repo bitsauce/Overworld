@@ -150,7 +150,7 @@ class Player : Humanoid, Serializable
 		// Furniture interaction
 		if(Input.getKeyState(KEY_RMB))
 		{
-			Furniture @furniture = @scene::game.getHoveredFurniture();
+			Furniture @furniture = @World.getHoveredFurniture();
 			if(@furniture != null && (furniture.getPosition() - position).length() <= ITEM_PICKUP_RADIUS) {
 				furniture.interact(@this);
 			}

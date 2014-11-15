@@ -97,6 +97,6 @@ class Projectile : GameObject, Serializable
 	{
 		sprite.setRotation(body.getAngle()*(180/Math.PI));
 		sprite.setPosition(body.getPosition());
-		sprite.draw(@scene::game.getBatch(SCENE));
+		sprite.draw(@Layers[LAYER_SCENE]);
 	}
 }

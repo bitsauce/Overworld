@@ -79,7 +79,7 @@ class Zombie : Humanoid, Serializable
 		}
 		
 		// Find target player
-		Player @target = @scene::game.getClosestPlayer(body.getCenter());
+		Player @target = @World.getClosestPlayer(body.getCenter());
 		
 		// Get the direction to the target
 		Vector2 dt = target.body.getPosition() - body.getCenter();

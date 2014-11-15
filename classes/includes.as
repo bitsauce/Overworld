@@ -7,6 +7,7 @@
 #include "humanoid.as"
 #include "raycast.as"
 #include "simplex.as"
+#include "world.as"
 
 // Scenes
 #include "scenes/mainmenu.as"

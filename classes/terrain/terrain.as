@@ -50,7 +50,7 @@ class TerrainManager
 			string key = keys[i];
 			if(cast<TerrainChunk@>(chunks[key]).modified)
 			{
-				Scripts.serialize(cast<Serializable@>(chunks[key]), scene::game.getWorldDir() + "/chunks/" + key + ".obj");
+				Scripts.serialize(cast<Serializable@>(chunks[key]), World.getWorldPath() + "/chunks/" + key + ".obj");
 			}
 		}
 	}
@@ -239,7 +239,7 @@ class TerrainManager
 			
 				// Create new chunk
 				TerrainChunk @chunk;
-				string chunkFile = scene::game.getWorldDir() + "/chunks/" + key + ".obj";
+				string chunkFile = World.getWorldPath() + "/chunks/" + key + ".obj";
 				if(FileSystem.fileExists(chunkFile))
 				{
 					@chunk = cast<TerrainChunk>(@Scripts.deserialize(chunkFile));

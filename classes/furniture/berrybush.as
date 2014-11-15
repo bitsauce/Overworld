@@ -51,6 +51,6 @@ class Bush : Furniture
 	
 	void draw()
 	{
-		Furniture::draw(@scene::game.getBatch(SCENE));
+		Furniture::draw(@Layers[LAYER_SCENE]);
 	}
 }

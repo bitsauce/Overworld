@@ -18,6 +18,6 @@ class DebugManager
 			variables.get(keys[i], str);
 			drawString += keys[i] + ": " + str + "\n";
 		}
-		font::large.draw(@scene::game.getBatch(UITEXT), Vector2(5.0f, 48.0f), drawString);
+		font::large.draw(@Layers[LAYER_UITEXT], Vector2(5.0f, 48.0f), drawString);
 	}
 }

@@ -50,12 +50,12 @@ const int INV_HEIGHT = 3;
 // Drawing layers
 enum Layer
 {
-	BACKGROUND,
-	SCENE,
-	FOREGROUND,
-	GUI,
-	UITEXT,
-	LAYERS_MAX
+	LAYER_BACKGROUND,
+	LAYER_SCENE,
+	LAYER_FOREGROUND,
+	LAYER_GUI,
+	LAYER_UITEXT,
+	LAYER_COUNT
 }
 
 // Terrain layers

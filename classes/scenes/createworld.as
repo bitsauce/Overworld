@@ -8,6 +8,16 @@ class CreateWorldMenu : Scene
 	{
 	}
 	
+	void createWorld()
+	{
+		// Get world name
+		string worldName = worldNameEdit.getText();
+		if(worldName.length == 0) return;
+		
+		// Create world
+		World.create("saves:/Overworld/" + worldName);
+	}
+	
 	void show()
 	{
 		Console.log("CreateWorldMenu: Show");
@@ -36,40 +46,23 @@ class CreateWorldMenu : Scene
 	
 	void update()
 	{
-		Terrain.update();
-		
 		// Update all ui objects
-		for(int i = 0; i < uiObjects.size; ++i) {
+		for(uint i = 0; i < uiObjects.size; ++i)
+		{
 			uiObjects[i].update();
 		}
+		
+		::update();
 	}
 	
 	void draw()
 	{
-		// Clear batch
-		batch.clear();
-		
 		// Draw all ui objects
-		for(int i = 0; i < uiObjects.size; ++i)
+		for(uint i = 0; i < uiObjects.size; ++i)
 		{
-			uiObjects[i].draw(@batch);
+			uiObjects[i].draw(@Layers[LAYER_GUI]);
 		}
 		
-		// Draw batch
-		batch.draw();
-	}
-	
-	void createWorld()
-	{
-		// Get world name
-		string worldName = worldNameEdit.getText();
-		if(worldName.length == 0)
-			return;
-		
-		// Create world
-		scene::game.createWorld(worldName);
-		
-		// Show game
-		Engine.pushScene(@scene::game);
+		::draw();
 	}
 }
