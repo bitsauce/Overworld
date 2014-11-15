@@ -109,18 +109,10 @@ class GameScene : Scene
 		worldFile.setValue("world", "name", worldName);
 		worldFile.save();
 		
-		// Create terrain
-		//Console.log("Creating terrain...");
-		//@terrain = @Terrain();
-		
-		// Generate world
-		//terrain.generate(250, 50);
-		
 		// Create player
 		Console.log("Creating player...");
 		
 		Player player();
-		
 		player.body.setPosition(Vector2(0, Terrain.generator.getGroundHeight(0)*TILE_PX));
 		
 		// Give default loadout
@@ -135,8 +127,9 @@ class GameScene : Scene
 		// Set the world directory
 		setWorldDir(worldDir);
 		
-		// Load terrain
-		//@terrain = cast<Terrain@>(@Scripts.deserialize(worldDir + "/terrain.obj"));
+		// Load world file
+		IniFile @worldFile = @IniFile(worldDir + "/world.ini");
+		Terrain.generator.seed = parseInt(worldFile.getValue("world", "seed"));
 		
 		// Load time of day
 		//@timeOfDay = cast<TimeOfDay@>(Scripts.deserialize(worldDir + "/timeOfDay.obj"));
@@ -163,8 +156,13 @@ class GameScene : Scene
 	
 	void save()
 	{
+		// Save world file
+		IniFile @worldFile = @IniFile(worldDir + "/world.ini");
+		
 		// Save terrain
-		//Scripts.serialize(@terrain, worldDir + "/terrain.obj");
+		Console.log("Saving terrain...");
+		worldFile.setValue("world", "seed", ""+Terrain.generator.seed);
+		Terrain.saveChunks();
 		
 		// Save time of day
 		//Scripts.serialize(@timeOfDay, worldDir + "/timeOfDay.obj");
@@ -174,6 +172,7 @@ class GameScene : Scene
 		for(int i = 0; i < objects.size; ++i) {
 			Scripts.serialize(cast<Serializable>(@objects[i]), worldDir + "/objects/" + i + ".obj");
 		}
+		worldFile.save();
 	}
 	
 	void show()

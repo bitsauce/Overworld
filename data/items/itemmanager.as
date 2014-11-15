@@ -18,6 +18,8 @@ class ItemManager
 		
 		// Mark as initialized
 		initialized = true;
+		
+		// TODO: Add a check here if all items were loaded
 	}
 	
 	ItemData @opIndex(int idx)

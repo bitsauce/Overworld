@@ -24,8 +24,7 @@ class TerrainChunk : Serializable
 {
 	// CHUNK
 	private int chunkX, chunkY;
-	private array<grid<TileID>> tiles(TERRAIN_LAYERS_MAX);
-	private array<uint> tileOffsets(MAX_TILES);
+	private array<grid<TileID>> tiles;
 	
 	// PHYSICS
 	private b2Body @body;
@@ -78,6 +77,7 @@ class TerrainChunk : Serializable
 		
 		// Resize tile grid
 		fixtures = grid<b2Fixture@>(CHUNK_SIZE, CHUNK_SIZE, null);
+		tiles = array<grid<TileID>>(TERRAIN_LAYERS_MAX);
 		for(int i = 0; i < TERRAIN_LAYERS_MAX; ++i)
 		{
 			tiles[i] = grid<TileID>(CHUNK_SIZE, CHUNK_SIZE, EMPTY_TILE);
@@ -180,7 +180,7 @@ class TerrainChunk : Serializable
 			{
 				for(int i = TERRAIN_LAYERS_MAX-1; i >= 0; --i)
 				{
-					TileID tile = getTileAt(x, y, TerrainLayer(i));
+					TileID tile = tiles[i][x, y];
 					if(tile <= RESERVED_TILE) tile = EMPTY_TILE;
 					ss.write(int(tile));
 				}
@@ -200,18 +200,21 @@ class TerrainChunk : Serializable
 		init(chunkX, chunkY);
 		
 		// Load tiles from file
-		for(int y = 0; y < CHUNK_SIZE; y++)
+		for(int y = 0; y < CHUNK_SIZE; ++y)
 		{
-			for(int x = 0; x < CHUNK_SIZE; x++)
+			for(int x = 0; x < CHUNK_SIZE; ++x)
 			{
 				for(int i = TERRAIN_LAYERS_MAX-1; i >= 0; --i)
 				{
 					int tile;
 					ss.read(tile);
-					setTile(x, y, TileID(tile), TerrainLayer(i));
+					tiles[i][x, y] = TileID(tile);
 				}
 			}
 		}
+		
+		state = CHUNK_INITIALIZED;
+		generateVBO();
 	}
 	
 	int getX() const { return chunkX; }

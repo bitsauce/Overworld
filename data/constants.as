@@ -8,9 +8,6 @@ const float BORDER_PXF = BORDER_PX;
 const int FULL_TILE_PX = TILE_PX + BORDER_PX*2;
 const float FULL_TILE_PXF = FULL_TILE_PX;
 
-const int QUADRANT_PX = TILE_PX * 0.5f + BORDER_PX;
-const float QUADRANT_PXF = QUADRANT_PX;
-
 const int CHUNK_SIZE = 16;
 const float CHUNK_SIZEF = CHUNK_SIZE;
 const int CHUNK_SIZE_PX = CHUNK_SIZE*TILE_PX;

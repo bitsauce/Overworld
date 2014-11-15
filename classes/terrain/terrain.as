@@ -7,7 +7,7 @@ TerrainLayer getLayerByTile(TileID tile)
 
 const int MAX_LOADED_CHUNKS = 128;
 
-class TerrainManager : Serializable
+class TerrainManager
 {
 	// Terrain chunks
 	private array<TerrainChunk@> loadedChunks;
@@ -24,31 +24,26 @@ class TerrainManager : Serializable
 	
 	TerrainManager()
 	{
-		init();
-		generator.seed = Random().nextInt();
-	}
-	
-	// SERIALIZATION
-	private void init()
-	{
 		Console.log("Initializing terrain");
 		
 		// Setup vertex format
 		vertexFormat.set(VERTEX_POSITION, 2);
 		vertexFormat.set(VERTEX_TEX_COORD, 2);
+		
+		// Get terrain seed
+		generator.seed = Random().nextInt();
 	}
 	
+	// VERTEX FORMAT
 	VertexFormat getVertexFormat() const
 	{
 		return vertexFormat;
 	}
 	
-	void serialize(StringStream &ss)
+	// Move?
+	void saveChunks()
 	{
-		Console.log("Saving terrain...");
-		
-		ss.write(generator.seed);
-		
+		Console.log("Saving chunks...");
 		array<string> @keys = chunks.getKeys();
 		for(int i = 0; i < keys.size; ++i)
 		{
@@ -60,13 +55,11 @@ class TerrainManager : Serializable
 		}
 	}
 	
-	void deserialize(StringStream &ss)
+	void load(IniFile @file)
 	{
 		Console.log("Loading terrain...");
 		
-		init();
-		
-		ss.read(generator.seed);
+		generator.seed = parseInt(file.getValue("terrain", "seed"));
 	}
 	
 	// TILE HELPERS
@@ -245,9 +238,19 @@ class TerrainManager : Serializable
 				Console.log("Chunk ["+chunkX+", "+chunkY+"] added to queue");
 			
 				// Create new chunk
-				TerrainChunk @chunk = @TerrainChunk(chunkX, chunkY);
+				TerrainChunk @chunk;
+				string chunkFile = scene::game.getWorldDir() + "/chunks/" + key + ".obj";
+				if(FileSystem.fileExists(chunkFile))
+				{
+					@chunk = cast<TerrainChunk>(@Scripts.deserialize(chunkFile));
+				}
+				else
+				{
+					@chunk = @TerrainChunk(chunkX, chunkY);
+					chunkLoadQueue.insertAt(0, @chunk); // Add to load queue
+				}
+				
 				@chunks[key] = @chunk;
-				chunkLoadQueue.insertAt(0, @chunk); // Add to load queue
 				return @chunk;
 			}
 			return @TerrainChunk(); // Create dummy
