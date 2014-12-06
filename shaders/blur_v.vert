@@ -1,7 +1,7 @@
-varying vec2 texCoord;
+varying vec2 v_texCoord;
 
 void main()
 {
 	gl_Position = gl_ModelViewProjectionMatrix*gl_Vertex;
-	texCoord = gl_MultiTexCoord0.xy;
+	v_texCoord = gl_MultiTexCoord0.xy;
 }
